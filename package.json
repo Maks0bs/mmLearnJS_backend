@@ -1,0 +1,34 @@
+{
+  "name": "mmlearnjs_backend",
+  "version": "1.0.0",
+  "description": "backend for mmlearnjs",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Maks0bs/mmLearnJS_backend.git"
+  },
+  "keywords": [
+    "learn",
+    "js",
+    "backend",
+    "nodejs",
+    "node"
+  ],
+  "author": "maks0bs",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Maks0bs/mmLearnJS_backend/issues"
+  },
+  "homepage": "https://github.com/Maks0bs/mmLearnJS_backend#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "concurrently": "^5.1.0",
+    "nodemon": "^2.0.2"
+  }
+}

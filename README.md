@@ -1,1 +1,1 @@
-# mmLearnJS_backend
+eventually migration to django is possible (not really)
