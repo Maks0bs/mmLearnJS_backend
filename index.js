@@ -1,6 +1,7 @@
 let express = require('express');
 let dotenv = require('dotenv');
 let cors = require('cors');
+let morgan = require('morgan');
 // imports
 
 // config and setup
@@ -9,6 +10,9 @@ let app = express();
 
 // basic middleware
 app.use(cors());
+if (process.env.NODE_ENV !== 'production') {
+	app.use(morgan('dev'));
+}
 
 // temporary test route
 app.get('/', (req, res) => {
