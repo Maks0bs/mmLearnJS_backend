@@ -1,8 +1,9 @@
 // module imports
+let constants = require('./constants')
 let express = require('express');
-let dotenv = require('dotenv');
 let cors = require('cors');
 let mongoose = require('mongoose')
+let bodyParser = require('body-parser');
 
 
 // app imports
@@ -11,9 +12,8 @@ let mainRouter = require('./routes')
 
 // config, database and setup
 let app = express();
-dotenv.config()
 mongoose.connect(
-  	process.env.MONGODB_URI,
+  	constants.database.MONGODB_URI,
   	{
   		useNewUrlParser: true,
    		useUnifiedTopology: true
@@ -26,11 +26,12 @@ mongoose.connection.on('error', err => {
 
 
 // basic middleware and dev features
-if (process.env.NODE_ENV !== 'production') {
+if (constants.environment !== 'production') {
 	let morgan = require('morgan');
 	app.use(morgan('dev'));
 }
 app.use(cors());
+app.use(bodyParser.json());
 
 // app middleware
 app.use('/', mainRouter);
@@ -38,7 +39,7 @@ app.use('/', mainRouter);
 
 // get requests from specified port
 
-let port = process.env.PORT || 8080
+let port = constants.network.PORT || 8080
 app.listen(
 	port,
 	() => console.log(`App listening on port ${port}`)

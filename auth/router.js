@@ -1,10 +1,8 @@
 let {
-	getNews,
-	createNewsEntry
+	signup
 } = require('./controller');
 let router = require('express').Router()
 
-router.get('/', getNews);
-router.post('/create', createNewsEntry);
+router.post('/signup', signup);
 
 module.exports = router;

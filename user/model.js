@@ -1,0 +1,92 @@
+let mongoose = require('mongoose');
+let { v1: uuidv1 } = require('uuid');
+let crypto = require('crypto');
+let { ObjectId } = mongoose.Schema;
+let userSchema = new mongoose.Schema({
+	name: {
+		type: String,
+		trim: true,
+		required: true
+	},
+	email: {
+		type: String,
+		trim: true,
+		required: true
+	},
+	hashed_password: {
+		type: String,
+		required: true
+	},
+	salt: String, 
+	created: {
+		type: Date,
+		default: Date.now
+	},
+	updated: Date,
+	profilePhoto: {
+		data: Buffer,
+		contentType: String
+	},
+	about: {
+		type: String,
+		trim: true
+	},
+	resetPasswordToken: {
+		data: String,
+		default: ""
+	},
+	role: {
+		type: String,
+		default: "student"
+	},
+	activated: {
+		data: Boolean,
+		default: false
+	}
+	/*courses: [
+
+	]*/
+});
+
+userSchema 
+	.virtual('password')
+	.set(function(password){
+		// create temp variable called _password
+		this._password = password;
+		// generate a timestamp
+		this.salt = uuidv1();
+		// encrypt the pass
+		this.hashed_password = this.encryptPassword(password);
+	})
+	.get(function() {
+		return this._password;
+	})
+
+userSchema 
+	.virtual('activationToken')
+	.set(function(token){
+		this._activationToken = token;
+	})
+	.get(function() {
+		return this._activationToken
+	})
+
+userSchema.methods = {
+	authenticate : function(plainText){
+		return this.encryptPassword(plainText) === this.hashed_password
+	}, 
+
+	encryptPassword: function(password){
+		if (!password) return "";
+		try {
+			return crypto.createHmac('sha1', this.salt)
+			.update(password)
+			.digest('hex');
+		} catch (err){
+			return "";
+		}
+
+	}
+}
+
+module.exports = mongoose.model("User", userSchema);
