@@ -3,6 +3,7 @@ let User = require('../user/model');
 let { sendEmail } = require('../helpers');
 
 let { JWT_SECRET } = require('../constants').auth
+let { CLIENT_URL } = require('../constants').client
 
 exports.signup = (req, res) => {
 	User.findOne({ email: req.body.email })
@@ -32,7 +33,7 @@ exports.signup = (req, res) => {
                 text: `Please use the following link to activate your account: ${user.activationToken}`,
                 html: `
                     <p> Please use the following link to activate your account: </p> 
-                    <p> ${user.activationToken} </p>
+                    <p> ${CLIENT_URL}/activate-account/${user.activationToken} </p>
                 `
             });
             return user;
@@ -43,6 +44,31 @@ exports.signup = (req, res) => {
         .then(data => {
             res.json({
                 message: `Signup success for user ${req.body.email}`
+            })
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(err.status || 400)
+                .json({
+                    error: err
+                })
+        })
+}
+
+exports.activateAccount = (req, res) => {
+    User.findOne({ activationToken: req.body.token })
+        .then(user => {
+            if (!user) throw {
+                status: 403,
+                message: 'Cannot activate user with this token'
+            }
+            user.activationToken = '';
+            user.activated = true;
+            return user.save();
+        })
+        .then(data => {
+            res.json({
+                message: `Account successfully activated`
             })
         })
         .catch(err => {

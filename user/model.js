@@ -40,8 +40,11 @@ let userSchema = new mongoose.Schema({
 		default: "student"
 	},
 	activated: {
-		data: Boolean,
+		type: Boolean,
 		default: false
+	},
+	activationToken: {
+		type: String
 	}
 	/*courses: [
 
@@ -60,15 +63,6 @@ userSchema
 	})
 	.get(function() {
 		return this._password;
-	})
-
-userSchema 
-	.virtual('activationToken')
-	.set(function(token){
-		this._activationToken = token;
-	})
-	.get(function() {
-		return this._activationToken
 	})
 
 userSchema.methods = {
