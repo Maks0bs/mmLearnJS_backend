@@ -137,7 +137,7 @@ exports.signin = (req, res) => {
                 {
                     //httpOnly: true,
                     sameSite: true,
-                    secure: (environment === 'production') ? true : false
+                    secure: (environment === 'production') ? true : false,
                     maxAge: 100000
                 }
             );
