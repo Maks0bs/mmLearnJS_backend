@@ -136,7 +136,7 @@ exports.signin = (req, res) => {
                 token, 
                 {
                     httpOnly: true,
-                    sameSite: "Strict",
+                    sameSite: "None",
                     secure: (environment === 'production') ? true : false,
                     maxAge: 100000
                 }
