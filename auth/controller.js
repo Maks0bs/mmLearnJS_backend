@@ -4,6 +4,7 @@ let { sendEmail } = require('../helpers');
 
 let { JWT_SECRET } = require('../constants').auth
 let { CLIENT_URL } = require('../constants').client
+let { environment } = require('../constants')
 
 exports.signup = (req, res) => {
 	User.findOne({ email: req.body.email })
@@ -136,6 +137,7 @@ exports.signin = (req, res) => {
                 {
                     //httpOnly: true,
                     sameSite: true,
+                    secure: (environment === 'production') ? true : false
                     maxAge: 100000
                 }
             );
