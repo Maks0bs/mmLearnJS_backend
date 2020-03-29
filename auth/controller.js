@@ -20,26 +20,29 @@ exports.signup = (req, res) => {
                     _id: user._id,
                     email: user.email
                 },
-                JWT_SECRET
+                JWT_SECRET,
+                {
+                    expiresIn: 15 * 60
+                }
             )
-            user.activationToken = token;
-            return user;
+            let data = {
+                email: user.email,
+                token: token
+            }
+            user.save()
+            return data;
         })
-        .then(user => {
-            sendEmail({
+        .then(data => {
+            return sendEmail({
                 from: "noreply@mmlearnjs.com",
-                to: user.email,
+                to: data.email,
                 subject: "Account activation instructions",
-                text: `Please use the following link to activate your account: ${user.activationToken}`,
+                text: `Please use the following link to activate your account: ${CLIENT_URL}/activate-account/${data.token}`,
                 html: `
                     <p> Please use the following link to activate your account: </p> 
-                    <p> ${CLIENT_URL}/activate-account/${user.activationToken} </p>
+                    <p> ${CLIENT_URL}/activate-account/${data.token} </p>
                 `
             });
-            return user;
-        })
-        .then(user => {
-            return user.save();
         })
         .then(data => {
             res.json({
@@ -55,20 +58,40 @@ exports.signup = (req, res) => {
         })
 }
 
+exports.sendActivationToken = (req, res) => {
+
+}
+
 exports.activateAccount = (req, res) => {
-    User.findOne({ activationToken: req.body.token })
+    let token = req.body.token;
+    let userData;
+    try {
+        userData = jwt.verify(token, JWT_SECRET)
+    }
+    catch (err) {
+        if (err.name === 'TokenExpiredError'){
+            res.status(401)
+                .json({
+                    error: {
+                        status: 401,
+                        message: 'Activation link expired. Try getting a new activation link'
+                    }
+                })
+        }
+    }
+
+    User.findOne({ _id: userData._id })
         .then(user => {
             if (!user) throw {
                 status: 403,
                 message: 'Cannot activate user with this token'
             }
-            user.activationToken = '';
             user.activated = true;
             return user.save();
         })
         .then(data => {
             res.json({
-                message: `Account successfully activated`
+                message: `Account with email ${userData.email} successfully activated`
             })
         })
         .catch(err => {
@@ -79,6 +102,68 @@ exports.activateAccount = (req, res) => {
                 })
         })
 }
+
+// TODO:
+// add reset password without saving it in db
+// make reset token with uuid
+
+exports.signin = (req, res) => {
+    let { _id, email, password } = req.body;
+    User.findOne({ email })
+        .then(user => {
+            if (!user) throw {
+                status: 403,
+                message: `User with that email doesn't exist`
+            }
+
+            if (!user.checkCredentials(password)) throw {
+                status: 401,
+                message: 'Wrong password for this user'
+            }
+
+            let token = jwt.sign(
+                {
+                    _id: user._id,
+                    role: user.role,
+                    email: user.email
+                },
+                JWT_SECRET/*add expiration or work with browser cookies*/
+            )
+
+            res.cookie(
+                'auth',
+                token, 
+                {
+                    //httpOnly: true,
+                    sameSite: true,
+                    maxAge: 100000
+                }
+            );
+            console.log(res.getHeaders());
+            return res.json({
+                message: `User ${user.email} signed in successfully`
+            })
+        })
+        .catch(err => {
+            res.status(err.status || 400)
+                .json({
+                    error: err
+                })
+        })
+
+
+
+    
+};
+
+exports.test = (req, res) => {
+    res.json({
+        info: jwt.verify(req.cookies['auth'], JWT_SECRET)
+    })
+}
+
+
+
 
 /*exports.signin = (req, res) => {
 	// find the user based on email

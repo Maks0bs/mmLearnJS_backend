@@ -43,9 +43,6 @@ let userSchema = new mongoose.Schema({
 		type: Boolean,
 		default: false
 	},
-	activationToken: {
-		type: String
-	}
 	/*courses: [
 
 	]*/
@@ -66,7 +63,7 @@ userSchema
 	})
 
 userSchema.methods = {
-	authenticate : function(plainText){
+	checkCredentials : function(plainText){
 		return this.encryptPassword(plainText) === this.hashed_password
 	}, 
 

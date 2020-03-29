@@ -4,6 +4,7 @@ let express = require('express');
 let cors = require('cors');
 let mongoose = require('mongoose')
 let bodyParser = require('body-parser');
+let cookieParser = require('cookie-parser')
 
 
 // app imports
@@ -30,8 +31,20 @@ if (constants.environment !== 'production') {
 	let morgan = require('morgan');
 	app.use(morgan('dev'));
 }
-app.use(cors());
+app.use(cors({
+    origin: (origin, callback) => {
+        console.log(constants.client.CLIENT_URL);
+        if (!origin || origin === constants.client.CLIENT_URL) return callback(null, true);
+
+        return callback(
+            new Error('the cors policy for this site does not allow access from the specified origin'),
+            false
+        )
+    },
+    credentials: true
+}));
 app.use(bodyParser.json());
+app.use(cookieParser())
 
 // app middleware
 app.use('/', mainRouter);
