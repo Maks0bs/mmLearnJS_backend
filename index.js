@@ -41,7 +41,8 @@ app.use(cors({
             false
         )
     },
-    credentials: true
+    credentials: true,
+    withCredentials: true
 }));
 app.use(bodyParser.json());
 app.use(cookieParser())
