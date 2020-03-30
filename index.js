@@ -41,7 +41,6 @@ app.use(cors({
             false
         )
     },
-
     withCredentials: true,
     credentials: true
 }));

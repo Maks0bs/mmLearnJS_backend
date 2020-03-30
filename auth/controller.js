@@ -4,7 +4,7 @@ let { sendEmail } = require('../helpers');
 
 let { JWT_SECRET } = require('../constants').auth
 
-let { CLIENT_URL, DEFAULT_COOKIE_OPTIONS } = require('../constants').client
+let { CLIENT_URL, DEFAULT_COOKIE_OPTIONS, NO_ACTION_LOGOUT_TIME } = require('../constants').client
 
 
 exports.signup = (req, res) => {
@@ -137,7 +137,7 @@ exports.signin = (req, res) => {
                 token, 
                 {
                     ...DEFAULT_COOKIE_OPTIONS,
-                    maxAge: 100000
+                    maxAge: NO_ACTION_LOGOUT_TIME
                 }
             );
             console.log(res.getHeaders());
@@ -157,10 +157,37 @@ exports.signin = (req, res) => {
     
 };
 
-exports.test = (req, res) => {
-    res.json({
-        info: jwt.verify(req.cookies['auth'], JWT_SECRET)
-    })
+// change name
+// this middleware should be called every time we perform an action on /classroom to check authentication
+exports.extendSession = (req, res, next) => {
+    let token = req.cookies['auth'];
+    let userData;
+    try {
+        userData = jwt.verify(token, JWT_SECRET)
+        delete userData.iat;
+        let updatedToken = jwt.sign(userData, JWT_SECRET);
+        res.cookie(
+            'auth',
+            updatedToken,
+            {
+                ...DEFAULT_COOKIE_OPTIONS,
+                maxAge: NO_ACTION_LOGOUT_TIME
+            }
+        )
+        res.json(userData)
+    }
+    catch (err) {
+        if (err.name === 'JsonWebTokenError' && err.message === 'jwt must be provided'){
+            res.status(401)
+                .json({
+                    error: {
+                        status: 401,
+                        message: 'you are logged out'
+                    }
+                })
+        }
+    }
+    
 }
 
 /*exports.signin = (req, res) => {
