@@ -213,7 +213,7 @@ exports.getAuthenticatedUser = (req, res) => {
 }
 
 exports.logout = (req, res) => {
-    res.clearCookie('auth');
+    res.clearCookie('auth', {...DEFAULT_COOKIE_OPTIONS});
     res.json({
         message: 'logout successfull'
     })
