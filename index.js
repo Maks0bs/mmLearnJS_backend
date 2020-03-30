@@ -41,6 +41,8 @@ app.use(cors({
             false
         )
     },
+
+    withCredentials: true,
     credentials: true
 }));
 app.use(bodyParser.json());
