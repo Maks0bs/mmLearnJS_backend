@@ -3,7 +3,9 @@ let User = require('../user/model');
 let { sendEmail } = require('../helpers');
 
 let { JWT_SECRET } = require('../constants').auth
+
 let { CLIENT_URL, DEFAULT_COOKIE_OPTIONS } = require('../constants').client
+
 
 exports.signup = (req, res) => {
 	User.findOne({ email: req.body.email })
