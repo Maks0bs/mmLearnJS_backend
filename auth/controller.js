@@ -3,7 +3,7 @@ let User = require('../user/model');
 let { sendEmail } = require('../helpers');
 
 let { JWT_SECRET } = require('../constants').auth
-let { CLIENT_URL } = require('../constants').client
+let { CLIENT_URL, DEFAULT_COOKIE_OPTIONS } = require('../constants').client
 
 exports.signup = (req, res) => {
 	User.findOne({ email: req.body.email })
@@ -134,8 +134,7 @@ exports.signin = (req, res) => {
                 'auth',
                 token, 
                 {
-                    //httpOnly: true,
-                    sameSite: true,
+                    ...DEFAULT_COOKIE_OPTIONS,
                     maxAge: 100000
                 }
             );
@@ -161,9 +160,6 @@ exports.test = (req, res) => {
         info: jwt.verify(req.cookies['auth'], JWT_SECRET)
     })
 }
-
-
-
 
 /*exports.signin = (req, res) => {
 	// find the user based on email

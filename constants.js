@@ -1,11 +1,25 @@
 require('dotenv').config();
 
 let clientUrl = process.env.CLIENT_URL
+let defaultCookieOptions
 if (!clientUrl && process.env.NODE_ENV === 'production'){
 	clientUrl = 'https://mmlearnjs-frontend.herokuapp.com'
 }
 else if (!clientUrl){
 	clientUrl = 'http://localhost:3000'
+}
+
+if (process.env.NODE_ENV === 'production'){
+	defaultCookieOptions = {
+		httpOnly: true,
+        sameSite: 'None',
+        secure: true
+	}
+}
+else{
+	defaultCookieOptions = {
+		httpOnly: true
+	}
 }
 
 module.exports = {
@@ -23,6 +37,7 @@ module.exports = {
 		JWT_SECRET: process.env.JWT_SECRET
 	},
 	client: {
+		DEFAULT_COOKIE_OPTIONS: defaultCookieOptions,
 		CLIENT_URL: clientUrl
 	}
 }
