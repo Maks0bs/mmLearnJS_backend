@@ -16,6 +16,8 @@ exports.createNewsEntry = (req, res) => {
 				error: err
 			})
 		}
-		res.json(result);
+		res.json({
+			result
+		});
 	});
 }

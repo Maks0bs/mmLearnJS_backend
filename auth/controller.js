@@ -48,7 +48,8 @@ exports.signup = (req, res) => {
         })
         .then(data => {
             res.json({
-                message: `Signup success for user ${req.body.email}`
+                message: `Signup success for user ${req.body.email}`,
+                auth: req.auth
             })
         })
         .catch(err => {
@@ -93,7 +94,8 @@ exports.activateAccount = (req, res) => {
         })
         .then(data => {
             res.json({
-                message: `Account with email ${userData.email} successfully activated`
+                message: `Account with email ${userData.email} successfully activated`,
+                auth: req.auth
             })
         })
         .catch(err => {
@@ -157,15 +159,32 @@ exports.signin = (req, res) => {
     
 };
 
+exports.authenticate = (req, res, next) => {
+    let token = req.cookies['auth']
+    if (!token){
+        return next();
+    }
+    let userData = undefined;
+    try {
+        userData = jwt.verify(token, JWT_SECRET);
+        delete userData.iat;
+        req.auth = userData
+    }
+    catch(err) {
+        console.log(err);
+    }
+
+    return next();
+}
+
 // change name
 // this middleware should be called every time we perform an action on /classroom to check authentication
 exports.extendSession = (req, res, next) => {
-    let token = req.cookies['auth'];
-    let userData;
+    if (!req.auth){
+        return next()
+    }
     try {
-        userData = jwt.verify(token, JWT_SECRET)
-        delete userData.iat;
-        let updatedToken = jwt.sign(userData, JWT_SECRET);
+        let updatedToken = jwt.sign(req.auth, JWT_SECRET);
         res.cookie(
             'auth',
             updatedToken,
@@ -174,20 +193,30 @@ exports.extendSession = (req, res, next) => {
                 maxAge: NO_ACTION_LOGOUT_TIME
             }
         )
-        res.json(userData)
     }
     catch (err) {
-        if (err.name === 'JsonWebTokenError' && err.message === 'jwt must be provided'){
-            res.status(401)
-                .json({
-                    error: {
-                        status: 401,
-                        message: 'you are logged out'
-                    }
-                })
-        }
+        console.log(err);
     }
-    
+
+    return next()
+}
+
+exports.requireAuthentication = (req, res, next) => {
+    if (!req.auth){
+        return res.status(401).json({error: 'Unauthorized'})
+    }
+    next();
+}
+
+exports.getAuthenticatedUser = (req, res) => {
+    res.json(req.auth);
+}
+
+exports.logout = (req, res) => {
+    res.clearCookie('auth');
+    res.json({
+        message: 'logout successfull'
+    })
 }
 
 /*exports.signin = (req, res) => {
