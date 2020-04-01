@@ -209,7 +209,17 @@ exports.requireAuthentication = (req, res, next) => {
 }
 
 exports.getAuthenticatedUser = (req, res) => {
-    res.json(req.auth);
+    User.findOne({ _id: req.auth._id })
+    .then(user => {
+        res.json(user);
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(err.status || 400)
+            .json({
+                error: err
+            })
+    })
 }
 
 exports.logout = (req, res) => {
