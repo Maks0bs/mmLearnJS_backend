@@ -32,7 +32,7 @@ let userSchema = new mongoose.Schema({
 		trim: true
 	},
 	resetPasswordToken: {
-		data: String,
+		type: String,
 		default: ""
 	},
 	role: {
@@ -43,9 +43,18 @@ let userSchema = new mongoose.Schema({
 		type: Boolean,
 		default: false
 	},
-	/*courses: [
-
-	]*/
+	enrolledCourses: [
+		{
+			type: ObjectId,
+			ref: 'Course'
+		}
+	],
+	teacherCourses: [
+		{
+			type: ObjectId,
+			ref: 'Course'
+		}
+	]
 });
 
 userSchema 

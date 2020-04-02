@@ -25,7 +25,8 @@ else{
 module.exports = {
 	environment: process.env.NODE_ENV,
 	users: {
-		USER_HIDDEN: 'USER_HIDDEN'
+		USER_HIDDEN: 'USER_HIDDEN',
+		TEACHER_PASSWORD: 'testpass'
 	},
 	network: {
 		PORT: process.env.PORT || 8080

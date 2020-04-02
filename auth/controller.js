@@ -5,6 +5,7 @@ let { sendEmail } = require('../helpers');
 let { JWT_SECRET } = require('../constants').auth
 
 let { CLIENT_URL, DEFAULT_COOKIE_OPTIONS, NO_ACTION_LOGOUT_TIME } = require('../constants').client
+let { TEACHER_PASSWORD } = require('../constants').users
 
 
 exports.signup = (req, res) => {
@@ -13,6 +14,9 @@ exports.signup = (req, res) => {
             if (user) throw {
                 status: 403,
                 message: 'Email is taken'
+            }
+            if (req.body.teacherPassword === TEACHER_PASSWORD){
+                req.body.role = 'teacher'
             }
             return new User(req.body)
         })
@@ -205,6 +209,17 @@ exports.requireAuthentication = (req, res, next) => {
     if (!req.auth){
         return res.status(401).json({error: 'Unauthorized'})
     }
+    next();
+}
+
+exports.isTeacher = (req, res, next) => {
+    if (req.auth.role !== 'teacher'){
+        return res.status(401)
+            .json({
+                message: 'Only teachers can create'
+            })
+    }
+
     next();
 }
 
