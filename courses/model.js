@@ -23,10 +23,12 @@ let courseSchema = new mongoose.Schema({
 		}
 	],
 	about: String,
-	courseType: {
+	type: {
 		type: String, //can be public, open for students to search and view basic info, hidden
 		require: true
-	}
+	},
+	//to be made a virtual method
+	password: String
 })
 
 module.exports = mongoose.model('Course', courseSchema);

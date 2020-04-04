@@ -164,6 +164,11 @@ exports.signin = (req, res) => {
 };
 
 exports.authenticate = (req, res, next) => {
+    if (req.auth){
+        res.json({
+            securityError: 'auth is defined in req before obtaining it from cookies - that is illegal'
+        })
+    }
     let token = req.cookies['auth']
     if (!token){
         return next();
