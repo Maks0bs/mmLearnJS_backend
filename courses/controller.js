@@ -2,6 +2,7 @@ let Course = require('./model')
 let User = require('../user/model');
 
 exports.createCourse = (req, res) => {
+	console.log('create course data', req.body)
 	let courseData = req.body;
 	courseData.creator = req.auth;
 	courseData.teachers = [req.auth];
@@ -36,15 +37,27 @@ exports.createCourse = (req, res) => {
 
 exports.enrollInCourse = (req, res) => {
 	courseId = req.body._id;
-	User.findByIdAndUpdate(
-		req.auth._id,
-		{
-			$push: {
-				enrolledCourses: { courseId }
+	Course.findOne({_id: courseId})
+	.then(course => {
+		if (course.hasPassword && course.password !== req.body.password) {
+			throw {
+				status: 401,
+				message: 'wrong course password'
 			}
-		},
-		{new: true}
-	)
+		}
+		return course;
+	})
+	.then(course => {
+		return User.findByIdAndUpdate(
+			req.auth._id,
+			{
+				$push: {
+					enrolledCourses: { _id: courseId }
+				}
+			},
+			{new: true}
+		)
+	})
 	.then(result => {
 		return Course.findByIdAndUpdate(
 			courseId,
@@ -76,7 +89,12 @@ exports.getOpenCourses = (req, res) => {
 }
 
 exports.getCoursesFiltered = async (req, res) => {
+
+	//!!! add validation for sane request (e. g. can't post enrolled + teacher)
 	let filter = {};
+	if (req.body.courseId){
+		filter._id = req.body.courseId;
+	}
 	if (req.body.type){
 		filter.type = req.body.type;
 	}
@@ -119,7 +137,6 @@ exports.getCoursesFiltered = async (req, res) => {
 	//maybe select only necessary info
 	.sort('name')//optimize sorting - see bookmarks
 	.then(courses => {
-		console.log('--------------', req.body, courses);
 		return res.json(courses);
 	})
 	.catch(err => {

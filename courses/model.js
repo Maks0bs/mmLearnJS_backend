@@ -28,6 +28,10 @@ let courseSchema = new mongoose.Schema({
 		require: true
 	},
 	//to be made a virtual method
+	hasPassword: {
+		type: Boolean,
+		default: false
+	},
 	password: String
 })
 

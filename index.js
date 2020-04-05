@@ -31,6 +31,7 @@ if (constants.environment !== 'production') {
 	let morgan = require('morgan');
 	app.use(morgan('dev'));
 }
+//app.disable('etag');
 app.use(cors({
     origin: (origin, callback) => {
         console.log(constants.client.CLIENT_URL);
