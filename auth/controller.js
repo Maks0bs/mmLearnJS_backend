@@ -146,7 +146,6 @@ exports.signin = (req, res) => {
                     maxAge: NO_ACTION_LOGOUT_TIME
                 }
             );
-            console.log(res.getHeaders());
             return res.json({
                 message: `User ${user.email} signed in successfully`
             })
@@ -212,7 +211,9 @@ exports.extendSession = (req, res, next) => {
 
 exports.requireAuthentication = (req, res, next) => {
     if (!req.auth){
-        return res.status(401).json({error: 'Unauthorized'})
+        return res.status(401).json({
+            error: {message:'Unauthorized'}
+        })
     }
     next();
 }

@@ -34,7 +34,6 @@ if (constants.environment !== 'production') {
 //app.disable('etag');
 app.use(cors({
     origin: (origin, callback) => {
-        console.log(constants.client.CLIENT_URL);
         if (!origin || origin === constants.client.CLIENT_URL) return callback(null, true);
 
         return callback(

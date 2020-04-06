@@ -2,7 +2,6 @@ let Course = require('./model')
 let User = require('../user/model');
 
 exports.createCourse = (req, res) => {
-	console.log('create course data', req.body)
 	let courseData = req.body;
 	courseData.creator = req.auth;
 	courseData.teachers = [req.auth];
@@ -22,7 +21,8 @@ exports.createCourse = (req, res) => {
 	})
 	.then(result => {
 		return res.json({
-			message: 'Your course has been created successfully'
+			message: 'Your course has been created successfully',
+			_id: course._id
 		});
 	})
 	.catch(err => {
@@ -39,7 +39,7 @@ exports.enrollInCourse = (req, res) => {
 	courseId = req.body._id;
 	Course.findOne({_id: courseId})
 	.then(course => {
-		if (course.hasPassword && course.password !== req.body.password) {
+		if (course.hasPassword && !course.checkPassword(req.body.password)) {
 			throw {
 				status: 401,
 				message: 'wrong course password'
