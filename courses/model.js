@@ -2,6 +2,26 @@ let mongoose = require('mongoose');
 let { ObjectId } = mongoose.Schema;
 let uuidv1 = require('uuid/v1');
 let crypto = require('crypto');
+
+/*let courseEntrySchema = new mongoose.Schema({
+
+})
+
+let CourseEntry = mongoose.model('CourseEntry', courseEntrySchema);
+
+let courseSectionSchema = new mongoose.Schema({
+	name: String,
+	description: String,
+	entries: [
+		{
+			type: ObjectId,
+			ref: ''
+		}
+	]
+})
+
+let CourseSection = mongoose.model('CourseSection', course)*/
+
 let courseSchema = new mongoose.Schema({
 	name: {
 		type: String,
@@ -30,12 +50,30 @@ let courseSchema = new mongoose.Schema({
 		type: String, //can be public, open for students to search and view basic info, hidden
 		require: true
 	},
-	//to be made a virtual method
 	hasPassword: {
 		type: Boolean,
 		default: false
 	},
-	hashed_password: String
+	hashed_password: String,
+	actions: [
+		{
+			type: Object
+		}
+	],
+	sections: [
+		{
+			name: String,
+			description: String,
+			entries: [
+				{
+					type: String,
+					name: String,
+					content: {},
+					description: {}
+				}
+			]
+		}
+	]
 })
 
 courseSchema
