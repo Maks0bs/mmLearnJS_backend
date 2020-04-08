@@ -2,6 +2,7 @@ let Course = require('./model')
 let User = require('../user/model');
 
 exports.createCourse = (req, res) => {
+	console.log(req.body);
 	let courseData = req.body;
 	courseData.creator = req.auth;
 	courseData.teachers = [req.auth];

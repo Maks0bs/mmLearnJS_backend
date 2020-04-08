@@ -5,6 +5,7 @@ let cors = require('cors');
 let mongoose = require('mongoose')
 let bodyParser = require('body-parser');
 let cookieParser = require('cookie-parser')
+let fs = require('fs');
 
 
 // app imports
@@ -48,7 +49,22 @@ app.use(bodyParser.json());
 app.use(cookieParser())
 
 // app middleware
+
 app.use('/', mainRouter);
+
+app.get('/', (req, res) => {
+    fs.readFile('docs/apiDocs.json', (err, data) => {
+        if (err){
+            res.status(400).json({
+            error: err
+            });
+        }
+        let docs = JSON.parse(data);
+        res.json({
+            info: docs
+        });
+    })
+})
 
 
 // get requests from specified port
