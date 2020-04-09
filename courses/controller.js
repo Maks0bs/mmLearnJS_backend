@@ -36,6 +36,31 @@ exports.createCourse = (req, res) => {
 
 };
 
+exports.updateCourse = (req, res) => {
+	console.log(req.body);
+	Course.findByIdAndUpdate(
+		req.body._id,
+		{
+			$set: {
+				...req.body
+			}
+		},
+		{new: true}
+	)
+	.then((result) => {
+		return res.json({
+			message: 'course updated successfully'
+		})
+	})
+	.catch(err => {
+		console.log(err);
+		return res.status(err.status || 400)
+			.json({
+				error: err
+			})
+	}) 
+}
+
 exports.enrollInCourse = (req, res) => {
 	courseId = req.body._id;
 	Course.findOne({_id: courseId})

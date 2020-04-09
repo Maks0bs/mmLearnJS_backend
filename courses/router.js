@@ -6,7 +6,8 @@ let {
 let {
 	createCourse,
 	enrollInCourse,
-	getCoursesFiltered
+	getCoursesFiltered,
+	updateCourse
 } = require('./controller')
 
 let router = require('express').Router()
@@ -18,5 +19,10 @@ router.post('/create',
 );
 router.post('/enroll', requireAuthentication, enrollInCourse);
 router.post('/filter', getCoursesFiltered)
+router.put('/update', 
+	requireAuthentication, 
+	isTeacher, 
+	updateCourse
+);
 
 module.exports = router;
