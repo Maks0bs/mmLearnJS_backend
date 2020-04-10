@@ -6,6 +6,9 @@ let mongoose = require('mongoose')
 let bodyParser = require('body-parser');
 let cookieParser = require('cookie-parser')
 let fs = require('fs');
+let GridFS = require('gridfs-stream');
+let GridFSStorage = require('multer-gridfs-storage');
+let multer = require('multer');
 
 
 // app imports
@@ -25,6 +28,27 @@ mongoose.connect(
 mongoose.connection.on('error', err => {
   	console.log(`DB connection error: ${err.message}`)
 });
+
+
+/*let storage = new GridFSStorage({
+    url: constants.database.MONGODB_URI,
+    file: (req, file) => {
+        return new Promise((resolve, reject) => {
+            crypto.randomBytes(16, (err, buf) => {
+                if (err) {
+                    return reject(err);
+                }
+                let filename = buf.toString('hex');
+                let fileInfo = {
+                    filename: filename,
+                    bucketName: 'uploads'
+                }
+                resolve(fileInfo);
+            })
+        })
+    }
+})
+let upload = multer({ storage })*/
 
 
 // basic middleware and dev features

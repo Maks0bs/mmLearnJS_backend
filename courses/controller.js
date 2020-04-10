@@ -37,7 +37,7 @@ exports.createCourse = (req, res) => {
 };
 
 exports.updateCourse = (req, res) => {
-	console.log(req.body);
+	console.log(req.body.sections.entries[0]);
 	Course.findByIdAndUpdate(
 		req.body._id,
 		{
