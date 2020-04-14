@@ -7,7 +7,12 @@ let {
 	uploadFiles,
 	sendFiles,
 	getFilesFiltered,
-	streamFileById
+	streamFile,
+	setFilename,
+	fileById,
+	configDownload,
+	configStream,
+	deleteFile
 } = require('./controller');
 let {
 	isTeacher,
@@ -19,6 +24,11 @@ router.post('/upload',
 	uploadFiles, 
 	sendFiles
 );
-router.get('/stream/:fileId', streamFileById);
+router.get('/download/:fileId/:filename', configDownload, streamFile);
+router.get('/stream/:fileId/:filename', configStream, streamFile);
+router.delete('/:fileId', deleteFile);
+
+router.param('fileId', fileById);
+router.param('filename', setFilename)
 
 module.exports = router;

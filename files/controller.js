@@ -60,34 +60,17 @@ exports.getFilesFiltered = (req, res) => {
 			})
 		}
 
-		console.log(files);
+		console.log('files', files);
 
 		res.json(files);
 	}) 
-}
-
-exports.setFilename = (req, res, next) => {
-	if (req.params.filename){
-		req.filename = req.params.filename;
-	}
-	else if (req.body && req.body.filename){
-		req.filename = req.body.filename;
-	}
-	next();
-}
-
-exports.configDownload = (req, res, next) => {
-	res.set({
-		'Content-Disposition': `attachment; filename=${req.filename || 'unknown_name'}`
-	})
-	next();
 }
 
 exports.fileById = (req, res, next, id) => {
 	gfs.files.findOne({_id: mongoose.mongo.ObjectId(id)}, (err, file) => {
 		if (err){
 			return res.status(400).json({
-				error: err;
+				error: err
 			})
 		}
 
@@ -103,35 +86,47 @@ exports.fileById = (req, res, next, id) => {
 	})
 }
 
-exports.streamFileById = (req, res) => {
-	/*res.set({
-		'Accept-Ranges': 'bytes',
-		'Content-Disposition': `attachment; filename=${req.params.fileId}`
-		content-type: specify it here 
-	})*/
-	let filter = {};
-	let id = req.params.fileId;
-	filter._id = mongoose.mongo.ObjectId(id);
-	console.log('filter------- ', filter)
-	gfs.files.findOne(filter, (err, file) => {
-		if (err){
-			return res.status(400).json({
-				error: err
-			})
-		}
-		if (!file || file.length === 0) {
-			console.log('stuff')
-			return res.status(404).json({
-				status: 404,
-				error: 'no such file exists'
-			})
-		}
+exports.setFilename = (req, res, next, filename) => {
+	req.originalname = filename;
+	next();
+}
 
-		res.set({
-			'Content-Length': file.length
-		})
-
-		let readStream = gfs.createReadStream(file.filename);
-		readStream.pipe(res);
+exports.configStream = (req, res, next) => {
+	res.set({
+		'Content-Type': req.file.contentType,
+		'Content-Disposition': `inline; filename=${req.originalname || 'unknown_name'}`
 	})
+	next();
+}
+
+exports.configDownload = (req, res, next) => {
+	res.set({
+		'Content-Length': req.file.length,
+		//'Content-Type': `attachment; filename=${req.originalname || 'unknown_name'}`
+		'Content-Type': 'application/octet-stream'
+	})
+	next();
+}
+
+exports.streamFile = (req, res) => {
+	let readStream = gfs.createReadStream(req.file.filename);
+	readStream.pipe(res);
+}
+
+exports.deleteFile = (req, res) => {
+	console.log('file', req.file);
+	console.log('request body', req.body);
+	let objId = mongoose.mongo.ObjectId(req.file._id);
+	gfs.remove({_id: objId, root: 'uploads'}, (err, gridStore) => {
+		if (err) {
+			return res.status(404).json({
+				err: err
+			})
+		}
+		else{
+			res.json({
+				message: 'file deleted successfully'
+			})
+		}
+	});
 }
