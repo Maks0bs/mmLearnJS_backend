@@ -6,7 +6,8 @@ let crypto = require('crypto');
 let {
 	uploadFiles,
 	sendFiles,
-	getFileById
+	getFilesFiltered,
+	streamFileById
 } = require('./controller');
 let {
 	isTeacher,
@@ -18,6 +19,6 @@ router.post('/upload',
 	uploadFiles, 
 	sendFiles
 );
-router.get('/by-id', getFileById);
+router.get('/stream/:fileId', streamFileById);
 
 module.exports = router;

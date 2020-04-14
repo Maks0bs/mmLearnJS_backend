@@ -38,23 +38,100 @@ exports.sendFiles = (req, res) => {
 	})
 }
 
-exports.getFileById = (req, res) => {
-	gfs.files.findOne({_id: req.fileId})
-	.then(file => {
-		if (!file || file.length === 0){
-			throw {
-				status: 404,
-				message: 'file does not exist'
-			}
-		}
-
-		res.json(file);
-	})
-	.catch(err => {
-		console.log(err);
-		return res.status(err.status || 400)
-			.json({
+exports.getFilesFiltered = (req, res) => {
+	console.log('body',req.body);
+	let filter = {}
+	if (req.body.fileId){
+		filter._id = mongoose.mongo.ObjectId(req.body.fileId);
+	}
+	gfs.files.find(filter).toArray((err, files) =>{
+		if (err) {
+			return res.status(400).json({
 				error: err
 			})
+		}
+
+		if (!files || files.length === 0){
+			return res.status(404).json({
+				error: {
+					status: 404,
+					message: 'files do not exist'
+				}
+			})
+		}
+
+		console.log(files);
+
+		res.json(files);
 	}) 
+}
+
+exports.setFilename = (req, res, next) => {
+	if (req.params.filename){
+		req.filename = req.params.filename;
+	}
+	else if (req.body && req.body.filename){
+		req.filename = req.body.filename;
+	}
+	next();
+}
+
+exports.configDownload = (req, res, next) => {
+	res.set({
+		'Content-Disposition': `attachment; filename=${req.filename || 'unknown_name'}`
+	})
+	next();
+}
+
+exports.fileById = (req, res, next, id) => {
+	gfs.files.findOne({_id: mongoose.mongo.ObjectId(id)}, (err, file) => {
+		if (err){
+			return res.status(400).json({
+				error: err;
+			})
+		}
+
+		if (!file || file.length === 0){
+			return res.status(404).json({
+				status: 404,
+				error: 'no such file exists'
+			})
+		}
+
+		req.file = file;
+		next();
+	})
+}
+
+exports.streamFileById = (req, res) => {
+	/*res.set({
+		'Accept-Ranges': 'bytes',
+		'Content-Disposition': `attachment; filename=${req.params.fileId}`
+		content-type: specify it here 
+	})*/
+	let filter = {};
+	let id = req.params.fileId;
+	filter._id = mongoose.mongo.ObjectId(id);
+	console.log('filter------- ', filter)
+	gfs.files.findOne(filter, (err, file) => {
+		if (err){
+			return res.status(400).json({
+				error: err
+			})
+		}
+		if (!file || file.length === 0) {
+			console.log('stuff')
+			return res.status(404).json({
+				status: 404,
+				error: 'no such file exists'
+			})
+		}
+
+		res.set({
+			'Content-Length': file.length
+		})
+
+		let readStream = gfs.createReadStream(file.filename);
+		readStream.pipe(res);
+	})
 }

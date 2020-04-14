@@ -9,14 +9,19 @@ let { TEACHER_PASSWORD } = require('../constants').users
 
 
 exports.signup = (req, res) => {
+    console.log(req.body);
 	User.findOne({ email: req.body.email })
         .then(user => {
             if (user) throw {
                 status: 403,
                 message: 'Email is taken'
             }
-            if (req.body.teacherPassword === TEACHER_PASSWORD){
+            if (req.body.teacher && req.body.teacherPassword === TEACHER_PASSWORD){
                 req.body.role = 'teacher'
+            }
+            else if (req.body.teacher) throw {
+                status: 401,
+                message: 'Wrong teacher password'
             }
             return new User(req.body)
         })
