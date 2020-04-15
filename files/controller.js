@@ -21,7 +21,10 @@ let storage = new GridFSStorage({
                 let filename = buf.toString('hex');
                 let fileInfo = {
                     filename: filename,
-                    bucketName: 'uploads'
+                    bucketName: 'uploads',
+                    metadata: {
+                    	uploadedBy: req.auth._id
+                    }
                 }
                 resolve(fileInfo);
             })
@@ -86,6 +89,15 @@ exports.fileById = (req, res, next, id) => {
 	})
 }
 
+exports.allowModifyFile = (req, res, next) => {
+	// may need to cast to ObjectId
+	if (req.file.metadata.postedBy !== req.auth._id){
+		res.status(401).json({
+			error: 'you are not authorized to modify this file'
+		})
+	}
+}
+
 exports.setFilename = (req, res, next, filename) => {
 	req.originalname = filename;
 	next();
@@ -114,8 +126,6 @@ exports.streamFile = (req, res) => {
 }
 
 exports.deleteFile = (req, res) => {
-	console.log('file', req.file);
-	console.log('request body', req.body);
 	let objId = mongoose.mongo.ObjectId(req.file._id);
 	gfs.remove({_id: objId, root: 'uploads'}, (err, gridStore) => {
 		if (err) {
@@ -129,4 +139,25 @@ exports.deleteFile = (req, res) => {
 			})
 		}
 	});
+}
+
+exports.deleteFiles = async (req, res, next) => {
+	let cnt = 0;
+	if (!req.filesToDelete || req.filesToDelete.length === 0){
+		return next();
+	}
+	for (let i of req.filesToDelete){
+		await gfs.remove(
+			{
+				_id: i,
+				root: 'uploads'
+			},
+			(err, gridStore) => {
+				return console.log('deleted file in deleteFiles route', i);
+			}
+		)
+	}
+
+	next();
+	
 }

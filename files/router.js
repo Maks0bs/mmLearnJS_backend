@@ -12,11 +12,13 @@ let {
 	fileById,
 	configDownload,
 	configStream,
-	deleteFile
+	deleteFile,
+	allowModifyFile,
+	deleteFiles
 } = require('./controller');
 let {
 	isTeacher,
-	requireAuthentication
+	requireAuthentication,
 } = require('../auth/controller')
 let router = require('express').Router()
 router.post('/upload', 
@@ -24,9 +26,14 @@ router.post('/upload',
 	uploadFiles, 
 	sendFiles
 );
+
 router.get('/download/:fileId/:filename', configDownload, streamFile);
 router.get('/stream/:fileId/:filename', configStream, streamFile);
-router.delete('/:fileId', deleteFile);
+router.delete('/:fileId', 
+	requireAuthentication, 
+	allowModifyFile, 
+	deleteFile
+);
 
 router.param('fileId', fileById);
 router.param('filename', setFilename)

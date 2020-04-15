@@ -80,8 +80,8 @@ let courseSchema = new mongoose.Schema({
 					content: {},
 					description: {
 						type: {
-							type: String,
-							required: true
+							type: String//,
+							//required: true
 						},
 						content: {}
 					}
