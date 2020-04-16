@@ -33,9 +33,15 @@ let storage = new GridFSStorage({
 })
 let upload = multer({ storage });
 
-exports.uploadFiles = upload.array('files', constants.database.FILES_UPLOAD_LIMIT)
+exports.uploadFiles = upload.any()/*.fields([
+	{
+		name: 'files', 
+		maxCount: constants.database.FILES_UPLOAD_LIMIT
+	}
+])*/
 
 exports.sendFiles = (req, res) => {
+	console.log('sent files -------- sent files', req);
 	res.json({
 		files: req.files
 	})

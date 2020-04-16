@@ -2,6 +2,7 @@ let Course = require('./model')
 let User = require('../user/model');
 let _ = require('lodash');
 let mongoose = require('mongoose');
+let formidable = require('formidable'); 
 
 exports.courseById = (req, res, next, id) => {
 	Course.findOne({_id: id})
@@ -24,7 +25,6 @@ exports.courseById = (req, res, next, id) => {
 }
 
 exports.createCourse = (req, res) => {
-	console.log(req.body);
 	let courseData = req.body;
 	courseData.creator = req.auth;
 	courseData.teachers = [req.auth];
@@ -58,26 +58,30 @@ exports.createCourse = (req, res) => {
 
 };
 
+exports.getNewCourseData = (req, res, next) => {
+	let form = new formidable.IncomingForm();
+	console.log('request bodyyyyyyyyyyyyyyy', req.body);
+	req.newCourseData = JSON.parse(req.body.newCourseData);
+	req.filesPositions = JSON.parse(req.body.filesPositions);
+	next();
+}
+
 exports.getCleanupFiles = (req, res, next) => {
 	// compare entries in found course with the one in req body
 	// if compare file ids in both lists
 	// if some ids that are in mongo course are not present in req body - delete them
 	let curFiles = {};
+	console.log('new course entries in cleanup files ------', req.newCourseData.sections[0].entries);
 	for (let section of req.courseData.sections){
-		console.log('old section', section);
 		for (let i of section.entries){
-			console.log('old entry', i);
 			if (i.type === 'file'){
 				curFiles[i.content.id] = 'none';
 			}
 		}
 	}
 
-	for (let section of req.body.sections) {
-		console.log('new section', section);
+	for (let section of req.newCourseData.sections) {
 		for (let i of section.entries){
-
-			console.log('new entry', i);
 			if (i.type === 'file'){
 				curFiles[i.content.id] = 'exist'
 			}
@@ -93,16 +97,18 @@ exports.getCleanupFiles = (req, res, next) => {
 
 	req.filesToDelete = filesToDelete;
 
-	console.log('kdlfkdlfdkflsdkflsdkflsdkflsdkf', curFiles);
-
-	console.log('files to delete', filesToDelete);
-
 	next();
 }
 
 exports.updateCourse = (req, res) => {
+	let newCourseData = req.newCourseData;
+	for (let i = 0; i < req.filesPositions.length; i++){
+		let cur = req.filesPositions[i];
+		newCourseData.sections[cur.section].entries[cur.entry].content = req.files[i]
+	}
+	console.log('new request entries in update course', newCourseData.sections);
 	let course = req.courseData;
-	course = _.extend(course, req.body);
+	course = _.extend(course, newCourseData);
 	course.save()
 	.then((result) => {
 		return res.json({

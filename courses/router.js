@@ -10,18 +10,20 @@ let {
 	updateCourse,
 	courseById,
 	updateCleanup,
-	getCleanupFiles
+	getCleanupFiles,
+	getNewCourseData
 } = require('./controller')
 
 let {
-	deleteFiles
+	deleteFiles,
+	uploadFiles
 } = require('../files/controller');
 
 let router = require('express').Router()
 
 router.post('/create', 
 	requireAuthentication,
-	isTeacher, 
+	isTeacher,
 	createCourse
 );
 router.post('/enroll/:courseId', requireAuthentication, enrollInCourse);
@@ -29,10 +31,14 @@ router.post('/filter', getCoursesFiltered)
 router.put('/update/:courseId', 
 	requireAuthentication, 
 	isTeacher,
+	uploadFiles,
+	getNewCourseData,
 	getCleanupFiles,
 	deleteFiles,
 	updateCourse
 );
+
+router.post('/testingroute', getNewCourseData);
 
 router.param('courseId', courseById);
 
