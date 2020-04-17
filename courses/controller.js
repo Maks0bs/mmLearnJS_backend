@@ -14,7 +14,6 @@ exports.courseById = (req, res, next, id) => {
 
 		course.salt = undefined;
 		course.hashed_password = undefined;
-		course.__v = undefined;
 
 		req.courseData = course;
 		next();
@@ -214,7 +213,6 @@ exports.getCoursesFiltered = async (req, res) => {
 		for (let i = 0; i < courses.length; i++){
 			courses[i].salt = undefined;
 			courses[i].hashed_password = undefined;
-			courses[i].__v = undefined;
 			if (courses[i].type === 'public'){
 				continue;
 			}
@@ -260,4 +258,21 @@ exports.getCoursesFiltered = async (req, res) => {
 				error: err
 			})
 	})
+}
+
+exports.deleteCourse = (req, res) => {
+	Course.deleteOne({ _id: req.courseData._id})
+	.then(() => {
+		res.json({
+			message: 'course deleted successfully'
+		})
+	})
+	.catch(err => {
+		console.log(err);
+		res.status(err.status || 400)
+			.json({
+				error: err
+			})
+	})
+
 }

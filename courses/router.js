@@ -1,6 +1,7 @@
 let {
 	isTeacher,
-	requireAuthentication
+	requireAuthentication,
+	isCreator
 } = require('../auth/controller')
 
 let {
@@ -11,7 +12,8 @@ let {
 	courseById,
 	updateCleanup,
 	getCleanupFiles,
-	getNewCourseData
+	getNewCourseData,
+	deleteCourse
 } = require('./controller')
 
 let {
@@ -36,6 +38,11 @@ router.put('/update/:courseId',
 	getCleanupFiles,
 	deleteFiles,
 	updateCourse
+);
+router.delete('/:courseId', 
+	requireAuthentication, 
+	isCreator,
+	deleteCourse
 );
 //router.get('/:courseId', getCourse);
 

@@ -236,6 +236,20 @@ exports.isTeacher = (req, res, next) => {
     next();
 }
 
+exports.isCreator = (req, res, next) => {
+    if (!req.courseData.creator._id.equals(req.auth._id)){
+        res.status(401).json({
+            error: {
+                status: 401,
+                message: 'you are not the creator of the course'
+            }
+        })
+    }
+    else{
+        next();
+    }
+}
+
 exports.getAuthenticatedUser = (req, res) => {
     if (!req.auth){
         return res.json(null);

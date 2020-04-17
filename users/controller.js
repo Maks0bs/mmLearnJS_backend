@@ -13,7 +13,6 @@ exports.userById = (req, res, next, id) => {
 
 		user.salt = undefined;
 		user.hashed_password = undefined;
-		user.__v = undefined;
 
 		req.user = user;//may need to change req.user to req.userById to avoid conflicts
 		next();
