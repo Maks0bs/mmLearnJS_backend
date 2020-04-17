@@ -1,5 +1,5 @@
 let jwt = require('jsonwebtoken');
-let User = require('../user/model');
+let User = require('../users/model');
 let { sendEmail } = require('../helpers');
 
 let { JWT_SECRET } = require('../constants').auth
@@ -68,10 +68,6 @@ exports.signup = (req, res) => {
                     error: err
                 })
         })
-}
-
-exports.sendActivationToken = (req, res) => {
-
 }
 
 exports.activateAccount = (req, res) => {
@@ -167,7 +163,7 @@ exports.signin = (req, res) => {
     
 };
 
-exports.authenticate = (req, res, next) => {
+exports.authenticate = async (req, res, next) => {
     if (req.auth){
         res.json({
             securityError: 'auth is defined in req before obtaining it from cookies - that is illegal'
@@ -181,13 +177,13 @@ exports.authenticate = (req, res, next) => {
     try {
         userData = jwt.verify(token, JWT_SECRET);
         delete userData.iat;
-        req.auth = userData
+        req.auth = await User.findOne({_id: userData._id})
+        return next();
     }
     catch(err) {
         console.log(err);
+        return next();
     }
-
-    return next();
 }
 
 // change name
@@ -197,7 +193,13 @@ exports.extendSession = (req, res, next) => {
         return next()
     }
     try {
-        let updatedToken = jwt.sign(req.auth, JWT_SECRET);
+        let updatedToken = jwt.sign(
+           {
+                _id: req.auth._id,
+                role: req.auth.role,
+                email: req.auth.email
+            },
+            JWT_SECRET);
         res.cookie(
             'auth',
             updatedToken,
@@ -217,7 +219,7 @@ exports.extendSession = (req, res, next) => {
 exports.requireAuthentication = (req, res, next) => {
     if (!req.auth){
         return res.status(401).json({
-            error: {message:'Unauthorized'}
+            error: { message:'Unauthorized' }
         })
     }
     next();
@@ -227,7 +229,7 @@ exports.isTeacher = (req, res, next) => {
     if (req.auth.role !== 'teacher'){
         return res.status(401)
             .json({
-                message: 'Only teachers can create'
+                message: 'You are not a teacher'
             })
     }
 
@@ -235,7 +237,11 @@ exports.isTeacher = (req, res, next) => {
 }
 
 exports.getAuthenticatedUser = (req, res) => {
+    if (!req.auth){
+        return res.json(null);
+    }
     User.findOne({ _id: req.auth._id })
+    .select('-salt -hashed_password')
     .then(user => {
         res.json(user);
     })
@@ -251,7 +257,7 @@ exports.getAuthenticatedUser = (req, res) => {
 exports.logout = (req, res) => {
     res.clearCookie('auth', {...DEFAULT_COOKIE_OPTIONS});
     res.json({
-        message: 'logout successfull'
+        message: 'logout successful'
     })
 }
 

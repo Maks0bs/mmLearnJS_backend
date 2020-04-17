@@ -37,8 +37,8 @@ router.put('/update/:courseId',
 	deleteFiles,
 	updateCourse
 );
+//router.get('/:courseId', getCourse);
 
-router.post('/testingroute', getNewCourseData);
 
 router.param('courseId', courseById);
 

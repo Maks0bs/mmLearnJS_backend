@@ -1,5 +1,5 @@
 let Course = require('./model')
-let User = require('../user/model');
+let User = require('../users/model');
 let _ = require('lodash');
 let mongoose = require('mongoose');
 let formidable = require('formidable'); 
@@ -11,6 +11,10 @@ exports.courseById = (req, res, next, id) => {
 			status: 404,
 			error: 'course not found'
 		}
+
+		course.salt = undefined;
+		course.hashed_password = undefined;
+		course.__v = undefined;
 
 		req.courseData = course;
 		next();
@@ -60,7 +64,6 @@ exports.createCourse = (req, res) => {
 
 exports.getNewCourseData = (req, res, next) => {
 	let form = new formidable.IncomingForm();
-	console.log('request bodyyyyyyyyyyyyyyy', req.body);
 	req.newCourseData = JSON.parse(req.body.newCourseData);
 	req.filesPositions = JSON.parse(req.body.filesPositions);
 	next();
@@ -71,7 +74,6 @@ exports.getCleanupFiles = (req, res, next) => {
 	// if compare file ids in both lists
 	// if some ids that are in mongo course are not present in req body - delete them
 	let curFiles = {};
-	console.log('new course entries in cleanup files ------', req.newCourseData.sections[0].entries);
 	for (let section of req.courseData.sections){
 		for (let i of section.entries){
 			if (i.type === 'file'){
@@ -206,11 +208,49 @@ exports.getCoursesFiltered = async (req, res) => {
 		})
 	}
 	Course.find({...filter})
-	.populate('students', '_id name')
-	.populate('teachers', '_id name')
 	//maybe select only necessary info
 	.sort('name')//optimize sorting - see bookmarks
 	.then(courses => {
+		for (let i = 0; i < courses.length; i++){
+			courses[i].salt = undefined;
+			courses[i].hashed_password = undefined;
+			courses[i].__v = undefined;
+			if (courses[i].type === 'public'){
+				continue;
+			}
+			if (!req.auth){
+				courses[i].sections = undefined;
+				courses[i].actions = undefined;
+				courses[i].students = undefined;
+				courses[i].creator = undefined;
+				continue;
+			}
+			let isTeacher = false, isStudent = false;
+			for (let teacher of courses[i].teachers){
+				if (teacher.equals(req.auth._id)){
+					isTeacher = true;
+					break;
+				}
+			}
+			for (let student of courses[i].students){
+				if (student.equals(req.auth._id)){
+					isStudent = true;
+					break;
+				}
+			}
+			if (courses[i].creator._id.equals(req.auth._id) || isTeacher){
+				continue;
+			}
+			if (isStudent){
+				courses[i].creator = undefined;
+				continue;
+			}
+			
+			courses[i].creator = undefined;
+			courses[i].actions = undefined;
+			courses[i].sections = undefined;
+			courses[i].students = undefined;
+		}
 		return res.json(courses);
 	})
 	.catch(err => {
