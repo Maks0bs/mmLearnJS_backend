@@ -62,9 +62,9 @@ exports.createCourse = (req, res) => {
 };
 
 exports.getNewCourseData = (req, res, next) => {
-	let form = new formidable.IncomingForm();
+	console.log('request body----------', req.body);
 	req.newCourseData = JSON.parse(req.body.newCourseData);
-	req.filesPositions = JSON.parse(req.body.filesPositions);
+	req.filesPositions = req.body.filesPositions && JSON.parse(req.body.filesPositions);
 	next();
 }
 
@@ -73,6 +73,9 @@ exports.getCleanupFiles = (req, res, next) => {
 	// if compare file ids in both lists
 	// if some ids that are in mongo course are not present in req body - delete them
 	let curFiles = {};
+	if (!req.newCourseData.sections){
+		return next();
+	}
 	for (let section of req.courseData.sections){
 		for (let i of section.entries){
 			if (i.type === 'file'){
@@ -103,9 +106,11 @@ exports.getCleanupFiles = (req, res, next) => {
 
 exports.updateCourse = (req, res) => {
 	let newCourseData = req.newCourseData;
-	for (let i = 0; i < req.filesPositions.length; i++){
-		let cur = req.filesPositions[i];
-		newCourseData.sections[cur.section].entries[cur.entry].content = req.files[i]
+	if (req.filesPositions){
+		for (let i = 0; i < req.filesPositions.length; i++){
+			let cur = req.filesPositions[i];
+			newCourseData.sections[cur.section].entries[cur.entry].content = req.files[i]
+		}
 	}
 	console.log('new request entries in update course', newCourseData.sections);
 	let course = req.courseData;
