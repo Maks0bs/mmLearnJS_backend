@@ -3,11 +3,14 @@ let {
 } = require('../auth/controller');
 let {
 	getUser,
-	userById
+	userById,
+	addNotifications,
+	testtest
 } = require('./controller');
 let router = require('express').Router()
 
 router.get('/:userId', getUser);
+router.post('/notifications/', addNotifications, testtest);
 
 router.param('userId', userById);
 

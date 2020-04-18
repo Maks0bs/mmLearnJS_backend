@@ -45,3 +45,36 @@ exports.getUser = (req, res) => {
 	}
 	return res.json(user);
 }
+
+exports.addNotifications = (req, res, next) => {
+	// req.notificationsToAdd: {data: [array of notifications], user: _id}
+	console.log(req.body);
+	let notifications = req.body.notificationsToAdd.data;
+	let user = req.body.notificationsToAdd.user;
+	User.findByIdAndUpdate(
+		user,
+		{
+			$push: {
+				notifications: {
+					$each: notifications
+				}
+			}
+		},
+		{ new: true }
+	)
+	.then(user => {
+		req.testtest = user;
+		return next();
+	})
+	.catch(err => {
+		console.log(err);
+		return res.status(err.status || 400)
+			.json({
+				error: err
+			})
+	}) 
+}
+
+exports.testtest = (req, res) => {
+	res.json(req.testtest)
+}

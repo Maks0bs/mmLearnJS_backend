@@ -35,6 +35,20 @@ let userSchema = new mongoose.Schema({
 		type: String,
 		default: ""
 	},
+	notifications: [
+		{
+			type: {
+				type: String,
+			},
+			title: String,
+			text: String,
+			link: String,
+			created: {
+				type: Date,
+				default: Date.now
+			}
+		}
+	],
 	role: {
 		type: String,
 		default: "student"
