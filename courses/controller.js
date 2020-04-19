@@ -3,6 +3,8 @@ let User = require('../users/model');
 let _ = require('lodash');
 let mongoose = require('mongoose');
 let formidable = require('formidable'); 
+let constants = require('../constants');
+let { COURSE_TEACHER_INVITATION } = constants.notifications
 
 exports.courseById = (req, res, next, id) => {
 	Course.findOne({_id: id})
@@ -216,6 +218,8 @@ exports.getCoursesFiltered = async (req, res) => {
 	.sort('name')//optimize sorting - see bookmarks
 	.then(courses => {
 		for (let i = 0; i < courses.length; i++){
+			
+			
 			courses[i].salt = undefined;
 			courses[i].hashed_password = undefined;
 			if (courses[i].type === 'public'){
@@ -228,6 +232,19 @@ exports.getCoursesFiltered = async (req, res) => {
 				courses[i].creator = undefined;
 				continue;
 			}
+
+			if (courses[i].invitedTeachers){
+				let invitedTeachers = _.cloneDeep(courses[i].invitedTeachers);
+				courses[i].invitedTeachers = undefined;
+				for (let invited of invitedTeachers){
+					if (invited.equals(req.auth._id)){
+						console.log('-----invited', invited);
+						courses[i].invitedTeachers = invitedTeachers;
+						break;
+					}
+				}
+			}
+
 			let isTeacher = false, isStudent = false;
 			for (let teacher of courses[i].teachers){
 				if (teacher.equals(req.auth._id)){
@@ -280,4 +297,112 @@ exports.deleteCourse = (req, res) => {
 			})
 	})
 
+}
+
+exports.sendTeacherInvite = (req, res, next) => {
+	console.log('------req body', req.body)
+	User.findOne({email: req.body.email})
+	.then((user) => {
+		if (!user || user.role !== 'teacher') throw {
+			status: 404,
+			message: 'Teacher with this email could not be found'
+		}
+		req.invitedTeacher = user;
+		req.notificationsToAdd = {
+			user: user,
+			data: [
+				{
+					type: COURSE_TEACHER_INVITATION,
+					title: 'You are invited to be a teacher',
+					text: `The creator of the course "${req.courseData.name}" has invited you
+						to be a teacher in their course. You can accept of decline this invitation`,
+					data: {
+						courseId: req.courseData._id
+					}
+				}
+			]
+		}
+		return next();
+	})
+	.catch(err => {
+		console.log(err);
+		res.status(err.status || 400)
+			.json({
+				error: err
+			})
+	})
+}
+
+exports.addToInvitedList = (req, res) => {
+	let course = req.courseData;
+	course.invitedTeachers.push(req.invitedTeacher);
+	course.save()
+	.then(course => {
+		return res.json({
+			message: 'Invite sent to teacher'
+		})
+	})
+	.catch(err => {
+		console.log(err);
+		return res.status(err.status || 400)
+			.json({
+				error: err
+			})
+	}) 
+}
+
+exports.acceptTeacherInvite = (req, res) => {
+	let course = req.courseData;
+	let hasTeacher = false;
+	console.log('request auth---fdfsdfsdfdf',req.auth);
+	console.log('invited teachers arrayyyyy', course.invitedTeachers);
+	for (let i = 0; i < course.invitedTeachers.length; i++){
+		let cur = course.invitedTeachers[i];
+		console.log('invited teacher-----', i, '----', cur);
+		if (cur.equals(req.auth._id)){
+			course.invitedTeachers.splice(i, 1);
+			hasTeacher = true;
+			break;
+		}
+	}
+	if (!hasTeacher){
+		return res.status(401).json({
+			message: 'You are not on the list of invited teacher to this course'
+		})
+	}
+
+	course.teachers.push(req.auth);
+
+	course.save()
+	.then((course) => {
+		return User.findByIdAndUpdate(
+			req.auth._id,
+			{
+				$pull: {
+					notifications: {
+						type: COURSE_TEACHER_INVITATION,
+						data: {
+							courseId: req.courseData._id
+						}
+					}
+				},
+				$push: {
+					teacherCourses: course
+				}
+			},
+			{new: true}
+		)
+	})
+	.then((user) => {
+		return res.json({
+			message: 'You are now a teacher of this course'
+		})
+	})
+	.catch(err => {
+		console.log(err);
+		return res.status(err.status || 400)
+			.json({
+				error: err
+			})
+	}) 
 }

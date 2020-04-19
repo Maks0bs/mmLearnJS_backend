@@ -42,15 +42,19 @@ exports.getUser = (req, res) => {
 		user.activated = undefined;
 		user.enrolledCourses = undefined;
 		user.teacherCourses = undefined;
+		user.notifications = undefined;
 	}
 	return res.json(user);
 }
 
+exports.getUsersFiltered = (req, res) => {
+
+}
+
 exports.addNotifications = (req, res, next) => {
 	// req.notificationsToAdd: {data: [array of notifications], user: _id}
-	console.log(req.body);
-	let notifications = req.body.notificationsToAdd.data;
-	let user = req.body.notificationsToAdd.user;
+	let notifications = req.notificationsToAdd.data;
+	let user = req.notificationsToAdd.user;
 	User.findByIdAndUpdate(
 		user,
 		{
@@ -63,7 +67,6 @@ exports.addNotifications = (req, res, next) => {
 		{ new: true }
 	)
 	.then(user => {
-		req.testtest = user;
 		return next();
 	})
 	.catch(err => {
@@ -73,8 +76,4 @@ exports.addNotifications = (req, res, next) => {
 				error: err
 			})
 	}) 
-}
-
-exports.testtest = (req, res) => {
-	res.json(req.testtest)
 }

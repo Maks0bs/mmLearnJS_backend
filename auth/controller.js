@@ -6,6 +6,7 @@ let { JWT_SECRET } = require('../constants').auth
 
 let { CLIENT_URL, DEFAULT_COOKIE_OPTIONS, NO_ACTION_LOGOUT_TIME } = require('../constants').client
 let { TEACHER_PASSWORD } = require('../constants').users
+let { ACTIVATE_ACCOUNT } = require('../constants').notifications
 
 
 exports.signup = (req, res) => {
@@ -16,6 +17,7 @@ exports.signup = (req, res) => {
                 status: 403,
                 message: 'Email is taken'
             }
+
             if (req.body.teacher && req.body.teacherPassword === TEACHER_PASSWORD){
                 req.body.role = 'teacher'
             }
@@ -23,6 +25,11 @@ exports.signup = (req, res) => {
                 status: 401,
                 message: 'Wrong teacher password'
             }
+            req.body.notifications = [{
+                type: ACTIVATE_ACCOUNT,
+                title: 'Activate your account',
+                text: 'Please check your email to activate your account'
+            }]
             return new User(req.body)
         })
         .then(user => {
@@ -57,7 +64,7 @@ exports.signup = (req, res) => {
         })
         .then(data => {
             res.json({
-                message: `Signup success for user ${req.body.email}`,
+                message: `Signup success for user ${req.body.email}. Please check your email for activation`,
                 auth: req.auth
             })
         })
@@ -86,6 +93,12 @@ exports.activateAccount = (req, res) => {
                     }
                 })
         }
+        else{
+            res.status(400)
+                .json({
+                    error: err
+                })
+        }
     }
 
     User.findOne({ _id: userData._id })
@@ -94,7 +107,22 @@ exports.activateAccount = (req, res) => {
                 status: 403,
                 message: 'Cannot activate user with this token'
             }
+            if (user.activated){
+                return res.json({
+                    message: `Account for user with email ${userData.email} is already activated`
+                })
+            }
             user.activated = true;
+            if (user.notifications){
+                for (let i = 0; i < user.notifications.length; i++) {
+                    let cur = user.notifications[i];
+                    if (cur.type === ACTIVATE_ACCOUNT){
+                        user.notifications.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+            
             return user.save();
         })
         .then(data => {

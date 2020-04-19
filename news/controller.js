@@ -3,7 +3,7 @@ let NewsEntry = require('./model')
 exports.getNews = (req, res) => {
 	res.json([
 		{
-			message: 'test successful'
+			message: 'password for signing in as teacher : "testpass" '
 		}
 	])
 }

@@ -5,12 +5,13 @@ let {
 	getUser,
 	userById,
 	addNotifications,
-	testtest
+	getUsersFiltered
 } = require('./controller');
 let router = require('express').Router()
 
 router.get('/:userId', getUser);
-router.post('/notifications/', addNotifications, testtest);
+//router.post('/notifications/', addNotifications);
+router.post('/filter', getUsersFiltered);
 
 router.param('userId', userById);
 

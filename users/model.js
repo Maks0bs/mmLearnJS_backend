@@ -42,7 +42,7 @@ let userSchema = new mongoose.Schema({
 			},
 			title: String,
 			text: String,
-			link: String,
+			data: {},
 			created: {
 				type: Date,
 				default: Date.now

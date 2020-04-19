@@ -13,13 +13,20 @@ let {
 	updateCleanup,
 	getCleanupFiles,
 	getNewCourseData,
-	deleteCourse
+	deleteCourse,
+	sendTeacherInvite,
+	addToInvitedList,
+	acceptTeacherInvite
 } = require('./controller')
 
 let {
 	deleteFiles,
 	uploadFiles
 } = require('../files/controller');
+
+let {
+	addNotifications
+} = require('../users/controller')
 
 let router = require('express').Router()
 
@@ -44,6 +51,18 @@ router.delete('/:courseId',
 	isCreator,
 	deleteCourse
 );
+router.post('/send-teacher-invite/:courseId',
+	requireAuthentication,
+	isCreator,
+	sendTeacherInvite,
+	addNotifications,
+	addToInvitedList//send notification to teacher and add them to invitedTeacher array in db
+)
+router.post('/accept-teacher-invite/:courseId',
+	requireAuthentication,
+	isTeacher,
+	acceptTeacherInvite
+)
 //router.get('/:courseId', getCourse);
 
 

@@ -38,6 +38,12 @@ let courseSchema = new mongoose.Schema({
 			ref: 'User'
 		}
 	],
+	invitedTeachers: [
+		{
+			type: ObjectId,
+			ref: 'User'
+		}
+	],
 	salt: String,
 	students: [
 		{
