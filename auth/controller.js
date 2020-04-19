@@ -1,23 +1,35 @@
 let jwt = require('jsonwebtoken');
-let User = require('../user/model');
+let User = require('../users/model');
 let { sendEmail } = require('../helpers');
 
 let { JWT_SECRET } = require('../constants').auth
 
 let { CLIENT_URL, DEFAULT_COOKIE_OPTIONS, NO_ACTION_LOGOUT_TIME } = require('../constants').client
 let { TEACHER_PASSWORD } = require('../constants').users
+let { ACTIVATE_ACCOUNT } = require('../constants').notifications
 
 
 exports.signup = (req, res) => {
+    console.log(req.body);
 	User.findOne({ email: req.body.email })
         .then(user => {
             if (user) throw {
                 status: 403,
                 message: 'Email is taken'
             }
-            if (req.body.teacherPassword === TEACHER_PASSWORD){
+
+            if (req.body.teacher && req.body.teacherPassword === TEACHER_PASSWORD){
                 req.body.role = 'teacher'
             }
+            else if (req.body.teacher) throw {
+                status: 401,
+                message: 'Wrong teacher password'
+            }
+            req.body.notifications = [{
+                type: ACTIVATE_ACCOUNT,
+                title: 'Activate your account',
+                text: 'Please check your email to activate your account'
+            }]
             return new User(req.body)
         })
         .then(user => {
@@ -52,7 +64,7 @@ exports.signup = (req, res) => {
         })
         .then(data => {
             res.json({
-                message: `Signup success for user ${req.body.email}`,
+                message: `Signup success for user ${req.body.email}. Please check your email for activation`,
                 auth: req.auth
             })
         })
@@ -63,10 +75,6 @@ exports.signup = (req, res) => {
                     error: err
                 })
         })
-}
-
-exports.sendActivationToken = (req, res) => {
-
 }
 
 exports.activateAccount = (req, res) => {
@@ -85,6 +93,12 @@ exports.activateAccount = (req, res) => {
                     }
                 })
         }
+        else{
+            res.status(400)
+                .json({
+                    error: err
+                })
+        }
     }
 
     User.findOne({ _id: userData._id })
@@ -93,7 +107,22 @@ exports.activateAccount = (req, res) => {
                 status: 403,
                 message: 'Cannot activate user with this token'
             }
+            if (user.activated){
+                return res.json({
+                    message: `Account for user with email ${userData.email} is already activated`
+                })
+            }
             user.activated = true;
+            if (user.notifications){
+                for (let i = 0; i < user.notifications.length; i++) {
+                    let cur = user.notifications[i];
+                    if (cur.type === ACTIVATE_ACCOUNT){
+                        user.notifications.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+            
             return user.save();
         })
         .then(data => {
@@ -162,7 +191,7 @@ exports.signin = (req, res) => {
     
 };
 
-exports.authenticate = (req, res, next) => {
+exports.authenticate = async (req, res, next) => {
     if (req.auth){
         res.json({
             securityError: 'auth is defined in req before obtaining it from cookies - that is illegal'
@@ -176,13 +205,13 @@ exports.authenticate = (req, res, next) => {
     try {
         userData = jwt.verify(token, JWT_SECRET);
         delete userData.iat;
-        req.auth = userData
+        req.auth = await User.findOne({_id: userData._id})
+        return next();
     }
     catch(err) {
         console.log(err);
+        return next();
     }
-
-    return next();
 }
 
 // change name
@@ -192,7 +221,13 @@ exports.extendSession = (req, res, next) => {
         return next()
     }
     try {
-        let updatedToken = jwt.sign(req.auth, JWT_SECRET);
+        let updatedToken = jwt.sign(
+           {
+                _id: req.auth._id,
+                role: req.auth.role,
+                email: req.auth.email
+            },
+            JWT_SECRET);
         res.cookie(
             'auth',
             updatedToken,
@@ -212,7 +247,7 @@ exports.extendSession = (req, res, next) => {
 exports.requireAuthentication = (req, res, next) => {
     if (!req.auth){
         return res.status(401).json({
-            error: {message:'Unauthorized'}
+            error: { message:'Unauthorized' }
         })
     }
     next();
@@ -222,15 +257,33 @@ exports.isTeacher = (req, res, next) => {
     if (req.auth.role !== 'teacher'){
         return res.status(401)
             .json({
-                message: 'Only teachers can create'
+                message: 'You are not a teacher'
             })
     }
 
     next();
 }
 
+exports.isCreator = (req, res, next) => {
+    if (!req.courseData.creator._id.equals(req.auth._id)){
+        res.status(401).json({
+            error: {
+                status: 401,
+                message: 'you are not the creator of the course'
+            }
+        })
+    }
+    else{
+        next();
+    }
+}
+
 exports.getAuthenticatedUser = (req, res) => {
+    if (!req.auth){
+        return res.json(null);
+    }
     User.findOne({ _id: req.auth._id })
+    .select('-salt -hashed_password')
     .then(user => {
         res.json(user);
     })
@@ -246,7 +299,7 @@ exports.getAuthenticatedUser = (req, res) => {
 exports.logout = (req, res) => {
     res.clearCookie('auth', {...DEFAULT_COOKIE_OPTIONS});
     res.json({
-        message: 'logout successfull'
+        message: 'logout successful'
     })
 }
 

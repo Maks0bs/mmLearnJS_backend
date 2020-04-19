@@ -32,14 +32,19 @@ module.exports = {
 		PORT: process.env.PORT || 8080
 	},
 	database: {
-		MONGODB_URI: process.env.MONGODB_URI
+		MONGODB_URI: process.env.MONGODB_URI,
+		FILES_UPLOAD_LIMIT: 500
 	},
 	auth: {
 		JWT_SECRET: process.env.JWT_SECRET
 	},
 	client: {
-		NO_ACTION_LOGOUT_TIME: 60 * 1000,
+		NO_ACTION_LOGOUT_TIME: 5 * 60 * 1000,
 		DEFAULT_COOKIE_OPTIONS: defaultCookieOptions,
 		CLIENT_URL: clientUrl
+	},
+	notifications: {
+		ACITVATE_ACCOUNT: 'USER_NOTIFICATION_ACTIVATE_ACCOUNT',
+		COURSE_TEACHER_INVITATION: 'USER_NOTIFICATION_TEACHER_INVITATION'
 	}
 }

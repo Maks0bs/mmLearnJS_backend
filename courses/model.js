@@ -38,6 +38,12 @@ let courseSchema = new mongoose.Schema({
 			ref: 'User'
 		}
 	],
+	invitedTeachers: [
+		{
+			type: ObjectId,
+			ref: 'User'
+		}
+	],
 	salt: String,
 	students: [
 		{
@@ -62,14 +68,29 @@ let courseSchema = new mongoose.Schema({
 	],
 	sections: [
 		{
-			name: String,
+			name: {
+				type: String,
+				required: true
+			},
 			description: String,
 			entries: [
 				{
-					type: String,
-					name: String,
+					type: {
+						type: String,
+						required: true
+					},
+					name: {
+						type: String,
+						required: true
+					},
 					content: {},
-					description: {}
+					description: {
+						type: {
+							type: String//,
+							//required: true
+						},
+						content: {}
+					}
 				}
 			]
 		}

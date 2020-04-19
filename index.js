@@ -5,6 +5,10 @@ let cors = require('cors');
 let mongoose = require('mongoose')
 let bodyParser = require('body-parser');
 let cookieParser = require('cookie-parser')
+let fs = require('fs');
+let GridFS = require('gridfs-stream');
+let GridFSStorage = require('multer-gridfs-storage');
+let multer = require('multer');
 
 
 // app imports
@@ -24,7 +28,6 @@ mongoose.connect(
 mongoose.connection.on('error', err => {
   	console.log(`DB connection error: ${err.message}`)
 });
-
 
 // basic middleware and dev features
 if (constants.environment !== 'production') {
@@ -48,7 +51,22 @@ app.use(bodyParser.json());
 app.use(cookieParser())
 
 // app middleware
+
 app.use('/', mainRouter);
+
+app.get('/', (req, res) => {
+    fs.readFile('docs/apiDocs.json', (err, data) => {
+        if (err){
+            res.status(400).json({
+            error: err
+            });
+        }
+        let docs = JSON.parse(data);
+        res.json({
+            info: docs
+        });
+    })
+})
 
 
 // get requests from specified port
