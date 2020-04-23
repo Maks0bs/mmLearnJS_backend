@@ -1,16 +1,18 @@
 let jwt = require('jsonwebtoken');
 let User = require('../users/model');
+let Course = require('../courses/model');
 let { sendEmail } = require('../helpers');
 
 let { JWT_SECRET } = require('../constants').auth
 
 let { CLIENT_URL, DEFAULT_COOKIE_OPTIONS, NO_ACTION_LOGOUT_TIME } = require('../constants').client
 let { TEACHER_PASSWORD } = require('../constants').users
-let { ACTIVATE_ACCOUNT } = require('../constants').notifications
+let { ACTIVATE_ACCOUNT, COURSE_TEACHER_INVITATION } = require('../constants').notifications
 
 
 exports.signup = (req, res) => {
     console.log(req.body);
+    let data = {};
 	User.findOne({ email: req.body.email })
         .then(user => {
             if (user) throw {
@@ -43,14 +45,13 @@ exports.signup = (req, res) => {
                     expiresIn: 15 * 60
                 }
             )
-            let data = {
+            data = {
                 email: user.email,
                 token: token
             }
-            user.save()
-            return data;
+            return user.save()
         })
-        .then(data => {
+        .then(user => {
             return sendEmail({
                 from: "noreply@mmlearnjs.com",
                 to: data.email,
@@ -59,6 +60,127 @@ exports.signup = (req, res) => {
                 html: `
                     <p> Please use the following link to activate your account: </p> 
                     <p> ${CLIENT_URL}/activate-account/${data.token} </p>
+                `
+            });
+        })
+        .then(result => {
+            res.json({
+                message: `Signup success for user ${req.body.email}. Please check your email for activation`,
+                auth: req.auth
+            })
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(err.status || 400)
+                .json({
+                    error: err
+                })
+        })
+}
+
+exports.inviteSignup = (req, res) => {
+    /*console.log('request', req.body);
+    console.log('verified token', jwt.verify(req.body.token, JWT_SECRET));
+    res.json({
+        message: 'wow omg it works'
+    })*/
+    let inviteData = {};
+    let emailData = {};
+    try {
+        inviteData = jwt.verify(req.body.token, JWT_SECRET)
+    }
+    catch (err) {
+        if (err.name === 'TokenExpiredError'){
+            res.status(401)
+                .json({
+                    error: {
+                        status: 401,
+                        message: 'Invite link expired. Try getting a new invite link'
+                    }
+                })
+        }
+        else{
+            res.status(400)
+                .json({
+                    error: err
+                })
+        }
+    }
+    User.findOne({ email: req.body.email })
+        .then(user => {
+            if (user) throw {
+                status: 403,
+                message: 'Email is taken'
+            }
+
+            if (inviteData.teacher || (req.body.teacher && req.body.teacherPassword === TEACHER_PASSWORD)){
+                req.body.role = 'teacher'
+            }
+            else if (req.body.teacher && req.body.teacherPassword !== TEACHER_PASSWORD) throw {
+                status: 401,
+                message: 'Wrong teacher password'
+            }
+            req.body.notifications = [
+                {
+                    type: ACTIVATE_ACCOUNT,
+                    title: 'Activate your account',
+                    text: 'Please check your email to activate your account'
+                }
+            ]
+
+            if (inviteData.courseId){
+                req.body.notifications.push({
+                    type: COURSE_TEACHER_INVITATION,
+                    title: 'You are invited to be a teacher',
+                    text: `The creator of the course "${inviteData.courseName || inviteData.courseId}" has invited you
+                        to be a teacher in their course. You can accept of decline this invitation`,
+                    data: {
+                        courseId: inviteData.courseId
+                    }
+                })
+            }
+            return new User(req.body)
+        })
+        .then(user => {
+            let token = jwt.sign(
+                {
+                    _id: user._id,
+                    email: user.email
+                },
+                JWT_SECRET,
+                {
+                    expiresIn: 15 * 60
+                }
+            )
+            emailData = {
+                email: user.email,
+                token: token
+            }
+            return user.save()
+        })
+        .then(user => {
+            if (!inviteData.courseId){
+                return data;
+            }
+            return Course.findByIdAndUpdate(
+                inviteData.courseId,
+                {
+                    $push: {
+                        invitedTeachers: user
+                    }
+                },
+                { new: true }
+            )
+        })
+        .then(data => {
+            return sendEmail({
+                from: "noreply@mmlearnjs.com",
+                to: emailData.email,
+                subject: "Account activation instructions",
+                text: `Please use the following link to activate your account: ${CLIENT_URL}/activate-account/${emailData.token}`,
+                html: `
+                    <p> Please use the following link to activate your account: </p> 
+                    <p> ${CLIENT_URL}/activate-account/${emailData.token} </p>
                 `
             });
         })
@@ -262,6 +384,31 @@ exports.isTeacher = (req, res, next) => {
     }
 
     next();
+}
+
+exports.teacherInCourse = (req, res, next) => {
+    if (!req.courseData.teachers){
+        return res.status(401).json({
+            message: 'No teachers in this course'
+        })
+    }
+
+    let check = false;
+
+    for (let i of req.courseData.teachers){
+        if (i.equals(req.auth._id)){
+            check = true;
+            break;
+        }
+    }
+
+    if (!check){
+        return res.status(401).json({
+            message: 'You are not authorized to perform this action'
+        })
+    }
+
+    return next();
 }
 
 exports.isCreator = (req, res, next) => {

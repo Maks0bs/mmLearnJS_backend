@@ -4,7 +4,12 @@ let _ = require('lodash');
 let mongoose = require('mongoose');
 let formidable = require('formidable'); 
 let constants = require('../constants');
+let { sendEmail } = require('../helpers');
 let { COURSE_TEACHER_INVITATION } = constants.notifications
+let { CLIENT_URL } = constants.client;
+let jwt = require('jsonwebtoken');
+
+let { JWT_SECRET } = constants.auth;
 
 exports.courseById = (req, res, next, id) => {
 	Course.findOne({_id: id})
@@ -300,10 +305,42 @@ exports.deleteCourse = (req, res) => {
 }
 
 exports.sendTeacherInvite = (req, res, next) => {
-	console.log('------req body', req.body)
+	console.log('------req body', req.body);
+	let newUser = false;
 	User.findOne({email: req.body.email})
 	.then((user) => {
-		if (!user || user.role !== 'teacher') throw {
+
+		if (!user) {
+			newUser = true;
+			let token = jwt.sign(
+                {
+                    email: req.body.email,
+                    teacher: true,
+                    courseId: req.courseData._id,
+                    courseName: req.courseData.name
+                },
+                JWT_SECRET,
+                {
+                    expiresIn: 30 * 24 * 60 * 60
+                }
+            )
+			return sendEmail({
+	            from: "noreply@mmlearnjs.com",
+	            to: req.body.email,
+	            subject: "Teacher invitation to course on mmlearnjs",
+	            text: `You have been invited to be a teacher at the course "${req.courseData.name}" on mmlearnjs. Please sign up with this link to become a teacher at that course:
+	            	${CLIENT_URL}/invite-signup/${token}?teacher=true&email=${req.body.email}`,
+	            html: `
+	            	<div>
+		                <p>You have been invited to be a teacher at the course "${req.courseData.name}" on mmlearnjs.</p> 
+		                <p>Please sign up with this link to become a teacher at that course: </p>
+		                <p>${CLIENT_URL}/invite-signup/${token}?teacher=true&email=${req.body.email}</p>
+		            </div>
+	            `
+	        })
+		}
+
+		if (user.role !== 'teacher') throw {
 			status: 404,
 			message: 'Teacher with this email could not be found'
 		}
@@ -321,6 +358,24 @@ exports.sendTeacherInvite = (req, res, next) => {
 					}
 				}
 			]
+		}
+
+		return sendEmail({
+            from: "noreply@mmlearnjs.com",
+            to: user.email,
+            subject: "Teacher invitation to course",
+            text: `You have been invited to be a teacher at the course "${req.courseData.name}". ${CLIENT_URL}/classroom/course/${req.courseData._id}`,
+            html: `
+                <p>You have been invited to be a teacher at the course "${req.courseData.name}".</p> 
+                <p>${CLIENT_URL}/classroom/course/${req.courseData._id}</p>
+            `
+        });
+	})
+	.then((data) => {
+		if (newUser){
+			return res.json({
+				message: 'invite send to unregistered user'
+			})
 		}
 		return next();
 	})

@@ -1,7 +1,8 @@
 let {
 	isTeacher,
 	requireAuthentication,
-	isCreator
+	isCreator,
+	teacherInCourse
 } = require('../auth/controller')
 
 let {
@@ -40,6 +41,7 @@ router.post('/filter', getCoursesFiltered)
 router.put('/update/:courseId', 
 	requireAuthentication, 
 	isTeacher,
+	teacherInCourse,
 	uploadFiles,
 	getNewCourseData,
 	getCleanupFiles,
