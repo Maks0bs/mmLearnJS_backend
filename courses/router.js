@@ -1,3 +1,5 @@
+let activitiesRouter = require('./activities/router');
+
 let {
 	isTeacher,
 	requireAuthentication,
@@ -66,6 +68,7 @@ router.post('/accept-teacher-invite/:courseId',
 	acceptTeacherInvite
 )
 //router.get('/:courseId', getCourse);
+router.use('/activities/', activitiesRouter);
 
 
 router.param('courseId', courseById);
