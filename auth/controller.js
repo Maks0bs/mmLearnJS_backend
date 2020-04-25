@@ -1,6 +1,6 @@
 let jwt = require('jsonwebtoken');
 let User = require('../users/model');
-let Course = require('../courses/model');
+let { Course } = require('../courses/model');
 let { sendEmail } = require('../helpers');
 
 let { JWT_SECRET } = require('../constants').auth

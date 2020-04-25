@@ -1,4 +1,4 @@
-let Course = require('./model')
+let { Course, EntryFile, EntryText, Entry, EntryContent } = require('./model')
 let User = require('../users/model');
 let _ = require('lodash');
 let mongoose = require('mongoose');
@@ -18,7 +18,9 @@ exports.courseById = (req, res, next, id) => {
 			status: 404,
 			error: 'course not found'
 		}
-
+		return course;
+	})
+	.then(course => {
 		course.salt = undefined;
 		course.hashed_password = undefined;
 
@@ -69,7 +71,6 @@ exports.createCourse = (req, res) => {
 };
 
 exports.getNewCourseData = (req, res, next) => {
-	console.log('request body----------', req.body);
 	req.newCourseData = JSON.parse(req.body.newCourseData);
 	req.filesPositions = req.body.filesPositions && JSON.parse(req.body.filesPositions);
 	next();
@@ -111,19 +112,45 @@ exports.getCleanupFiles = (req, res, next) => {
 	next();
 }
 
-exports.updateCourse = (req, res) => {
+// change update, add objectid handling
+exports.updateCourse = async (req, res) => {
 	let newCourseData = req.newCourseData;
+
 	if (req.filesPositions){
 		for (let i = 0; i < req.filesPositions.length; i++){
 			let cur = req.filesPositions[i];
 			newCourseData.sections[cur.section].entries[cur.entry].content = req.files[i]
 		}
 	}
-	console.log('new request entries in update course', newCourseData.sections);
+
+	console.log('new course data', newCourseData);
+
+	for (let section = 0; section < newCourseData.sections.length; section++){
+		for (let i = 0; i < newCourseData.sections[section].entries.length; i++){
+			let cur = newCourseData.sections[section].entries[i];
+			if (!cur.content.kind){
+				switch(cur.type){
+					case 'file': {
+						newCourseData.sections[section].entries[i].content.kind = 'EntryFile'
+						break;
+					}
+					case 'text': {
+						newCourseData.sections[section].entries[i].content.kind = 'EntryText'
+						break;
+					}
+					default: {
+						newCourseData.sections[section].entries[i].content.kind = 'EntryContent'
+						break;
+					}
+				}
+			}
+		}
+	}
 	let course = req.courseData;
 	course = _.extend(course, newCourseData);
 	course.save()
 	.then((result) => {
+		console.log('result', result.sections[0].entries);
 		return res.json({
 			message: 'course updated successfully'
 		})
@@ -243,7 +270,6 @@ exports.getCoursesFiltered = async (req, res) => {
 				courses[i].invitedTeachers = undefined;
 				for (let invited of invitedTeachers){
 					if (invited.equals(req.auth._id)){
-						console.log('-----invited', invited);
 						courses[i].invitedTeachers = invitedTeachers;
 						break;
 					}
@@ -305,7 +331,6 @@ exports.deleteCourse = (req, res) => {
 }
 
 exports.sendTeacherInvite = (req, res, next) => {
-	console.log('------req body', req.body);
 	let newUser = false;
 	User.findOne({email: req.body.email})
 	.then((user) => {
@@ -409,11 +434,8 @@ exports.addToInvitedList = (req, res) => {
 exports.acceptTeacherInvite = (req, res) => {
 	let course = req.courseData;
 	let hasTeacher = false;
-	console.log('request auth---fdfsdfsdfdf',req.auth);
-	console.log('invited teachers arrayyyyy', course.invitedTeachers);
 	for (let i = 0; i < course.invitedTeachers.length; i++){
 		let cur = course.invitedTeachers[i];
-		console.log('invited teacher-----', i, '----', cur);
 		if (cur.equals(req.auth._id)){
 			course.invitedTeachers.splice(i, 1);
 			hasTeacher = true;
@@ -422,7 +444,7 @@ exports.acceptTeacherInvite = (req, res) => {
 	}
 	if (!hasTeacher){
 		return res.status(401).json({
-			message: 'You are not on the list of invited teacher to this course'
+			message: 'You are not on the list of invited teachers to this course'
 		})
 	}
 

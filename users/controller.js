@@ -1,4 +1,4 @@
-let Course = require('../courses/model')
+let { Course } = require('../courses/model')
 let User = require('./model');
 let _ = require('lodash');
 let mongoose = require('mongoose');

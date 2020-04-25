@@ -2,25 +2,115 @@ let mongoose = require('mongoose');
 let { ObjectId } = mongoose.Schema;
 let uuidv1 = require('uuid/v1');
 let crypto = require('crypto');
+//let Int32 = require('mongoose-int32');
 
-/*let courseEntrySchema = new mongoose.Schema({
-
+let entryContentSchema = new mongoose.Schema({
+	info: {}
+}, {
+	discriminatorKey: 'kind'
 })
+let EntryContent = mongoose.model('EntryContent', entryContentSchema);
+exports.EntryContent = EntryContent;
 
-let CourseEntry = mongoose.model('CourseEntry', courseEntrySchema);
+let entryTextSchema = new mongoose.Schema({
+	text: String
+}, {
+	discriminatorKey: 'kind'
+})
+let EntryText = EntryContent.discriminator('EntryText', entryTextSchema);
+exports.EntryText = EntryText;
 
-let courseSectionSchema = new mongoose.Schema({
+let entryForumSchema = new mongoose.Schema({
 	name: String,
-	description: String,
-	entries: [
+	topics: [
 		{
-			type: ObjectId,
-			ref: ''
+			creator: {
+				type: ObjectId,
+				ref: 'User'
+			},
+			created: {
+				type: Date,
+				default: Date.now
+			},
+			updated: Date,
+			posts: [
+				{
+					creator: {
+						type: ObjectId,
+						ref: 'User'
+					},
+					created: {
+						type: Date,
+						default: Date.now
+					},
+					updated: Date,
+					content: String, //to change to smth more global
+					name: String
+				}
+			]
 		}
 	]
 })
 
-let CourseSection = mongoose.model('CourseSection', course)*/
+let entryFileSchema = new mongoose.Schema({
+	fieldname: String,
+	originalname: {
+		type: String,
+		required: true
+	},
+	encoding: String,
+	mimetype: String,
+	id: {
+		type: ObjectId,
+		ref: 'Uploads.File',
+		required: true
+	},
+	filename: {
+		type: String,
+		required: true
+	},
+	metadata: {},
+	bucketName: {
+		type: String,
+		required: true
+	},
+	chunkSize: Number,
+	size: Number,
+	md5: String,
+	uploadDate: Date,
+	contentType: {
+		type: String,
+		required: true
+	}
+}, {
+	discriminatorKey: 'kind'
+})
+let EntryFile = EntryContent.discriminator('EntryFile', entryFileSchema);
+exports.EntryFile = EntryFile;
+
+let entrySchema = new mongoose.Schema({
+	type: {
+		type: String,
+		required: true
+	},
+	name: {
+		type: String,
+		required: true
+	},
+	content: entryContentSchema,
+	description: {
+		text: String,
+		additionalContent: entryContentSchema
+	}
+}, {
+	discriminatorKey: 'kind'
+})
+entrySchema.path('content').discriminator('EntryFile', entryFileSchema)
+entrySchema.path('content').discriminator('EntryText', entryTextSchema)
+entrySchema.path('description.additionalContent').discriminator('EntryFile', entryFileSchema)
+entrySchema.path('description.additionalContent').discriminator('EntryText', entryTextSchema)
+let Entry = mongoose.model('Entry', entrySchema);
+exports.Entry = Entry;
 
 let courseSchema = new mongoose.Schema({
 	name: {
@@ -74,27 +164,12 @@ let courseSchema = new mongoose.Schema({
 			},
 			description: String,
 			entries: [
-				{
-					type: {
-						type: String,
-						required: true
-					},
-					name: {
-						type: String,
-						required: true
-					},
-					content: {},
-					description: {
-						type: {
-							type: String//,
-							//required: true
-						},
-						content: {}
-					}
-				}
+				entrySchema
 			]
 		}
 	]
+}, {
+	discriminatorKey: 'kind'
 })
 
 courseSchema
@@ -125,6 +200,6 @@ courseSchema.methods = {
 		}
 	}
 }
-
-module.exports = mongoose.model('Course', courseSchema);
+let Course = mongoose.model('Course', courseSchema);
+exports.Course = Course;
 

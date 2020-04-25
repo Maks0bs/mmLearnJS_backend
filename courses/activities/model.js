@@ -23,8 +23,24 @@ let activitiesSchema = new mongoose.Schema({
 		default: Date.now
 	},
 	updated: Date,
+	arr: [
+		{
+			type:ObjectId,
+			ref: 'Bruh'
+		}
+	]
 	
 }, options);
+
+let bruhSchema = mongoose.Schema({
+	f1: String,
+	f2: [
+		{
+			type: String
+		}
+	]
+})
+exports.Bruh = mongoose.model('  Bruh', bruhSchema);
 
 let Activity = mongoose.model('Activity', activitiesSchema);
 exports.Activity = Activity;
