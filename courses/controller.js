@@ -123,9 +123,12 @@ exports.updateCourse = async (req, res) => {
 		}
 	}
 
-	console.log('new course data', newCourseData);
+	let len = 0;
+	if (newCourseData.sections){
+		len = newCourseData.sections.length
+	}
 
-	for (let section = 0; section < newCourseData.sections.length; section++){
+	for (let section = 0; section < len; section++){
 		for (let i = 0; i < newCourseData.sections[section].entries.length; i++){
 			let cur = newCourseData.sections[section].entries[i];
 			if (!cur.content.kind){
@@ -138,6 +141,10 @@ exports.updateCourse = async (req, res) => {
 						newCourseData.sections[section].entries[i].content.kind = 'EntryText'
 						break;
 					}
+					case 'forum': {
+						newCourseData.sections[section].entries[i].content.kind = 'EntryForum'
+						break;
+					}
 					default: {
 						newCourseData.sections[section].entries[i].content.kind = 'EntryContent'
 						break;
@@ -146,11 +153,11 @@ exports.updateCourse = async (req, res) => {
 			}
 		}
 	}
+
 	let course = req.courseData;
 	course = _.extend(course, newCourseData);
 	course.save()
 	.then((result) => {
-		console.log('result', result.sections[0].entries);
 		return res.json({
 			message: 'course updated successfully'
 		})

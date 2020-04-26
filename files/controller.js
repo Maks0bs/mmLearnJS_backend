@@ -110,9 +110,10 @@ exports.setFilename = (req, res, next, filename) => {
 }
 
 exports.configStream = (req, res, next) => {
+	console.log('req file', req.file, 'req or name', req.originalname);
 	res.set({
 		'Content-Type': req.file.contentType,
-		'Content-Disposition': `inline; filename=${req.originalname || 'unknown_name'}`
+		'Content-Disposition': `inline; filename=${req.originalname || 'unknownname'}`
 	})
 	next();
 }

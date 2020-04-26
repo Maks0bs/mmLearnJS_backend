@@ -21,7 +21,8 @@ let EntryText = EntryContent.discriminator('EntryText', entryTextSchema);
 exports.EntryText = EntryText;
 
 let entryForumSchema = new mongoose.Schema({
-	name: String,
+	description: String,
+	teachersOnly: Boolean,
 	topics: [
 		{
 			creator: {
@@ -50,7 +51,11 @@ let entryForumSchema = new mongoose.Schema({
 			]
 		}
 	]
+}, {
+	discriminatorKey: 'kind'
 })
+let EntryForum = EntryContent.discriminator('EntryForum', entryForumSchema);
+exports.EntryForum = EntryForum;
 
 let entryFileSchema = new mongoose.Schema({
 	fieldname: String,
@@ -107,8 +112,10 @@ let entrySchema = new mongoose.Schema({
 })
 entrySchema.path('content').discriminator('EntryFile', entryFileSchema)
 entrySchema.path('content').discriminator('EntryText', entryTextSchema)
+entrySchema.path('content').discriminator('EntryForum', entryForumSchema)
 entrySchema.path('description.additionalContent').discriminator('EntryFile', entryFileSchema)
 entrySchema.path('description.additionalContent').discriminator('EntryText', entryTextSchema)
+entrySchema.path('description.additionalContent').discriminator('EntryForum', entryForumSchema)
 let Entry = mongoose.model('Entry', entrySchema);
 exports.Entry = Entry;
 
