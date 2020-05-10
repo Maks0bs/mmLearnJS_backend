@@ -386,6 +386,37 @@ exports.isTeacher = (req, res, next) => {
     next();
 }
 
+exports.userInCourse = (req, res, next) => {
+    let course = req.courseData;
+    if (course.creator._id.equals(req.auth._id)){
+        req.userCourseStatus = 'creator';
+        return next();
+    }
+    for (let i of course.teachers){
+        if (i._id.equals(req.auth._id)){
+            req.userCourseStatus = 'teacher';
+            return next();
+        }
+    }
+    for (let i of course.students){
+        if (i._id.equals(req.auth._id)){
+            req.userCourseStatus = 'student';
+            return next();
+        }
+    }
+
+    req.userCourseStatus = 'not enrolled';
+
+    return res.status(401).json({
+        error: {
+            status: 401,
+            message: `you don't have access to this course`
+        }
+    })
+
+
+}
+
 exports.teacherInCourse = (req, res, next) => {
     if (!req.courseData.teachers){
         return res.status(401).json({

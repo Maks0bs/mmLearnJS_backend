@@ -20,11 +20,33 @@ let entryTextSchema = new mongoose.Schema({
 let EntryText = EntryContent.discriminator('EntryText', entryTextSchema);
 exports.EntryText = EntryText;
 
+let forumTopicPostSchema = new mongoose.Schema({
+	creator: {
+		type: ObjectId,
+		ref: 'User'
+	},
+	created: {
+		type: Date,
+		default: Date.now
+	},
+	updated: Date,
+	content: String, //to change to smth more global
+	answers: [
+		{
+			type: ObjectId
+		}//!!!!!!!!!!populate this shit when sending response!!!!!!
+	]
+})
+
+let ForumTopicPost = mongoose.model('ForumTopicPost', forumTopicPostSchema);
+exports.ForumTopicPost = ForumTopicPost;
+
 let entryForumSchema = new mongoose.Schema({
 	description: String,
 	teachersOnly: Boolean,
 	topics: [
 		{
+			name: String,
 			creator: {
 				type: ObjectId,
 				ref: 'User'
@@ -46,7 +68,11 @@ let entryForumSchema = new mongoose.Schema({
 					},
 					updated: Date,
 					content: String, //to change to smth more global
-					name: String
+					answers: [
+						{
+							type: ObjectId
+						}//!!!!!!!!!!populate this shit when sending response!!!!!!
+					]
 				}
 			]
 		}

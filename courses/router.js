@@ -2,7 +2,8 @@ let {
 	isTeacher,
 	requireAuthentication,
 	isCreator,
-	teacherInCourse
+	teacherInCourse,
+	userInCourse
 } = require('../auth/controller')
 
 let {
@@ -17,7 +18,12 @@ let {
 	deleteCourse,
 	sendTeacherInvite,
 	addToInvitedList,
-	acceptTeacherInvite
+	acceptTeacherInvite,
+	createForumTopic,
+	entryById,
+	answerTopicPost,
+	topicById,
+	postById
 } = require('./controller')
 
 let {
@@ -66,8 +72,21 @@ router.post('/accept-teacher-invite/:courseId',
 	acceptTeacherInvite
 )
 //router.get('/:courseId', getCourse);
+router.post('/:courseId/forum/:entryId/new-topic',
+	requireAuthentication,
+	userInCourse,
+	createForumTopic,
+)
+router.post('/:courseId/forum/:entryId/topic/:topicId/post/:postId/answer',
+	requireAuthentication,
+	userInCourse,
+	answerTopicPost
+)
 
 
 router.param('courseId', courseById);
+router.param('entryId', entryById);
+router.param('topicId', topicById);
+router.param('postId', postById);
 
 module.exports = router;
