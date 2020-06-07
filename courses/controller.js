@@ -28,8 +28,6 @@ exports.courseById = (req, res, next, id) => {
 		return course;
 	})
 	.then(course => {
-		course.salt = undefined;
-		course.hashed_password = undefined;
 
 		req.courseData = course;
 		next();
@@ -44,6 +42,7 @@ exports.courseById = (req, res, next, id) => {
 }
 
 exports.createCourse = (req, res) => {
+	console.log('create coruse body', req.body)
 	let courseData = req.body;
 	courseData.creator = req.auth;
 	courseData.teachers = [req.auth];
@@ -179,10 +178,11 @@ exports.updateCourse = async (req, res) => {
 }
 
 exports.enrollInCourse = (req, res) => {
+	console.log('req body enroll', req.body);
 	courseId = req.body._id;
 	let course = req.courseData;
 	if (course.hasPassword && !course.checkPassword(req.body.password)) {
-		res.status(401).json({
+		return res.status(401).json({
 			error: {
 				status: 401,
 				message: 'wrong course password'

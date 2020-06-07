@@ -1,6 +1,6 @@
 let mongoose = require('mongoose');
 let { ObjectId } = mongoose.Schema;
-let uuidv1 = require('uuid/v1');
+let { v1: uuidv1} = require('uuid');
 let crypto = require('crypto');
 //let Int32 = require('mongoose-int32');
 
@@ -210,6 +210,7 @@ courseSchema
 	.set(function(password){
 		this._password = password;
 		this.salt = uuidv1();
+		console.log('course salt',this.salt, 'uuid', uuidv1());
 		this.hashed_password = this.encryptPassword(password);
 	})
 	.get(function() {
@@ -224,6 +225,7 @@ courseSchema.methods = {
 	encryptPassword: function(password){
 		if (!password) return '';
 		try {
+			console.log('test salt ', this, 'password ', password);
 			return crypto.createHmac('sha1', this.salt)
 			.update(password)
 			.digest('hex');
