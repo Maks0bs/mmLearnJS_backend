@@ -264,8 +264,6 @@ exports.getCoursesFiltered = async (req, res) => {
 	.sort('name')//optimize sorting - see bookmarks
 	.then(courses => {
 		for (let i = 0; i < courses.length; i++){
-			
-			
 			courses[i].salt = undefined;
 			courses[i].hashed_password = undefined;
 			if (courses[i].type === 'public'){
@@ -316,7 +314,88 @@ exports.getCoursesFiltered = async (req, res) => {
 			courses[i].sections = undefined;
 			courses[i].students = undefined;
 		}
-		return res.json(courses);
+
+		//Populating different fields in this loop
+		//This loop can be used not only for forums, but for all other types of entries
+
+		let usersToPopulate = [], usersToPopulateSet = {};
+		
+		for (let c = 0; c < courses.length; c++){
+			if (!courses[c].sections){
+				continue;
+			}
+
+			for (let i = 0; i < courses[c].sections.length; i++){
+				for (let j = 0; j < courses[c].sections[i].entries.length; j++){
+					let entry = courses[c].sections[i].entries[j];
+
+					if (entry.type === 'forum'){
+
+						//populate topic creators and posts creators
+						for (let topic of entry.content.topics){
+							if (!usersToPopulateSet[topic.creator._id]){
+								usersToPopulateSet[topic.creator._id] = 1;
+								usersToPopulate.push(topic.creator._id);
+							}
+
+							for (let post of topic.posts){
+								if (!usersToPopulateSet[post.creator._id]){
+									usersToPopulateSet[post.creator._id] = 1;
+									usersToPopulate.push(post.creator._id);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+
+		User.find({
+			_id: {
+				$in: usersToPopulate
+			}
+		})
+		.select('_id name email role')
+		.then((users) => {
+			for (let user of users){
+				usersToPopulateSet[user._id] = user;
+			}
+
+			for (let c = 0; c < courses.length; c++){
+				if (!courses[c].sections){
+					continue;
+				}
+
+				for (let i = 0; i < courses[c].sections.length; i++){
+					for (let j = 0; j < courses[c].sections[i].entries.length; j++){
+						let entry = courses[c].sections[i].entries[j];
+
+						if (entry.type === 'forum'){
+
+							//populate topic creators and posts creators
+							for (let t = 0; t < courses[c].sections[i].entries[j].content.topics.length; t++){
+								courses[c].sections[i].entries[j].content.topics[t].creator = 
+									usersToPopulateSet[
+										courses[c].sections[i].entries[j].content.topics[t].creator._id
+									];
+
+								for (let p = 0; p < courses[c].sections[i].entries[j].content.topics[t].posts.length; p++){
+									courses[c].sections[i].entries[j].content.topics[t].posts[p].creator = 
+									usersToPopulateSet[
+										courses[c].sections[i].entries[j].content.topics[t].posts[p].creator._id
+									];
+								}
+							}
+						}
+					}
+				}
+			}
+
+			return res.json(courses);
+		})
+
+		
 	})
 	.catch(err => {
 		console.log(err);
