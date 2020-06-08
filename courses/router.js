@@ -16,15 +16,22 @@ let {
 	getCleanupFiles,
 	getNewCourseData,
 	deleteCourse,
-	sendTeacherInvite,
-	addToInvitedList,
-	acceptTeacherInvite,
-	createForumTopic,
 	entryById,
+} = require('./controllers')
+
+let {
+	createForumTopic,
 	answerTopicPost,
 	topicById,
-	postById
-} = require('./controller')
+	postById,
+	deleteTopicPost
+} = require('./controllers/forums')
+
+let {
+	sendTeacherInvite,
+	addToInvitedList,
+	acceptTeacherInvite
+} = require('./controllers/teachers')
 
 let {
 	deleteFiles,
@@ -81,6 +88,11 @@ router.post('/:courseId/forum/:entryId/topic/:topicId/post/:postId/answer',
 	requireAuthentication,
 	userInCourse,
 	answerTopicPost
+)
+router.delete('/:courseId/forum/:entryId/topic/:topicId/post/:postId',
+	requireAuthentication,
+	userInCourse,
+	deleteTopicPost
 )
 
 

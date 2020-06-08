@@ -481,53 +481,7 @@ exports.logout = (req, res) => {
     })
 }
 
-/*exports.signin = (req, res) => {
-	// find the user based on email
-	let {_id, email, password} = req.body;
-	User.findOne({email}, (err, user) => {
-		if (err || !user){
-			return res.status(401).json({
-				error: "User with email " + req.body.email + " does not exist. Please signup."
-			})
-		}
-
-		//if user not found make sure email and pass match
-		//create auth method in model to use here
-		if (!user.authenticate(password)){
-			return res.status(401).json({
-				error: "Email and password do not match"
-			})
-		}
-
-		//generate a token with user id and secret
-		let token = jwt.sign({_id: user._id, role: user.role}, constants.auth.JWT_SECRET || 'randomsecretcode');
-
-		//persist the token as 't' is cookie with expiry date
-		res.cookie("t", token, {expire: new Date() + 9999});
-
-		//return response with user and token to frontend
-		let {_id, name, email, role} = user;
-
-		return res.json({token, user: {_id, email, name, role}});
-
-
-	})
-
-
-	
-};
-
-exports.signout = (req, res) => {
-	res.clearCookie("t");
-	return res.status(200).json({message: "Signout success!"});
-};
-
-exports.requireSignin = expressJwt({
-	// if the token is valid, express jwt the verifies user's id 
-	// in an auth key to the requests object
-	secret: process.env.JWT_SECRET || 'randomsecretcode',
-	userProperty: "auth"
-});
+/*
 
 exports.forgotPassword = (req, res) => {
     if (!req.body) return res.status(400).json({ message: "No request body" });

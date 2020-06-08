@@ -5,13 +5,13 @@ let {
 	Entry, 
 	EntryContent,
 	ForumTopicPost
-} = require('./model')
-let User = require('../users/model');
+} = require('../model')
+let User = require('../../users/model');
 let _ = require('lodash');
 let mongoose = require('mongoose');
 let formidable = require('formidable'); 
-let constants = require('../constants');
-let { sendEmail } = require('../helpers');
+let constants = require('../../constants');
+let { sendEmail } = require('../../helpers');
 let { COURSE_TEACHER_INVITATION } = constants.notifications
 let { CLIENT_URL } = constants.client;
 let jwt = require('jsonwebtoken');
@@ -423,160 +423,6 @@ exports.deleteCourse = (req, res) => {
 
 }
 
-exports.sendTeacherInvite = (req, res, next) => {
-	let newUser = false;
-	User.findOne({email: req.body.email})
-	.then((user) => {
-
-		if (!user) {
-			newUser = true;
-			let token = jwt.sign(
-                {
-                    email: req.body.email,
-                    teacher: true,
-                    courseId: req.courseData._id,
-                    courseName: req.courseData.name
-                },
-                JWT_SECRET,
-                {
-                    expiresIn: 30 * 24 * 60 * 60
-                }
-            )
-			return sendEmail({
-	            from: "noreply@mmlearnjs.com",
-	            to: req.body.email,
-	            subject: "Teacher invitation to course on mmlearnjs",
-	            text: `You have been invited to be a teacher at the course "${req.courseData.name}" on mmlearnjs. Please sign up with this link to become a teacher at that course:
-	            	${CLIENT_URL}/invite-signup/${token}?teacher=true&email=${req.body.email}`,
-	            html: `
-	            	<div>
-		                <p>You have been invited to be a teacher at the course "${req.courseData.name}" on mmlearnjs.</p> 
-		                <p>Please sign up with this link to become a teacher at that course: </p>
-		                <p>${CLIENT_URL}/invite-signup/${token}?teacher=true&email=${req.body.email}</p>
-		            </div>
-	            `
-	        })
-		}
-
-		if (user.role !== 'teacher') throw {
-			status: 404,
-			message: 'Teacher with this email could not be found'
-		}
-		req.invitedTeacher = user;
-		req.notificationsToAdd = {
-			user: user,
-			data: [
-				{
-					type: COURSE_TEACHER_INVITATION,
-					title: 'You are invited to be a teacher',
-					text: `The creator of the course "${req.courseData.name}" has invited you
-						to be a teacher in their course. You can accept of decline this invitation`,
-					data: {
-						courseId: req.courseData._id
-					}
-				}
-			]
-		}
-
-		return sendEmail({
-            from: "noreply@mmlearnjs.com",
-            to: user.email,
-            subject: "Teacher invitation to course",
-            text: `You have been invited to be a teacher at the course "${req.courseData.name}". ${CLIENT_URL}/classroom/course/${req.courseData._id}`,
-            html: `
-                <p>You have been invited to be a teacher at the course "${req.courseData.name}".</p> 
-                <p>${CLIENT_URL}/classroom/course/${req.courseData._id}</p>
-            `
-        });
-	})
-	.then((data) => {
-		if (newUser){
-			return res.json({
-				message: 'invite send to unregistered user'
-			})
-		}
-		return next();
-	})
-	.catch(err => {
-		console.log(err);
-		res.status(err.status || 400)
-			.json({
-				error: err
-			})
-	})
-}
-
-exports.addToInvitedList = (req, res) => {
-	let course = req.courseData;
-	course.invitedTeachers.push(req.invitedTeacher);
-	course.save()
-	.then(course => {
-		return res.json({
-			message: 'Invite sent to teacher'
-		})
-	})
-	.catch(err => {
-		console.log(err);
-		return res.status(err.status || 400)
-			.json({
-				error: err
-			})
-	}) 
-}
-
-exports.acceptTeacherInvite = (req, res) => {
-	let course = req.courseData;
-	let hasTeacher = false;
-	for (let i = 0; i < course.invitedTeachers.length; i++){
-		let cur = course.invitedTeachers[i];
-		if (cur.equals(req.auth._id)){
-			course.invitedTeachers.splice(i, 1);
-			hasTeacher = true;
-			break;
-		}
-	}
-	if (!hasTeacher){
-		return res.status(401).json({
-			message: 'You are not on the list of invited teachers to this course'
-		})
-	}
-
-	course.teachers.push(req.auth);
-
-	course.save()
-	.then((course) => {
-		return User.findByIdAndUpdate(
-			req.auth._id,
-			{
-				$pull: {
-					notifications: {
-						type: COURSE_TEACHER_INVITATION,
-						data: {
-							courseId: req.courseData._id
-						}
-					}
-				},
-				$push: {
-					teacherCourses: course
-				}
-			},
-			{new: true}
-		)
-	})
-	.then((user) => {
-		return res.json({
-			message: 'You are now a teacher of this course'
-		})
-	})
-	.catch(err => {
-		console.log(err);
-		return res.status(err.status || 400)
-			.json({
-				error: err
-			})
-	}) 
-}
-
 exports.entryById = (req, res, next, entryId) => {
 	let len = 0;
 	if (req.courseData.sections){
@@ -585,7 +431,6 @@ exports.entryById = (req, res, next, entryId) => {
 	for (let section = 0; section < len; section++){
 		for (let i = 0; i < req.courseData.sections[section].entries.length; i++){
 			let entry = req.courseData.sections[section].entries[i];
-			console.log('_id', entry._id, 'eid', entryId);
 			if(entry._id == entryId){
 				req.entry = {
 					data: entry,
@@ -605,129 +450,3 @@ exports.entryById = (req, res, next, entryId) => {
 	})
 }
 
-exports.topicById = (req, res, next, topicId) => {
-	let len = 0;
-	if (req.entry.data.content.topics){
-		len = req.entry.data.content.topics.length;
-	}
-
-	for (let i = 0; i < len; i++){
-		let topic = req.entry.data.content.topics[i];
-		if (topic._id == topicId){
-			req.topic = {
-				data: topic,
-				pos: i
-			}
-			return next();
-		}
-	}
-
-	return res.status(404).json({
-		error: {
-			status: 404,
-			message: "No topic with this id was found"
-		}
-	})
-}
-
-exports.postById = (req, res, next, postId) => {
-	let len = 0;
-	if (req.topic.data.posts){
-		len = req.topic.data.posts.length;
-	}
-
-	for (let i = 0; i < len; i++){
-		let post = req.topic.data.posts[i];
-		if (post._id == postId){
-			req.post = {
-				data: post,
-				pos: i
-			}
-			return next();
-		}
-	}
-
-	return res.status(404).json({
-		error: {
-			status: 404,
-			message: "No post with this id was found"
-		}
-	})
-}
-
-// req.body = {
-// 	name,
-// 	initContent
-// }
-exports.createForumTopic = (req, res) => {
-	let entry = req.entry.data;
-	console.log('entry', entry);
-	if (req.userCourseStatus === 'student' && entry.content.teachersOnly){
-		return res.status(401).json({
-			error: {
-				status: 401,
-				message: 'only teachers can create topics in this forum'
-			}
-		})
-	}
-	let newTopic = {
-		name: req.body.name,
-		creator: req.auth,
-		posts: [
-			{
-				creator: req.auth,
-				content: req.body.initContent,
-				answers: []
-			}
-		]
-	};
-	entry.content.topics.push(newTopic);
-	let course = req.courseData;
-	course.sections[req.entry.section].entries[req.entry.pos] = entry;
-	course.save()
-	.then(result => {
-		return res.json(result);
-	})
-	.catch(err => {
-		console.log(err);
-		return res.status(err.status || 400)
-			.json({
-				error: err
-			})
-	})
-}
-
-exports.answerTopicPost = async (req, res) => {
-	let entry = req.entry.data;
-	if (req.userCourseStatus === 'student' && entry.content.teachersOnly){
-		return res.status(401).json({
-			error: {
-				status: 401,
-				message: 'only teachers can create topics in this forum'
-			}
-		})
-	}
-	let rawPost = {
-		creator: req.auth,
-		content: req.body.content,
-		answers: []
-	};
-	let post = await new ForumTopicPost(rawPost);
-	let course = req.courseData;
-	course.sections[req.entry.section].entries[req.entry.pos]
-		.content.topics[req.topic.pos].posts.push(post);
-	course.sections[req.entry.section].entries[req.entry.pos]
-		.content.topics[req.topic.pos].posts[req.post.pos].answers
-		.push(mongoose.mongo.ObjectId(post._id));
-	course.save()
-	.then(result => {
-		return res.json(result);
-	})
-	.catch(err => {
-		console.log(err);
-		return res.status(err.status || 400)
-			.json({
-				error: err
-			})
-	})
-}
