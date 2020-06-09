@@ -154,6 +154,13 @@ exports.deleteTopicPost = (req, res) => {
 		while(head !== q.length){
 			let cur = q[head];
 			head++;//pop
+			if (!cur){
+				//TODO this solution is disguisting. No idea why undefineds are pushed in q
+				continue;
+			}
+			if (!cur.answers || cur.answers.length === 0){
+				continue;
+			}
 			for (let answerId of cur.answers){
 				if (!postsToDeleteMap[answerId]){
 					q.push(postsMap[answerId]);
@@ -177,8 +184,13 @@ exports.deleteTopicPost = (req, res) => {
 			
 		}
 
-		course.sections[req.entry.section].entries[req.entry.pos]
-			.content.topics[req.topic.pos].posts = newPosts;
+		if (newPosts.length === 0){
+			course.sections[req.entry.section].entries[req.entry.pos]
+				.content.topics.splice(req.topic.pos, 1);
+		} else {
+			course.sections[req.entry.section].entries[req.entry.pos]
+				.content.topics[req.topic.pos].posts = newPosts;
+		}
 
 	} else if (req.userCourseStatus === 'student'){
 		if (!req.post.data.creator.equals(req.auth._id)){
@@ -202,14 +214,20 @@ exports.deleteTopicPost = (req, res) => {
 				//TODO delete references to the deleted post in the parent post
 				for (let i = 0; i < req.topic.data.posts.length; i++){
 					let post = req.topic.data.posts[i];
-					if (post._id !== req.post._id){
+					if (!post._id.equals(req.post.data._id)){
 						newPosts.push(post);
 					}
-					
 				}
 
-				course.sections[req.entry.section].entries[req.entry.pos]
-					.content.topics[req.topic.pos].posts = newPosts;
+				if (newPosts.length === 0){
+					course.sections[req.entry.section].entries[req.entry.pos]
+						.content.topics.splice(req.topic.pos, 1);
+				} else {
+					course.sections[req.entry.section].entries[req.entry.pos]
+						.content.topics[req.topic.pos].posts = newPosts;
+				}
+
+				
 			}
 		}
 	} else if (req.userCourseStatus === 'not enrolled'){
