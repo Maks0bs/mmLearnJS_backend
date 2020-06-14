@@ -128,6 +128,10 @@ let entrySchema = new mongoose.Schema({
 		type: String,
 		required: true
 	},
+	access: {
+		type: String,
+		required: true
+	},
 	content: entryContentSchema,
 	description: {
 		text: String,

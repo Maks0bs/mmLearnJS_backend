@@ -160,6 +160,7 @@ exports.updateCourse = async (req, res) => {
 		}
 	}
 
+
 	let course = req.courseData;
 	course = _.extend(course, newCourseData);
 	course.save()
@@ -263,7 +264,12 @@ exports.getCoursesFiltered = async (req, res) => {
 	//maybe select only necessary info
 	.sort('name')//optimize sorting - see bookmarks
 	.then(courses => {
+		let userStatuses = [];
 		for (let i = 0; i < courses.length; i++){
+			userStatuses.push('');
+		}
+		for (let i = 0; i < courses.length; i++){
+			userStatuses[i] = 'not enrolled';
 			courses[i].salt = undefined;
 			courses[i].hashed_password = undefined;
 			if (courses[i].type === 'public'){
@@ -283,6 +289,7 @@ exports.getCoursesFiltered = async (req, res) => {
 				for (let invited of invitedTeachers){
 					if (invited.equals(req.auth._id)){
 						courses[i].invitedTeachers = invitedTeachers;
+						userStatuses[i] = 'invited teacher';
 						break;
 					}
 				}
@@ -292,16 +299,22 @@ exports.getCoursesFiltered = async (req, res) => {
 			for (let teacher of courses[i].teachers){
 				if (teacher.equals(req.auth._id)){
 					isTeacher = true;
+					userStatuses[i] = 'teacher';
 					break;
 				}
 			}
 			for (let student of courses[i].students){
 				if (student.equals(req.auth._id)){
 					isStudent = true;
+					userStatuses[i] = 'student';
 					break;
 				}
 			}
-			if (courses[i].creator._id.equals(req.auth._id) || isTeacher){
+			if (courses[i].creator._id.equals(req.auth._id)){
+				userStatuses[i] = 'creator';
+				continue;
+			}
+			if (isTeacher){
 				continue;
 			}
 			if (isStudent){
@@ -328,6 +341,13 @@ exports.getCoursesFiltered = async (req, res) => {
 			for (let i = 0; i < courses[c].sections.length; i++){
 				for (let j = 0; j < courses[c].sections[i].entries.length; j++){
 					let entry = courses[c].sections[i].entries[j];
+
+					if (entry.access === 'teachers' && 
+						!(userStatuses[c] === 'teacher' || userStatuses[c] === 'creator')
+					){
+						courses[c].sections[i].entries[j] = undefined;
+						continue;
+					}
 
 					if (entry.type === 'forum'){
 
@@ -371,7 +391,7 @@ exports.getCoursesFiltered = async (req, res) => {
 					for (let j = 0; j < courses[c].sections[i].entries.length; j++){
 						let entry = courses[c].sections[i].entries[j];
 
-						if (entry.type === 'forum'){
+						if (entry && entry.type === 'forum'){
 
 							//populate topic creators and posts creators
 							for (let t = 0; t < courses[c].sections[i].entries[j].content.topics.length; t++){
