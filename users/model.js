@@ -23,10 +23,6 @@ let userSchema = new mongoose.Schema({
 		default: Date.now
 	},
 	updated: Date,
-	profilePhoto: {
-		data: Buffer,
-		contentType: String
-	},
 	about: {
 		type: String,
 		trim: true
@@ -68,7 +64,11 @@ let userSchema = new mongoose.Schema({
 			type: ObjectId,
 			ref: 'Course'
 		}
-	]
+	],
+	photoRef: {
+		type: ObjectId,
+		ref: 'Uploads.File'
+	}
 });
 
 userSchema 

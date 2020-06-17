@@ -12,7 +12,6 @@ let {
 	getCoursesFiltered,
 	updateCourse,
 	courseById,
-	updateCleanup,
 	getCleanupFiles,
 	getNewCourseData,
 	deleteCourse,

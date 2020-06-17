@@ -42,7 +42,7 @@ exports.courseById = (req, res, next, id) => {
 }
 
 exports.createCourse = (req, res) => {
-	console.log('create coruse body', req.body)
+	console.log('create course body', req.body)
 	let courseData = req.body;
 	courseData.creator = req.auth;
 	courseData.teachers = [req.auth];
@@ -262,125 +262,79 @@ exports.getCoursesFiltered = async (req, res) => {
 	}
 	Course.find({...filter})
 	//maybe select only necessary info
-	.sort('name')//optimize sorting - see bookmarks
-	.then(courses => {
-		let userStatuses = [];
-		for (let i = 0; i < courses.length; i++){
-			userStatuses.push('');
-		}
-		for (let i = 0; i < courses.length; i++){
-			userStatuses[i] = 'not enrolled';
-			courses[i].salt = undefined;
-			courses[i].hashed_password = undefined;
-			if (courses[i].type === 'public'){
-				continue;
+		.populate('students', '_id name email role activated photoRef')
+		.populate('teachers', '_id name email role activated photoRef')
+		.populate('creator', '_id name email role activated photoRef')
+		.sort('name')//optimize sorting - see bookmarks
+		.then(courses => {
+			let userStatuses = [];
+			for (let i = 0; i < courses.length; i++){
+				userStatuses.push('');
 			}
-			if (!req.auth){
-				courses[i].sections = undefined;
-				courses[i].actions = undefined;
-				courses[i].students = undefined;
-				courses[i].creator = undefined;
-				continue;
-			}
-
-			if (courses[i].invitedTeachers){
-				let invitedTeachers = _.cloneDeep(courses[i].invitedTeachers);
-				courses[i].invitedTeachers = undefined;
-				for (let invited of invitedTeachers){
-					if (invited.equals(req.auth._id)){
-						courses[i].invitedTeachers = invitedTeachers;
-						userStatuses[i] = 'invited teacher';
-						break;
-					}
+			for (let i = 0; i < courses.length; i++){
+				userStatuses[i] = 'not enrolled';
+				courses[i].salt = undefined;
+				courses[i].hashed_password = undefined;
+				if (courses[i].type === 'public'){
+					continue;
 				}
-			}
-
-			let isTeacher = false, isStudent = false;
-			for (let teacher of courses[i].teachers){
-				if (teacher.equals(req.auth._id)){
-					isTeacher = true;
-					userStatuses[i] = 'teacher';
-					break;
+				if (!req.auth){
+					courses[i].sections = undefined;
+					courses[i].actions = undefined;
+					courses[i].students = undefined;
+					courses[i].creator = undefined;
+					continue;
 				}
-			}
-			for (let student of courses[i].students){
-				if (student.equals(req.auth._id)){
-					isStudent = true;
-					userStatuses[i] = 'student';
-					break;
-				}
-			}
-			if (courses[i].creator._id.equals(req.auth._id)){
-				userStatuses[i] = 'creator';
-				continue;
-			}
-			if (isTeacher){
-				continue;
-			}
-			if (isStudent){
-				courses[i].creator = undefined;
-				continue;
-			}
-			
-			courses[i].creator = undefined;
-			courses[i].actions = undefined;
-			courses[i].sections = undefined;
-			courses[i].students = undefined;
-		}
 
-		//Populating different fields in this loop
-		//This loop can be used not only for forums, but for all other types of entries
-
-		let usersToPopulate = [], usersToPopulateSet = {};
-		
-		for (let c = 0; c < courses.length; c++){
-			if (!courses[c].sections){
-				continue;
-			}
-
-			for (let i = 0; i < courses[c].sections.length; i++){
-				for (let j = 0; j < courses[c].sections[i].entries.length; j++){
-					let entry = courses[c].sections[i].entries[j];
-
-					if (entry.access === 'teachers' && 
-						!(userStatuses[c] === 'teacher' || userStatuses[c] === 'creator')
-					){
-						courses[c].sections[i].entries[j] = undefined;
-						continue;
-					}
-
-					if (entry.type === 'forum'){
-
-						//populate topic creators and posts creators
-						for (let topic of entry.content.topics){
-							if (!usersToPopulateSet[topic.creator._id]){
-								usersToPopulateSet[topic.creator._id] = 1;
-								usersToPopulate.push(topic.creator._id);
-							}
-
-							for (let post of topic.posts){
-								if (!usersToPopulateSet[post.creator._id]){
-									usersToPopulateSet[post.creator._id] = 1;
-									usersToPopulate.push(post.creator._id);
-								}
-							}
+				if (courses[i].invitedTeachers){
+					let invitedTeachers = _.cloneDeep(courses[i].invitedTeachers);
+					courses[i].invitedTeachers = undefined;
+					for (let invited of invitedTeachers){
+						if (invited.equals(req.auth._id)){
+							courses[i].invitedTeachers = invitedTeachers;
+							userStatuses[i] = 'invited teacher';
+							break;
 						}
 					}
 				}
-			}
-		}
 
+				let isTeacher = false, isStudent = false;
+				for (let teacher of courses[i].teachers){
+					if (teacher.equals(req.auth._id)){
+						isTeacher = true;
+						userStatuses[i] = 'teacher';
+						break;
+					}
+				}
+				for (let student of courses[i].students){
+					if (student.equals(req.auth._id)){
+						isStudent = true;
+						userStatuses[i] = 'student';
+						break;
+					}
+				}
+				if (courses[i].creator._id.equals(req.auth._id)){
+					userStatuses[i] = 'creator';
+					continue;
+				}
+				if (isTeacher){
+					continue;
+				}
+				if (isStudent){
+					courses[i].creator = undefined;
+					continue;
+				}
 
-		User.find({
-			_id: {
-				$in: usersToPopulate
+				courses[i].creator = undefined;
+				courses[i].actions = undefined;
+				courses[i].sections = undefined;
+				courses[i].students = undefined;
 			}
-		})
-		.select('_id name email role')
-		.then((users) => {
-			for (let user of users){
-				usersToPopulateSet[user._id] = user;
-			}
+
+			//Populating different fields in this loop
+			//This loop can be used not only for forums, but for all other types of entries
+
+			let usersToPopulate = [], usersToPopulateSet = {};
 
 			for (let c = 0; c < courses.length; c++){
 				if (!courses[c].sections){
@@ -391,20 +345,27 @@ exports.getCoursesFiltered = async (req, res) => {
 					for (let j = 0; j < courses[c].sections[i].entries.length; j++){
 						let entry = courses[c].sections[i].entries[j];
 
-						if (entry && entry.type === 'forum'){
+						if (entry.access === 'teachers' &&
+							!(userStatuses[c] === 'teacher' || userStatuses[c] === 'creator')
+						){
+							courses[c].sections[i].entries[j] = undefined;
+							continue;
+						}
+
+						if (entry.type === 'forum'){
 
 							//populate topic creators and posts creators
-							for (let t = 0; t < courses[c].sections[i].entries[j].content.topics.length; t++){
-								courses[c].sections[i].entries[j].content.topics[t].creator = 
-									usersToPopulateSet[
-										courses[c].sections[i].entries[j].content.topics[t].creator._id
-									];
+							for (let topic of entry.content.topics){
+								if (!usersToPopulateSet[topic.creator._id]){
+									usersToPopulateSet[topic.creator._id] = 1;
+									usersToPopulate.push(topic.creator._id);
+								}
 
-								for (let p = 0; p < courses[c].sections[i].entries[j].content.topics[t].posts.length; p++){
-									courses[c].sections[i].entries[j].content.topics[t].posts[p].creator = 
-									usersToPopulateSet[
-										courses[c].sections[i].entries[j].content.topics[t].posts[p].creator._id
-									];
+								for (let post of topic.posts){
+									if (!usersToPopulateSet[post.creator._id]){
+										usersToPopulateSet[post.creator._id] = 1;
+										usersToPopulate.push(post.creator._id);
+									}
 								}
 							}
 						}
@@ -412,8 +373,50 @@ exports.getCoursesFiltered = async (req, res) => {
 				}
 			}
 
-			return res.json(courses);
+
+		User.find({
+			_id: {
+				$in: usersToPopulate
+			}
 		})
+			.select('_id name email role')
+			.then((users) => {
+				for (let user of users){
+					usersToPopulateSet[user._id] = user;
+				}
+
+				for (let c = 0; c < courses.length; c++){
+					if (!courses[c].sections){
+						continue;
+					}
+
+					for (let i = 0; i < courses[c].sections.length; i++){
+						for (let j = 0; j < courses[c].sections[i].entries.length; j++){
+							let entry = courses[c].sections[i].entries[j];
+
+							if (entry && entry.type === 'forum'){
+
+								//populate topic creators and posts creators
+								for (let t = 0; t < courses[c].sections[i].entries[j].content.topics.length; t++){
+									courses[c].sections[i].entries[j].content.topics[t].creator =
+										usersToPopulateSet[
+											courses[c].sections[i].entries[j].content.topics[t].creator._id
+										];
+
+									for (let p = 0; p < courses[c].sections[i].entries[j].content.topics[t].posts.length; p++){
+										courses[c].sections[i].entries[j].content.topics[t].posts[p].creator =
+										usersToPopulateSet[
+											courses[c].sections[i].entries[j].content.topics[t].posts[p].creator._id
+										];
+									}
+								}
+							}
+						}
+					}
+				}
+
+				return res.json(courses);
+			})
 
 		
 	})
