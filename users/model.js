@@ -65,10 +65,15 @@ let userSchema = new mongoose.Schema({
 			ref: 'Course'
 		}
 	],
-	photoRef: {
+	photo: {
 		type: ObjectId,
 		ref: 'Uploads.File'
-	}
+	},
+	hideFields: [
+		{
+			type: String
+		}
+	]
 });
 
 userSchema 

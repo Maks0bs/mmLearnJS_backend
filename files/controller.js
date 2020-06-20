@@ -33,7 +33,8 @@ let storage = new GridFSStorage({
 })
 let upload = multer({ storage });
 
-exports.uploadFiles = upload.any()/*.fields([
+exports.uploadFiles = upload.any()
+/*.fields([
 	{
 		name: 'files', 
 		maxCount: constants.database.FILES_UPLOAD_LIMIT
@@ -41,14 +42,12 @@ exports.uploadFiles = upload.any()/*.fields([
 ])*/
 
 exports.sendFiles = (req, res) => {
-	console.log('sent files -------- sent files', req);
 	res.json({
 		files: req.files
 	})
 }
 
 exports.getFilesFiltered = (req, res) => {
-	console.log('body',req.body);
 	let filter = {}
 	if (req.body.fileId){
 		filter._id = mongoose.mongo.ObjectId(req.body.fileId);
@@ -113,7 +112,7 @@ exports.configStream = (req, res, next) => {
 	console.log('req file', req.file, 'req or name', req.originalname);
 	res.set({
 		'Content-Type': req.file.contentType,
-		'Content-Disposition': `inline; filename=${req.originalname || 'unknownname'}`
+		'Content-Disposition': `inline; filename=${req.originalname || 'unknown_name'}`
 	})
 	next();
 }
@@ -122,7 +121,7 @@ exports.configDownload = (req, res, next) => {
 	res.set({
 		'Content-Length': req.file.length,
 		//'Content-Type': `attachment; filename=${req.originalname || 'unknown_name'}`
-		'Content-Type': 'application/octet-stream'
+		'Content-Type': `application/octet-stream filename=${req.originalname || 'unknown_name'}`
 	})
 	next();
 }
