@@ -2,6 +2,7 @@ let jwt = require('jsonwebtoken');
 let User = require('../users/model');
 let { Course } = require('../courses/model');
 let { sendEmail } = require('../helpers');
+let _ = require('lodash')
 
 let { JWT_SECRET } = require('../constants').auth
 
@@ -42,7 +43,7 @@ exports.signup = (req, res) => {
                 },
                 JWT_SECRET,
                 {
-                    expiresIn: 15 * 60
+                    expiresIn: 24 * 60 * 60
                 }
             )
             data = {
@@ -78,12 +79,58 @@ exports.signup = (req, res) => {
         })
 }
 
+/**
+ * It is only possible to send activation to current authenticated user. That's why there is no user id parameter in this service
+ * @param req has info about authenticated user
+ * @param res sends activation link to authenticated user's email
+ * @returns {any} sends activation link to authenticated user's email
+ */
+exports.sendActivationLink = (req, res) => {
+    if (req.auth.activated){
+        return res.status(401).json({
+            error: {
+                status: 401,
+                message: 'Your account is already activated'
+            }
+        })
+    }
+
+    let token = jwt.sign(
+        {
+            _id: req.auth._id,
+            email: req.auth.email
+        },
+        JWT_SECRET,
+        {
+            expiresIn: 24 * 60 * 60
+        }
+    )
+
+    return sendEmail({
+        from: "noreply@mmlearnjs.com",
+        to: req.auth.email,
+        subject: "Account activation instructions",
+        text: `Please use the following link to activate your account: ${CLIENT_URL}/activate-account/${token}`,
+        html: `
+            <p> Please use the following link to activate your account: </p> 
+            <p> ${CLIENT_URL}/activate-account/${token} </p>
+        `
+    })
+        .then(result => {
+            return res.json({
+                message: 'activation link sent successfully'
+            })
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(err.status || 400)
+                .json({
+                    error: err
+                })
+        })
+}
+
 exports.inviteSignup = (req, res) => {
-    /*console.log('request', req.body);
-    console.log('verified token', jwt.verify(req.body.token, JWT_SECRET));
-    res.json({
-        message: 'wow omg it works'
-    })*/
     let inviteData = {};
     let emailData = {};
     try {
@@ -149,7 +196,7 @@ exports.inviteSignup = (req, res) => {
                 },
                 JWT_SECRET,
                 {
-                    expiresIn: 15 * 60
+                    expiresIn: 24 * 60 * 60
                 }
             )
             emailData = {
@@ -481,93 +528,116 @@ exports.logout = (req, res) => {
     })
 }
 
-/*
+
 
 exports.forgotPassword = (req, res) => {
     if (!req.body) return res.status(400).json({ message: "No request body" });
     if (!req.body.email)
-        return res.status(400).json({ message: "No Email in request body" });
- 
-    console.log("forgot password finding user with that email");
-    const { email } = req.body;
-    console.log("signin req.body", email);
-    // find the user based on email
-    User.findOne({ email }, (err, user) => {
-        // if err or no user
-        if (err || !user)
-            return res.status("401").json({
-                error: "User with that email does not exist!"
-            });
- 
-        // generate a token with user id and secret
-        const token = jwt.sign(
-            { _id: user._id, iss: "NODEAPI", role: user.role },
-            process.env.JWT_SECRET || 'randomsecretcode'
-        );
- 
-        // email data
-        const emailData = {
-            from: "noreply@node-react.com",
-            to: email,
-            subject: "Password Reset Instructions",
-            text: `Please use the following link to reset your password: ${
-                process.env.CLIENT_URL || 'test'
-            }/reset-password/${token}`,
-            html: `<p>Please use the following link to reset your password:</p> <p>${
-                process.env.CLIENT_URL || 'test'
-            }/reset-password/${token}</p>`
-        };
- 
-        return user.updateOne({ resetPasswordLink: token }, (err, success) => {
-            if (err) {
-                return res.json({ message: err });
-            } else {
-                sendEmail(emailData);
-                return res.status(200).json({
-                    message: `Email has been sent to ${email}. Follow the instructions to reset your password.`
-                });
-            }
+        return res.status(400).json({
+            message: "No Email in request body"
         });
-    });
-};
- 
-// to allow user to reset password
-// first you will find the user in the database with user's resetPasswordLink
-// user model's resetPasswordLink's value must match the token
-// if the user's resetPasswordLink(token) matches the incoming req.body.resetPasswordLink(token)
-// then we got the right user
- 
-exports.resetPassword = (req, res) => {
-    const { resetPasswordLink, newPassword } = req.body;
- 
-    User.findOne({ resetPasswordLink }, (err, user) => {
-        // if err or no user
-        if (err || !user)
-            return res.status("401").json({
-                error: "Invalid Link!"
-            });
- 
-        const updatedFields = {
-            password: newPassword,
-            resetPasswordLink: ""
-        };
+    let { email } = req.body;
 
-        console.log('wow');
- 
-        user = _.extend(user, updatedFields);
-        user.updated = Date.now();
- 
-        user.save((err, result) => {
-            if (err) {
-                return res.status(400).json({
+    /*
+     * Find user based on email
+     */
+    User.findOne({ email })
+        .then(user => {
+            if (!user)
+                return res.status("401").json({
+                    error: "User with that email does not exist!"
+                });
+
+            // generate a token with user id and secret
+            let token = jwt.sign(
+                {
+                    _id: user._id,
+                    email: user.email,
+                    role: user.role
+                },
+                JWT_SECRET,
+                {
+                    expiresIn:  10 * 60
+                }
+            );
+
+            // email data
+            let emailData = {
+                from: "noreply@node-react.com",
+                to: email,
+                subject: "Password Reset Instructions",
+                text: `Please use the following link to reset your password: ${CLIENT_URL}/reset-password/${token}`,
+                html: `
+                        <p>Please use the following link to reset your password:</p> 
+                        <p>${CLIENT_URL}/reset-password/${token}</p>
+                `
+            };
+
+            return sendEmail(emailData);
+        })
+        .then(result => {
+            return res.json({
+                message: `Email has been sent to ${email}. Follow the instructions to reset your password.`
+            });
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(err.status || 400)
+                .json({
                     error: err
+                })
+        })
+ 
+
+}
+
+exports.resetPassword = (req, res) => {
+    const { token, newPassword } = req.body;
+    let data = {};
+    try {
+        data = jwt.verify(token, JWT_SECRET)
+    }
+    catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            res.status(401)
+                .json({
+                    error: {
+                        status: 401,
+                        message: 'Reset link expired. Try getting a new one'
+                    }
+                })
+        } else {
+            res.status(400)
+                .json({
+                    error: err
+                })
+        }
+    }
+
+    console.log('data', data);
+ 
+    User.findOne({ email: data.email })
+        .then(user => {
+            if (!user) {
+                return res.status(400).json({
+                    error: "Invalid Link!"
                 });
             }
+            user.password = newPassword;
+            user.updated = Date.now();
+
+            return user.save();
+        })
+        .then(user => {
             res.json({
                 message: `Great! Now you can login with your new password.`
             });
-        });
-    });
-};
-
-*/
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(err.status || 400)
+                .json({
+                    error: err
+                })
+        })
+}

@@ -27,10 +27,6 @@ let userSchema = new mongoose.Schema({
 		type: String,
 		trim: true
 	},
-	resetPasswordToken: {
-		type: String,
-		default: ""
-	},
 	notifications: [
 		{
 			type: {
@@ -69,7 +65,7 @@ let userSchema = new mongoose.Schema({
 		type: ObjectId,
 		ref: 'Uploads.File'
 	},
-	hideFields: [
+	hiddenFields: [
 		{
 			type: String
 		}

@@ -40,12 +40,9 @@ exports.getUser = (req, res) => {
 
 	// TODO if user != auth user then hide hiddenFields, specified in user object
 	if (!req.auth || !user._id.equals(req.auth._id)){
-		user.email = undefined;
-		user.updated = undefined;
-		user.activated = undefined;
-		user.enrolledCourses = undefined;
-		user.teacherCourses = undefined;
-		user.notifications = undefined;
+		for (let field of user.hiddenFields){
+			user[field] = undefined;
+		}
 	}
 	return res.json(user);
 }
