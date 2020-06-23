@@ -5,6 +5,8 @@ let mongoose = require('mongoose');
 
 exports.userById = (req, res, next, id) => {
 	User.findOne({_id: id})
+		.populate('enrolledCourses', '_id name')
+		.populate('teacherCourses', '_id name')
 		.then(user => {
 			if (!user) throw {
 				status: 404,
@@ -40,9 +42,7 @@ exports.getUser = (req, res) => {
 
 	// TODO if user != auth user then hide hiddenFields, specified in user object
 	if (!req.auth || !user._id.equals(req.auth._id)){
-		for (let field of user.hiddenFields){
-			user[field] = undefined;
-		}
+		user.hideFields();
 	}
 	return res.json(user);
 }

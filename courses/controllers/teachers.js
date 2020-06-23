@@ -1,7 +1,9 @@
 let User = require('../../users/model');
 let constants = require('../../constants');
+const jwt = require("jsonwebtoken");
 let { sendEmail } = require('../../helpers');
 let { COURSE_TEACHER_INVITATION } = constants.notifications
+let { JWT_SECRET } = constants.auth;
 let { CLIENT_URL } = constants.client;
 
 exports.sendTeacherInvite = (req, res, next) => {
@@ -16,7 +18,8 @@ exports.sendTeacherInvite = (req, res, next) => {
                     email: req.body.email,
                     teacher: true,
                     courseId: req.courseData._id,
-                    courseName: req.courseData.name
+                    courseName: req.courseData.name,
+					invited: true
                 },
                 JWT_SECRET,
                 {
@@ -41,7 +44,7 @@ exports.sendTeacherInvite = (req, res, next) => {
 
 		if (user.role !== 'teacher') throw {
 			status: 404,
-			message: 'Teacher with this email could not be found'
+			message: 'User with this email is a STUDENT, can\'t make teachers out of students'
 		}
 		req.invitedTeacher = user;
 		req.notificationsToAdd = {
@@ -73,7 +76,7 @@ exports.sendTeacherInvite = (req, res, next) => {
 	.then((data) => {
 		if (newUser){
 			return res.json({
-				message: 'invite send to unregistered user'
+				message: 'invite sent to unregistered user'
 			})
 		}
 		return next();
@@ -82,7 +85,11 @@ exports.sendTeacherInvite = (req, res, next) => {
 		console.log(err);
 		res.status(err.status || 400)
 			.json({
-				error: err
+				error: err.message ? {
+						status: err.status,
+						message: err.message
+					}
+					: err
 			})
 	})
 }

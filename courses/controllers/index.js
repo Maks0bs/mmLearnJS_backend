@@ -262,10 +262,10 @@ exports.getCoursesFiltered = async (req, res) => {
 	}
 	Course.find({...filter})
 	//maybe select only necessary info
-		.populate('students', '_id name email role activated photoRef')
-		.populate('teachers', '_id name email role activated photoRef')
-		.populate('creator', '_id name email role activated photoRef')
-		.sort('name')//optimize sorting - see bookmarks
+		.populate('students')
+		.populate('teachers')
+		.populate('creator')
+		.sort('name')//TODO optimize sorting - see bookmarks
 		.then(courses => {
 			let userStatuses = [];
 			for (let i = 0; i < courses.length; i++){
@@ -299,20 +299,23 @@ exports.getCoursesFiltered = async (req, res) => {
 				}
 
 				let isTeacher = false, isStudent = false;
-				for (let teacher of courses[i].teachers){
-					if (teacher.equals(req.auth._id)){
-						isTeacher = true;
-						userStatuses[i] = 'teacher';
-						break;
-					}
-				}
+
 				for (let student of courses[i].students){
 					if (student.equals(req.auth._id)){
 						isStudent = true;
 						userStatuses[i] = 'student';
-						break;
 					}
+					student.hideFields();
 				}
+				for (let teacher of courses[i].teachers){
+					if (teacher.equals(req.auth._id)){
+						isTeacher = true;
+						userStatuses[i] = 'teacher';
+					}
+					teacher.hideFields();
+				}
+				courses[i].creator.hideFields();
+
 				if (courses[i].creator._id.equals(req.auth._id)){
 					userStatuses[i] = 'creator';
 					continue;
@@ -340,6 +343,8 @@ exports.getCoursesFiltered = async (req, res) => {
 				if (!courses[c].sections){
 					continue;
 				}
+
+
 
 				for (let i = 0; i < courses[c].sections.length; i++){
 					for (let j = 0; j < courses[c].sections[i].entries.length; j++){
@@ -374,14 +379,14 @@ exports.getCoursesFiltered = async (req, res) => {
 			}
 
 
-		User.find({
-			_id: {
-				$in: usersToPopulate
-			}
-		})
-			.select('_id name email role')
+			User.find({
+				_id: {
+					$in: usersToPopulate
+				}
+			})
 			.then((users) => {
 				for (let user of users){
+					user.hideFields();
 					usersToPopulateSet[user._id] = user;
 				}
 

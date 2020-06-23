@@ -89,8 +89,7 @@ userSchema
 userSchema.methods = {
 	checkCredentials : function(plainText){
 		return this.encryptPassword(plainText) === this.hashed_password
-	}, 
-
+	},
 	encryptPassword: function(password){
 		if (!password) return "";
 		try {
@@ -100,7 +99,11 @@ userSchema.methods = {
 		} catch (err){
 			return "";
 		}
-
+	},
+	hideFields: function(){
+		for (let field of this.hiddenFields){
+			this[field] = undefined;
+		}
 	}
 }
 
