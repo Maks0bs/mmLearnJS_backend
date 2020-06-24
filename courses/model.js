@@ -132,22 +132,75 @@ let entrySchema = new mongoose.Schema({
 		type: String,
 		required: true
 	},
-	content: entryContentSchema,
-	description: {
-		text: String,
-		additionalContent: entryContentSchema
-	}
+	content: entryContentSchema
 }, {
 	discriminatorKey: 'kind'
 })
 entrySchema.path('content').discriminator('EntryFile', entryFileSchema)
 entrySchema.path('content').discriminator('EntryText', entryTextSchema)
 entrySchema.path('content').discriminator('EntryForum', entryForumSchema)
-entrySchema.path('description.additionalContent').discriminator('EntryFile', entryFileSchema)
-entrySchema.path('description.additionalContent').discriminator('EntryText', entryTextSchema)
-entrySchema.path('description.additionalContent').discriminator('EntryForum', entryForumSchema)
 let Entry = mongoose.model('Entry', entrySchema);
 exports.Entry = Entry;
+
+let courseUpdateSchema = new mongoose.Schema({
+	created: {
+		type: Date,
+		default: Date.now
+	}
+}, {
+	discriminatorKey: 'kind'
+})
+let CourseUpdate = mongoose.model('CourseUpdate', courseUpdateSchema);
+exports.CourseUpdate = CourseUpdate;
+
+/**
+ * Here we don't use refs to EntrySchema, because they can get deleted an this might cause trouble
+ * @param newEntries.name name of the added entry,
+ * @param newEntries.type type of the added entry
+ */
+let updateNewEntriesSchema = new mongoose.Schema({
+	newEntries: [
+		{
+			name: String,
+			type: {
+				type: String
+			}
+		}
+
+	]
+})
+let UpdateNewEntries = CourseUpdate.discriminator('UpdateNewEntries', updateNewEntriesSchema);
+exports.UpdateNewEntries = UpdateNewEntries;
+
+/**
+ * Here we don't use refs to EntrySchema, because entries are not stored separately from the course
+ * @param newEntries.name name of the deleted entry,
+ * @param newEntries.type type of the deleted entry
+ */
+let updateDeletedEntriesSchema = new mongoose.Schema({
+	deletedEntries: [
+		{
+			name: String,
+			type: {
+				type: String
+			}
+		}
+
+	]
+})
+let UpdateDeletedEntries = CourseUpdate.discriminator('UpdateDeletedEntries', updateDeletedEntriesSchema);
+exports.UpdateDeletedEntries = UpdateDeletedEntries;
+
+/**
+ * @param newName new name of the updated course
+ * @param newAbout new info about the updated course
+ */
+let updateNewInfoSchema = new mongoose.Schema({
+	newName: String,
+	newAbout: String
+})
+let UpdateNewInfo = CourseUpdate.discriminator('UpdateNewInfo', updateNewInfoSchema);
+exports.UpdateNewInfo = UpdateNewInfo;
 
 let courseSchema = new mongoose.Schema({
 	name: {
@@ -178,6 +231,12 @@ let courseSchema = new mongoose.Schema({
 			ref: 'User'
 		}
 	],
+	subscribers: [
+		{
+			type: ObjectId,
+			ref: 'User'
+		}
+	],
 	about: String,
 	type: {
 		type: String, //can be public, open for students to search and view basic info, hidden
@@ -188,10 +247,8 @@ let courseSchema = new mongoose.Schema({
 		default: false
 	},
 	hashed_password: String,
-	actions: [
-		{
-			type: Object
-		}
+	updates: [
+		courseUpdateSchema
 	],
 	sections: [
 		{
@@ -208,6 +265,9 @@ let courseSchema = new mongoose.Schema({
 }, {
 	discriminatorKey: 'kind'
 })
+courseSchema.path('updates').discriminator('UpdateNewEntries', updateNewEntriesSchema)
+courseSchema.path('updates').discriminator('UpdateDeletedEntries', updateDeletedEntriesSchema)
+courseSchema.path('updates').discriminator('UpdateNewInfo', updateNewInfoSchema)
 
 courseSchema
 	.virtual('password')

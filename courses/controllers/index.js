@@ -1,22 +1,8 @@
-let { 
-	Course, 
-	EntryFile, 
-	EntryText, 
-	Entry, 
-	EntryContent,
-	ForumTopicPost
+let {
+	Course
 } = require('../model')
 let User = require('../../users/model');
 let _ = require('lodash');
-let mongoose = require('mongoose');
-let formidable = require('formidable'); 
-let constants = require('../../constants');
-let { sendEmail } = require('../../helpers');
-let { COURSE_TEACHER_INVITATION } = constants.notifications
-let { CLIENT_URL } = constants.client;
-let jwt = require('jsonwebtoken');
-
-let { JWT_SECRET } = constants.auth;
 
 exports.courseById = (req, res, next, id) => {
 	Course.findOne({_id: id})
@@ -82,11 +68,11 @@ exports.getNewCourseData = (req, res, next) => {
 	next();
 }
 
-exports.getCleanupFiles = (req, res, next) => {
+exports.cleanupCourseData = (req, res, next) => {
 	// compare entries in found course with the one in req body
 	// if compare file ids in both lists
 	// if some ids that are in mongo course are not present in req body - delete them
-	let curFiles = {};
+	let curFiles = {}, curEntries = {}, newEntries = [], deletedEntries = [];
 	if (!req.newCourseData.sections){
 		return next();
 	}
@@ -95,6 +81,12 @@ exports.getCleanupFiles = (req, res, next) => {
 			if (i.type === 'file'){
 				curFiles[i.content.id] = 'none';
 			}
+			curEntries[i._id] = {
+				none: true, data: {
+					name: i.name,
+					type: i.type,
+				}
+			};
 		}
 	}
 
@@ -102,6 +94,14 @@ exports.getCleanupFiles = (req, res, next) => {
 		for (let i of section.entries){
 			if (i.type === 'file'){
 				curFiles[i.content.id] = 'exist'
+			}
+			if (i._id){
+				curEntries[i._id] = 'exist';
+			} else if (!(i.access === 'teachers')){
+				newEntries.push({
+					name: i.name,
+					type: i.type
+				})
 			}
 		}
 	}
@@ -112,8 +112,19 @@ exports.getCleanupFiles = (req, res, next) => {
 			filesToDelete.push(i);
 		}
 	}
+	for (let i of Object.keys(curEntries)){
+		let cur = curEntries[i];
+		if (cur !== 'exist' && cur.none){
+			deletedEntries.push({
+				name: cur.data.name,
+				type: cur.data.type
+			})
+		}
+	}
 
 	req.filesToDelete = filesToDelete;
+	req.deletedEntries = deletedEntries;
+	req.newEntries = newEntries;
 
 	next();
 }
@@ -121,6 +132,7 @@ exports.getCleanupFiles = (req, res, next) => {
 // change update, add objectid handling
 exports.updateCourse = async (req, res) => {
 	let newCourseData = req.newCourseData;
+
 
 	if (req.filesPositions){
 		for (let i = 0; i < req.filesPositions.length; i++){
@@ -161,8 +173,41 @@ exports.updateCourse = async (req, res) => {
 	}
 
 
+
 	let course = req.courseData;
+
+	let prevInfo = {
+		name: req.courseData.name,
+		about: req.courseData.about
+	}
 	course = _.extend(course, newCourseData);
+
+	if (req.deletedEntries && req.deletedEntries.length > 0){
+		course.updates.push({
+			kind: 'UpdateDeletedEntries',
+			deletedEntries: req.deletedEntries
+		})
+	}
+	if (req.newEntries && req.newEntries.length > 0){
+		course.updates.push({
+			kind: 'UpdateNewEntries',
+			newEntries: req.newEntries
+		})
+	}
+	if (!_.isEqual(
+		{name: course.name, about: course.about},
+		prevInfo
+	)
+	){
+		course.updates.push({
+			kind: 'UpdateNewInfo',
+			newName: newCourseData.name,
+			newAbout: newCourseData.about
+		})
+	}
+
+
+
 	course.save()
 	.then((result) => {
 		return res.json({
@@ -220,7 +265,8 @@ exports.enrollInCourse = (req, res) => {
 exports.getCoursesFiltered = async (req, res) => {
 
 	//!!! add validation for sane request (e. g. can't post enrolled + teacher)
-	let filter = {};
+	let filter = {}, usersToPopulate = [], usersToPopulateSet = {}, foundCourses;
+	let viewCourses = req.body.viewCourses;
 	if (req.body.courseId){
 		filter._id = req.body.courseId;
 	}
@@ -267,6 +313,10 @@ exports.getCoursesFiltered = async (req, res) => {
 		.populate('creator')
 		.sort('name')//TODO optimize sorting - see bookmarks
 		.then(courses => {
+			foundCourses = courses;
+			/*
+				So many checks are used here to provide privacy - users shouldn't see course data, which they aren't meant to receive
+			 */
 			let userStatuses = [];
 			for (let i = 0; i < courses.length; i++){
 				userStatuses.push('');
@@ -283,6 +333,7 @@ exports.getCoursesFiltered = async (req, res) => {
 					courses[i].actions = undefined;
 					courses[i].students = undefined;
 					courses[i].creator = undefined;
+					courses[i].updates = undefined;
 					continue;
 				}
 
@@ -332,12 +383,11 @@ exports.getCoursesFiltered = async (req, res) => {
 				courses[i].actions = undefined;
 				courses[i].sections = undefined;
 				courses[i].students = undefined;
+				courses[i].updates = undefined;
 			}
 
 			//Populating different fields in this loop
 			//This loop can be used not only for forums, but for all other types of entries
-
-			let usersToPopulate = [], usersToPopulateSet = {};
 
 			for (let c = 0; c < courses.length; c++){
 				if (!courses[c].sections){
@@ -377,61 +427,62 @@ exports.getCoursesFiltered = async (req, res) => {
 					}
 				}
 			}
-
-
-			User.find({
+			return User.find({
 				_id: {
 					$in: usersToPopulate
 				}
 			})
-			.then((users) => {
-				for (let user of users){
-					user.hideFields();
-					usersToPopulateSet[user._id] = user;
+		})
+		.then((users) => {
+			for (let user of users){
+				user.hideFields();
+				usersToPopulateSet[user._id] = user;
+			}
+
+			for (let c = 0; c < foundCourses.length; c++){
+				if (!foundCourses[c].sections){
+					continue;
 				}
 
-				for (let c = 0; c < courses.length; c++){
-					if (!courses[c].sections){
-						continue;
-					}
+				for (let i = 0; i < foundCourses[c].sections.length; i++){
+					for (let j = 0; j < foundCourses[c].sections[i].entries.length; j++){
+						let entry = foundCourses[c].sections[i].entries[j];
 
-					for (let i = 0; i < courses[c].sections.length; i++){
-						for (let j = 0; j < courses[c].sections[i].entries.length; j++){
-							let entry = courses[c].sections[i].entries[j];
+						if (entry && entry.type === 'forum'){
 
-							if (entry && entry.type === 'forum'){
-
-								//populate topic creators and posts creators
-								for (let t = 0; t < courses[c].sections[i].entries[j].content.topics.length; t++){
-									courses[c].sections[i].entries[j].content.topics[t].creator =
-										usersToPopulateSet[
-											courses[c].sections[i].entries[j].content.topics[t].creator._id
+							//populate topic creators and posts creators
+							for (let t = 0; t < foundCourses[c].sections[i].entries[j].content.topics.length; t++){
+								foundCourses[c].sections[i].entries[j].content.topics[t].creator =
+									usersToPopulateSet[
+										foundCourses[c].sections[i].entries[j].content.topics[t].creator._id
 										];
 
-									for (let p = 0; p < courses[c].sections[i].entries[j].content.topics[t].posts.length; p++){
-										courses[c].sections[i].entries[j].content.topics[t].posts[p].creator =
+								for (let p = 0; p < foundCourses[c].sections[i].entries[j].content.topics[t].posts.length; p++){
+									foundCourses[c].sections[i].entries[j].content.topics[t].posts[p].creator =
 										usersToPopulateSet[
-											courses[c].sections[i].entries[j].content.topics[t].posts[p].creator._id
-										];
-									}
+											foundCourses[c].sections[i].entries[j].content.topics[t].posts[p].creator._id
+											];
 								}
 							}
 						}
 					}
 				}
+			}
 
-				return res.json(courses);
+			return new Promise((resolve, reject) => {
+				resolve(true);
 			})
-
-		
-	})
-	.catch(err => {
-		console.log(err);
-		res.status(err.status || 400)
-			.json({
-				error: err
-			})
-	})
+		})
+		.then(() => {
+			return res.json(foundCourses);
+		})
+		.catch(err => {
+			console.log(err);
+			res.status(err.status || 400)
+				.json({
+					error: err
+				})
+		})
 }
 
 exports.deleteCourse = (req, res) => {

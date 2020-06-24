@@ -46,6 +46,14 @@ exports.sendTeacherInvite = (req, res, next) => {
 			status: 404,
 			message: 'User with this email is a STUDENT, can\'t make teachers out of students'
 		}
+		if (req.courseData.teachers.includes(user._id)) throw {
+			status: 400,
+			message: 'User with this email is already a teacher at this course'
+		}
+		if (req.courseData.invitedTeachers.includes(user._id)) throw {
+			status: 400,
+			message: 'User with this email is already invited'
+		}
 		req.invitedTeacher = user;
 		req.notificationsToAdd = {
 			user: user,
@@ -76,7 +84,7 @@ exports.sendTeacherInvite = (req, res, next) => {
 	.then((data) => {
 		if (newUser){
 			return res.json({
-				message: 'invite sent to unregistered user'
+				message: 'invitation sent to unregistered user'
 			})
 		}
 		return next();
@@ -114,18 +122,33 @@ exports.addToInvitedList = (req, res) => {
 
 exports.acceptTeacherInvite = (req, res) => {
 	let course = req.courseData;
-	let hasTeacher = false;
+	let hasInvited = false, isTeacher = false
 	for (let i = 0; i < course.invitedTeachers.length; i++){
 		let cur = course.invitedTeachers[i];
 		if (cur.equals(req.auth._id)){
 			course.invitedTeachers.splice(i, 1);
-			hasTeacher = true;
+			hasInvited = true;
 			break;
 		}
 	}
-	if (!hasTeacher){
+	for (let i = 0; i < course.teachers.length; i++){
+		let cur = course.teachers[i];
+		if (cur.equals(req.auth._id)){
+			isTeacher = true;
+			break;
+		}
+	}
+	if (!hasInvited){
 		return res.status(401).json({
-			message: 'You are not on the list of invited teachers to this course'
+			error: {
+				status: 401,
+				message: 'You are not on the list of invited teachers to this course'
+			}
+		})
+	}
+	if (isTeacher){
+		return res.json({
+			message: 'You are already a teacher at this course'
 		})
 	}
 

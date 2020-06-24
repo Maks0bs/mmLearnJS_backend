@@ -153,6 +153,16 @@ exports.inviteSignup = (req, res) => {
                 })
         }
     }
+
+    if (!inviteData.invited){
+        return res.status(403).json({
+            error: {
+                status: 403,
+                message: 'Wrong token. Possibly not meant for signup through invitation'
+            }
+        })
+    }
+
     User.findOne({ email: req.body.email })
         .then(user => {
             if (user) throw {
@@ -633,11 +643,5 @@ exports.resetPassword = (req, res) => {
                 message: `Great! Now you can login with your new password.`
             });
         })
-        .catch(err => {
-            console.log(err);
-            res.status(err.status || 400)
-                .json({
-                    error: err
-                })
-        })
+
 }

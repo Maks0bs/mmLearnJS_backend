@@ -55,6 +55,15 @@ let userSchema = new mongoose.Schema({
 			ref: 'Course'
 		}
 	],
+	subscribedCourses: [
+		{
+			course: {
+				type: ObjectId,
+				ref: 'Course'
+			},
+			lastVisited: Date
+		}
+	],
 	teacherCourses: [
 		{
 			type: ObjectId,

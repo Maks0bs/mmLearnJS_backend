@@ -12,7 +12,7 @@ let {
 	getCoursesFiltered,
 	updateCourse,
 	courseById,
-	getCleanupFiles,
+	cleanupCourseData,
 	getNewCourseData,
 	deleteCourse,
 	entryById,
@@ -25,6 +25,12 @@ let {
 	postById,
 	deleteTopicPost
 } = require('./controllers/forums')
+
+let {
+	subscribe,
+	unsubscribe,
+	viewCourse
+} = require('./controllers/subscription')
 
 let {
 	sendTeacherInvite,
@@ -56,7 +62,7 @@ router.put('/update/:courseId',
 	teacherInCourse,
 	uploadFiles,
 	getNewCourseData,
-	getCleanupFiles,
+	cleanupCourseData,
 	deleteFiles,
 	updateCourse
 );
@@ -92,6 +98,20 @@ router.delete('/:courseId/forum/:entryId/topic/:topicId/post/:postId',
 	requireAuthentication,
 	userInCourse,
 	deleteTopicPost
+)
+router.post('/subscribe/:courseId',
+	requireAuthentication,
+	userInCourse,
+	subscribe
+)
+router.post('/unsubscribe/:courseId',
+	requireAuthentication,
+	userInCourse,
+	unsubscribe
+)
+router.post('/view/:courseId',
+	requireAuthentication,
+	viewCourse
 )
 
 
