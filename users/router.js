@@ -8,7 +8,8 @@ let {
 	getUsersFiltered,
 	updateUser,
 	deserializeAndCleanData,
-	isAuthenticatedUser
+	isAuthenticatedUser,
+	getUpdatesByDate
 } = require('./controller');
 let {
 	uploadFiles
@@ -28,5 +29,9 @@ router.put('/:userId',
 	deserializeAndCleanData,
 	updateUser
 );
+router.post('/updates-by-date',
+	requireAuthentication,
+	getUpdatesByDate
+)
 
 module.exports = router;

@@ -154,5 +154,43 @@ exports.updateUser = (req, res) => {
 				})
 		})
 
+}
 
+exports.getUpdatesByDate = (req, res) => {
+	let subscribedIds = [];
+	for (let i of req.auth.subscribedCourses){
+		subscribedIds.push(i.course);
+	}
+	Course.find({
+		_id: {
+			$in: subscribedIds
+		}
+	})
+		.then((courses) => {
+			let updates = [];
+			let from = new Date(req.body.dateFrom);
+			let to = new Date(req.body.dateTo);
+			to.setDate(to.getDate() + 1);
+			for (let c of courses){
+				for (let u of c.updates){
+					if (u.created >= from && u.created <= to){
+						updates.push({
+							data: u,
+							course: {
+								name: c.name,
+								id: c._id
+							}
+						});
+					}
+				}
+			}
+
+
+			updates.sort((a, b) => {
+				return b.data.created - a.data.created;
+			})
+
+
+			return res.json(updates);
+		})
 }

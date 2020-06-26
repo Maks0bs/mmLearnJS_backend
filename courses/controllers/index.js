@@ -201,6 +201,7 @@ exports.updateCourse = async (req, res) => {
 	){
 		course.updates.push({
 			kind: 'UpdateNewInfo',
+			oldName: prevInfo.name,
 			newName: newCourseData.name,
 			newAbout: newCourseData.about
 		})

@@ -196,6 +196,7 @@ exports.UpdateDeletedEntries = UpdateDeletedEntries;
  * @param newAbout new info about the updated course
  */
 let updateNewInfoSchema = new mongoose.Schema({
+	oldName: String,
 	newName: String,
 	newAbout: String
 })
