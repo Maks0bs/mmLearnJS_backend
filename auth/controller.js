@@ -518,17 +518,18 @@ exports.getAuthenticatedUser = (req, res) => {
         return res.json(null);
     }
     User.findOne({ _id: req.auth._id })
-    .select('-salt -hashed_password')
-    .then(user => {
-        res.json(user);
-    })
-    .catch(err => {
-        console.log(err);
-        res.status(err.status || 400)
-            .json({
-                error: err
-            })
-    })
+        .select('-salt -hashed_password')
+        .populate('subscribedCourses.course', '_id name')
+        .then(user => {
+            res.json(user);
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(err.status || 400)
+                .json({
+                    error: err
+                })
+        })
 }
 
 exports.logout = (req, res) => {

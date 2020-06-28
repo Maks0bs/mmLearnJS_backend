@@ -157,24 +157,21 @@ exports.updateUser = (req, res) => {
 }
 
 exports.getUpdatesByDate = (req, res) => {
-	let subscribedIds = [];
-	for (let i of req.auth.subscribedCourses){
-		subscribedIds.push(i.course);
-	}
+	let subscribedIds = req.body.courses;
 	Course.find({
 		_id: {
 			$in: subscribedIds
 		}
 	})
 		.then((courses) => {
-			let updates = [];
+			let preUpdates = [];
 			let from = new Date(req.body.dateFrom);
 			let to = new Date(req.body.dateTo);
 			to.setDate(to.getDate() + 1);
 			for (let c of courses){
 				for (let u of c.updates){
 					if (u.created >= from && u.created <= to){
-						updates.push({
+						preUpdates.push({
 							data: u,
 							course: {
 								name: c.name,
@@ -186,9 +183,20 @@ exports.getUpdatesByDate = (req, res) => {
 			}
 
 
-			updates.sort((a, b) => {
+			preUpdates.sort((a, b) => {
 				return b.data.created - a.data.created;
 			})
+
+
+			console.log(req.body);
+
+			let updates = [];
+			for (let i = req.body.starting;
+				 i < _.min([req.body.starting + req.body.cnt, preUpdates.length]);
+				 i++
+			){
+				updates.push(preUpdates[i]);
+			}
 
 
 			return res.json(updates);

@@ -82,9 +82,11 @@ exports.cleanupCourseData = (req, res, next) => {
 				curFiles[i.content.id] = 'none';
 			}
 			curEntries[i._id] = {
-				none: true, data: {
+				none: true,
+				data: {
 					name: i.name,
 					type: i.type,
+					access: i.access
 				}
 			};
 		}
@@ -114,7 +116,7 @@ exports.cleanupCourseData = (req, res, next) => {
 	}
 	for (let i of Object.keys(curEntries)){
 		let cur = curEntries[i];
-		if (cur !== 'exist' && cur.none){
+		if (cur !== 'exist' && cur.none && !(cur.data.access === 'teachers') ){
 			deletedEntries.push({
 				name: cur.data.name,
 				type: cur.data.type
