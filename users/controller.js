@@ -10,7 +10,9 @@ exports.userById = (req, res, next, id) => {
 		.then(user => {
 			if (!user) throw {
 				status: 404,
-				error: 'user not found'
+				error: {
+					message: 'user not found'
+				}
 			}
 
 			req.user = user;//may need to change req.user to req.userById to avoid conflicts

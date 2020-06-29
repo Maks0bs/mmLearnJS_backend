@@ -532,3 +532,45 @@ exports.entryById = (req, res, next, entryId) => {
 	})
 }
 
+exports.getUpdatesNotifications = (req, res) => {
+	let userSubbedSet = {};
+
+	for (let c of req.auth.subscribedCourses) {
+		userSubbedSet[c.course] = c.lastVisited;
+	}
+
+	Course.find({
+		_id: {
+			$in: req.body.courses
+		}
+	})
+		.then((courses) => {
+			let result = {};
+			for (let c of courses){
+				let lastVisited = userSubbedSet[c._id], curResult = 0;
+				if (!lastVisited){
+					continue;
+				}
+				for (let u of c.updates){
+					if (u.created > lastVisited){
+						curResult++;
+					}
+				}
+				if (curResult > 0){
+					result[c._id] = curResult;
+				}
+			}
+
+			console.log(result);
+
+			return res.json(result);
+		})
+		.catch(err => {
+			console.log(err);
+			res.status(err.status || 400)
+				.json({
+					error: err
+				})
+		})
+}
+

@@ -16,6 +16,7 @@ let {
 	getNewCourseData,
 	deleteCourse,
 	entryById,
+	getUpdatesNotifications
 } = require('./controllers')
 
 let {
@@ -112,6 +113,10 @@ router.post('/unsubscribe/:courseId',
 router.post('/view/:courseId',
 	requireAuthentication,
 	viewCourse
+)
+router.post('/updates-notifications',
+	requireAuthentication,
+	getUpdatesNotifications
 )
 
 
