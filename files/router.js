@@ -27,8 +27,8 @@ router.post('/upload',
 	sendFiles
 );
 
-router.get('/download/:fileId/:filename', configDownload, streamFile);
-router.get('/stream/:fileId/:filename', configStream, streamFile);
+router.get('/download/:fileId/:filename?', configDownload, streamFile);
+router.get('/stream/:fileId/:filename?', configStream, streamFile);
 router.delete('/:fileId', 
 	requireAuthentication, 
 	allowModifyFile, 

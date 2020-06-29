@@ -2,7 +2,8 @@ let {
 	isTeacher,
 	requireAuthentication,
 	isCreator,
-	teacherInCourse
+	teacherInCourse,
+	userInCourse
 } = require('../auth/controller')
 
 let {
@@ -11,14 +12,32 @@ let {
 	getCoursesFiltered,
 	updateCourse,
 	courseById,
-	updateCleanup,
-	getCleanupFiles,
+	cleanupCourseData,
 	getNewCourseData,
 	deleteCourse,
+	entryById,
+	getUpdatesNotifications
+} = require('./controllers')
+
+let {
+	createForumTopic,
+	answerTopicPost,
+	topicById,
+	postById,
+	deleteTopicPost
+} = require('./controllers/forums')
+
+let {
+	subscribe,
+	unsubscribe,
+	viewCourse
+} = require('./controllers/subscription')
+
+let {
 	sendTeacherInvite,
 	addToInvitedList,
 	acceptTeacherInvite
-} = require('./controller')
+} = require('./controllers/teachers')
 
 let {
 	deleteFiles,
@@ -44,7 +63,7 @@ router.put('/update/:courseId',
 	teacherInCourse,
 	uploadFiles,
 	getNewCourseData,
-	getCleanupFiles,
+	cleanupCourseData,
 	deleteFiles,
 	updateCourse
 );
@@ -66,8 +85,44 @@ router.post('/accept-teacher-invite/:courseId',
 	acceptTeacherInvite
 )
 //router.get('/:courseId', getCourse);
+router.post('/:courseId/forum/:entryId/new-topic',
+	requireAuthentication,
+	userInCourse,
+	createForumTopic,
+)
+router.post('/:courseId/forum/:entryId/topic/:topicId/post/:postId/answer',
+	requireAuthentication,
+	userInCourse,
+	answerTopicPost
+)
+router.delete('/:courseId/forum/:entryId/topic/:topicId/post/:postId',
+	requireAuthentication,
+	userInCourse,
+	deleteTopicPost
+)
+router.post('/subscribe/:courseId',
+	requireAuthentication,
+	userInCourse,
+	subscribe
+)
+router.post('/unsubscribe/:courseId',
+	requireAuthentication,
+	userInCourse,
+	unsubscribe
+)
+router.post('/view/:courseId',
+	requireAuthentication,
+	viewCourse
+)
+router.post('/updates-notifications',
+	requireAuthentication,
+	getUpdatesNotifications
+)
 
 
 router.param('courseId', courseById);
+router.param('entryId', entryById);
+router.param('topicId', topicById);
+router.param('postId', postById);
 
 module.exports = router;

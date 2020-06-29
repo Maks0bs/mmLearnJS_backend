@@ -23,17 +23,9 @@ let userSchema = new mongoose.Schema({
 		default: Date.now
 	},
 	updated: Date,
-	profilePhoto: {
-		data: Buffer,
-		contentType: String
-	},
 	about: {
 		type: String,
 		trim: true
-	},
-	resetPasswordToken: {
-		type: String,
-		default: ""
 	},
 	notifications: [
 		{
@@ -63,10 +55,28 @@ let userSchema = new mongoose.Schema({
 			ref: 'Course'
 		}
 	],
+	subscribedCourses: [
+		{
+			course: {
+				type: ObjectId,
+				ref: 'Course'
+			},
+			lastVisited: Date
+		}
+	],
 	teacherCourses: [
 		{
 			type: ObjectId,
 			ref: 'Course'
+		}
+	],
+	photo: {
+		type: ObjectId,
+		ref: 'Uploads.File'
+	},
+	hiddenFields: [
+		{
+			type: String
 		}
 	]
 });
@@ -88,8 +98,7 @@ userSchema
 userSchema.methods = {
 	checkCredentials : function(plainText){
 		return this.encryptPassword(plainText) === this.hashed_password
-	}, 
-
+	},
 	encryptPassword: function(password){
 		if (!password) return "";
 		try {
@@ -99,7 +108,11 @@ userSchema.methods = {
 		} catch (err){
 			return "";
 		}
-
+	},
+	hideFields: function(){
+		for (let field of this.hiddenFields){
+			this[field] = undefined;
+		}
 	}
 }
 
