@@ -309,6 +309,17 @@ exports.getCoursesFiltered = async (req, res) => {
 				})
 		})
 	}
+	if (req.body.searchWord){
+		//console.log('search word: ', req.body.searchWord);
+		let reOptions = {
+			$regex: req.body.searchWord,
+			$options: 'i'
+		}
+		filter.$or = [
+			{ name: reOptions },
+			{ about: reOptions }
+		]
+	}
 	Course.find({...filter})
 	//maybe select only necessary info
 		.populate('students')
@@ -477,6 +488,21 @@ exports.getCoursesFiltered = async (req, res) => {
 			})
 		})
 		.then(() => {
+			if (req.body.select){
+				let selectSet = {};
+				for (let s of req.body.select){
+					selectSet[s] = 1;
+				}
+				for (let i = 0; i < foundCourses.length; i++){
+					for (let v of Object.keys(foundCourses[i]._doc)){
+						if (!selectSet[v]){
+							foundCourses[i][v] = undefined;
+						}
+					}
+				}
+			}
+
+
 			return res.json(foundCourses);
 		})
 		.catch(err => {

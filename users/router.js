@@ -1,6 +1,6 @@
 let {
 	requireAuthentication,
-} = require('../auth/controller');
+} = require('../auth/controllers');
 let {
 	getUser,
 	userById,
@@ -14,6 +14,9 @@ let {
 let {
 	uploadFiles
 } = require('../files/controller')
+let {
+	userInfoValidator
+} = require('../auth/controllers/validator')
 let router = require('express').Router()
 
 router.get('/:userId', getUser);
@@ -25,6 +28,7 @@ router.param('userId', userById);
 router.put('/:userId',
 	requireAuthentication,
 	isAuthenticatedUser,
+	userInfoValidator,
 	uploadFiles,
 	deserializeAndCleanData,
 	updateUser

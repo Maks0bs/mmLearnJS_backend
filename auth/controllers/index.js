@@ -1,20 +1,20 @@
 let jwt = require('jsonwebtoken');
-let User = require('../users/model');
-let { Course } = require('../courses/model');
-let { sendEmail } = require('../helpers');
+let User = require('../../users/model');
+let { Course } = require('../../courses/model');
+let { sendEmail } = require('../../helpers');
 let _ = require('lodash')
 
-let { JWT_SECRET } = require('../constants').auth
+let { JWT_SECRET } = require('../../constants').auth
 
-let { CLIENT_URL, DEFAULT_COOKIE_OPTIONS, NO_ACTION_LOGOUT_TIME } = require('../constants').client
-let { TEACHER_PASSWORD } = require('../constants').users
-let { ACTIVATE_ACCOUNT, COURSE_TEACHER_INVITATION } = require('../constants').notifications
+let { CLIENT_URL, DEFAULT_COOKIE_OPTIONS, NO_ACTION_LOGOUT_TIME } = require('../../constants').client
+let { TEACHER_PASSWORD } = require('../../constants').users
+let { ACTIVATE_ACCOUNT, COURSE_TEACHER_INVITATION } = require('../../constants').notifications
 
 
 exports.signup = (req, res) => {
     console.log(req.body);
     let data = {};
-	User.findOne({ email: req.body.email })
+    User.findOne({ email: req.body.email })
         .then(user => {
             if (user) throw {
                 status: 403,
@@ -301,7 +301,7 @@ exports.activateAccount = (req, res) => {
                     }
                 }
             }
-            
+
             return user.save();
         })
         .then(data => {
@@ -348,7 +348,7 @@ exports.signin = (req, res) => {
 
             res.cookie(
                 'auth',
-                token, 
+                token,
                 {
                     ...DEFAULT_COOKIE_OPTIONS,
                     maxAge: NO_ACTION_LOGOUT_TIME
@@ -367,7 +367,7 @@ exports.signin = (req, res) => {
 
 
 
-    
+
 };
 
 exports.authenticate = async (req, res, next) => {
@@ -401,7 +401,7 @@ exports.extendSession = (req, res, next) => {
     }
     try {
         let updatedToken = jwt.sign(
-           {
+            {
                 _id: req.auth._id,
                 role: req.auth.role,
                 email: req.auth.email
@@ -598,7 +598,7 @@ exports.forgotPassword = (req, res) => {
                     error: err
                 })
         })
- 
+
 
 }
 
@@ -626,7 +626,7 @@ exports.resetPassword = (req, res) => {
     }
 
     console.log('data', data);
- 
+
     User.findOne({ email: data.email })
         .then(user => {
             if (!user) {

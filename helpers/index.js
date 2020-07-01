@@ -1,4 +1,7 @@
 const nodeMailer = require('nodemailer');
+let {
+    validationResult
+} = require('express-validator');
  
 exports.sendEmail = emailData => {
     const transporter = nodeMailer.createTransport({
@@ -18,3 +21,18 @@ exports.sendEmail = emailData => {
             .catch(err => console.log(`Problem sending email: ${err}`))
     );
 };
+
+exports.validate = (req, res, next) => {
+    let { errors } = validationResult(req);
+    if (errors.length > 0){
+        let firstError = errors.map((error) => error.msg)[0];
+        return res.status(400).json({
+            error: {
+                status: 400,
+                message: firstError
+            }
+        })
+    }
+
+    next();
+}

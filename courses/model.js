@@ -240,8 +240,9 @@ let courseSchema = new mongoose.Schema({
 	],
 	about: String,
 	type: {
-		type: String, //can be public, open for students to search and view basic info, hidden
-		require: true
+		type: String,
+		require: true,
+		enum: ['open', 'public', 'hidden']
 	},
 	hasPassword: {
 		type: Boolean,

@@ -4,7 +4,7 @@ let {
 	isCreator,
 	teacherInCourse,
 	userInCourse
-} = require('../auth/controller')
+} = require('../auth/controllers')
 
 let {
 	createCourse,

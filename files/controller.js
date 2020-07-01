@@ -18,6 +18,7 @@ let storage = new GridFSStorage({
                 if (err) {
                     return reject(err);
                 }
+                console.log('gfs', req.body);
                 let filename = buf.toString('hex');
                 let fileInfo = {
                     filename: filename,
