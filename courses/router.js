@@ -16,7 +16,8 @@ let {
 	getNewCourseData,
 	deleteCourse,
 	entryById,
-	getUpdatesNotifications
+	getUpdatesNotifications,
+	removeCourseMentions
 } = require('./controllers')
 
 let {
@@ -70,6 +71,8 @@ router.put('/update/:courseId',
 router.delete('/:courseId', 
 	requireAuthentication, 
 	isCreator,
+	removeCourseMentions,
+	deleteFiles,
 	deleteCourse
 );
 router.post('/send-teacher-invite/:courseId',

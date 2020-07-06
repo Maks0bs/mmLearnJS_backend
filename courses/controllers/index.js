@@ -28,7 +28,6 @@ exports.courseById = (req, res, next, id) => {
 }
 
 exports.createCourse = (req, res) => {
-	console.log('create course body', req.body)
 	let courseData = req.body;
 	courseData.creator = req.auth;
 	courseData.teachers = [req.auth];
@@ -227,7 +226,6 @@ exports.updateCourse = async (req, res) => {
 }
 
 exports.enrollInCourse = (req, res) => {
-	console.log('req body enroll', req.body);
 	courseId = req.body._id;
 	let course = req.courseData;
 	if (course.hasPassword && !course.checkPassword(req.body.password)) {
@@ -310,7 +308,6 @@ exports.getCoursesFiltered = async (req, res) => {
 		})
 	}
 	if (req.body.searchWord){
-		//console.log('search word: ', req.body.searchWord);
 		let reOptions = {
 			$regex: req.body.searchWord,
 			$options: 'i'
@@ -528,7 +525,81 @@ exports.deleteCourse = (req, res) => {
 				error: err
 			})
 	})
+	res.status(401).json({
+		error:{
+			message: 'kek',
 
+		}
+	})
+
+}
+
+exports.removeCourseMentions = (req, res, next) => {
+	let filesToDelete = [], course = req.courseData;
+
+	for (let s of course.sections){
+		for (let e of s.entries){
+			if (e.type === 'file'){
+				filesToDelete.push(e.content.id);
+			}
+		}
+	}
+
+	User.find({ _id: { $in:
+				[...course.subscribers, ...course.teachers, ...course.students]
+	}})
+		.then((users) => {
+			for (let u of users){
+				let index = -1;
+				for (let c = 0; c < u.subscribedCourses.length; c++){
+					if (u.subscribedCourses[c].course.equals(course._id)){
+						index = c;
+						break;
+					}
+				}
+				if (index >= 0){
+					u.subscribedCourses.splice(index, 1);
+				}
+
+				index = -1;
+				for (let c = 0; c < u.enrolledCourses.length; c++){
+					if (u.enrolledCourses[c].equals(course._id)){
+						index = c;
+						break;
+					}
+				}
+				if (index >= 0){
+					u.enrolledCourses.splice(index, 1);
+				}
+
+				if (u.teacherCourses){
+					index = -1;
+					for (let c = 0; c < u.teacherCourses.length; c++){
+						if (u.teacherCourses[c].equals(course._id)){
+							index = c;
+							break;
+						}
+					}
+					if (index >= 0){
+						u.teacherCourses.splice(index, 1);
+					}
+				}
+
+
+
+				u.save();
+			}
+		})
+		.catch(err => {
+			console.log(err);
+			res.status(err.status || 400)
+				.json({
+					error: err
+				})
+		})
+
+	req.filesToDelete = filesToDelete;
+	return next();
 }
 
 exports.entryById = (req, res, next, entryId) => {
@@ -587,7 +658,6 @@ exports.getUpdatesNotifications = (req, res) => {
 				}
 			}
 
-			console.log(result);
 
 			return res.json(result);
 		})

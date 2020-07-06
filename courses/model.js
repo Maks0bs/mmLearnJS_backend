@@ -67,11 +67,11 @@ let entryForumSchema = new mongoose.Schema({
 						default: Date.now
 					},
 					updated: Date,
-					content: String, //to change to smth more global
+					content: String, //TODO change to smth more global
 					answers: [
 						{
 							type: ObjectId
-						}//!!!!!!!!!!populate this shit when sending response!!!!!!
+						}
 					]
 				}
 			]
