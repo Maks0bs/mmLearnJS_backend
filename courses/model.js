@@ -2,7 +2,48 @@ let mongoose = require('mongoose');
 let { ObjectId } = mongoose.Schema;
 let { v1: uuidv1} = require('uuid');
 let crypto = require('crypto');
-//let Int32 = require('mongoose-int32');
+
+let courseExerciseSchema = new mongoose.Schema({
+	name: {
+		type: String,
+		required: true
+	},
+	participants: [
+		{
+			student: {
+				type: ObjectId,
+				ref: 'User'
+			},
+			attempts: [
+				{
+					startTime: Date,
+					endTime: Date,
+					answers: [
+						{
+							type: Object
+							//TODO maybe add discriminators for each type of task
+						}
+					],
+					score: Number
+				}
+			]
+		}
+	],
+	available: {
+		type: Boolean,
+		required: true
+	},
+	weight: {
+		type: Number,
+		required: true
+	}
+}, {
+	discriminatorKey: 'kind'
+})
+
+let Exercise = mongoose.model('CourseExercise', courseExerciseSchema);
+exports.Exercise = Exercise;
+
 
 let entryContentSchema = new mongoose.Schema({
 	info: {}
@@ -19,6 +60,16 @@ let entryTextSchema = new mongoose.Schema({
 })
 let EntryText = EntryContent.discriminator('EntryText', entryTextSchema);
 exports.EntryText = EntryText;
+
+let entryExerciseSchema = new mongoose.Schema({
+	exercise: {
+		type: ObjectId
+	}
+}, {
+	discriminatorKey: 'kind'
+})
+let EntryExercise = EntryContent.discriminator('EntryExercise', entryExerciseSchema);
+exports.EntryExercise = EntryExercise;
 
 let forumTopicPostSchema = new mongoose.Schema({
 	creator: {
@@ -139,6 +190,7 @@ let entrySchema = new mongoose.Schema({
 entrySchema.path('content').discriminator('EntryFile', entryFileSchema)
 entrySchema.path('content').discriminator('EntryText', entryTextSchema)
 entrySchema.path('content').discriminator('EntryForum', entryForumSchema)
+entrySchema.path('content').discriminator('EntryExercise', entryExerciseSchema)
 let Entry = mongoose.model('Entry', entrySchema);
 exports.Entry = Entry;
 
@@ -263,6 +315,9 @@ let courseSchema = new mongoose.Schema({
 				entrySchema
 			]
 		}
+	],
+	exercises: [
+		courseExerciseSchema
 	]
 }, {
 	discriminatorKey: 'kind'
