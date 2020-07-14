@@ -3,6 +3,19 @@ let { ObjectId } = mongoose.Schema;
 let { v1: uuidv1} = require('uuid');
 let crypto = require('crypto');
 
+let exerciseTaskSchema = new mongoose.Schema({
+	description: String,
+	score: {
+		type: Number,
+		required: true
+	}
+}, {
+	discriminatorKey: 'kind'
+})
+
+let ExerciseTask = mongoose.model('ExerciseTask', exerciseTaskSchema);
+exports.ExerciseTask = ExerciseTask;
+
 let courseExerciseSchema = new mongoose.Schema({
 	name: {
 		type: String,
@@ -29,6 +42,9 @@ let courseExerciseSchema = new mongoose.Schema({
 			]
 		}
 	],
+	tasks: [
+		exerciseTaskSchema
+	],
 	available: {
 		type: Boolean,
 		required: true
@@ -43,6 +59,53 @@ let courseExerciseSchema = new mongoose.Schema({
 
 let Exercise = mongoose.model('CourseExercise', courseExerciseSchema);
 exports.Exercise = Exercise;
+
+
+let oneChoiceExerciseSchema = new mongoose.Schema({
+	options: [
+		{
+			text: String,
+			key: String
+		}
+	],
+	correctAnswer: String //has to be one of the keys
+})
+let OneChoiceExercise = ExerciseTask.discriminator('OneChoiceExercise', oneChoiceExerciseSchema);
+exports.OneChoiceExercise = OneChoiceExercise;
+
+let multipleChoiceExerciseSchema = new mongoose.Schema({
+	options: [
+		{
+			text: String,
+			key: String
+		}
+	],
+	correctAnswers: [
+		{
+			type: String //has to be one of the keys
+		}
+	],
+	onlyFull: Boolean // if true, score for this exercise gets counted if all options are selected correctly
+})
+let MultipleChoiceExercise = ExerciseTask.discriminator('MultipleChoiceExercise', multipleChoiceExerciseSchema);
+exports.MultipleChoiceExercise = MultipleChoiceExercise;
+
+let textExerciseSchema = new mongoose.Schema({
+	correctAnswers: [
+		{
+			type: String //has to be one of the keys
+		}
+	],
+	interpretMath: Boolean //TODO for future: interpret the answer as a math statement
+})
+let TextExercise = ExerciseTask.discriminator('TextExercise', textExerciseSchema);
+exports.TextExercise = TextExercise;
+
+
+
+courseExerciseSchema.path('tasks').discriminator('OneChoiceExercise', oneChoiceExerciseSchema)
+courseExerciseSchema.path('tasks').discriminator('MultipleChoiceExercise', multipleChoiceExerciseSchema)
+courseExerciseSchema.path('tasks').discriminator('TextExercise', textExerciseSchema)
 
 
 let entryContentSchema = new mongoose.Schema({
@@ -60,16 +123,6 @@ let entryTextSchema = new mongoose.Schema({
 })
 let EntryText = EntryContent.discriminator('EntryText', entryTextSchema);
 exports.EntryText = EntryText;
-
-let entryExerciseSchema = new mongoose.Schema({
-	exercise: {
-		type: ObjectId
-	}
-}, {
-	discriminatorKey: 'kind'
-})
-let EntryExercise = EntryContent.discriminator('EntryExercise', entryExerciseSchema);
-exports.EntryExercise = EntryExercise;
 
 let forumTopicPostSchema = new mongoose.Schema({
 	creator: {
@@ -190,7 +243,6 @@ let entrySchema = new mongoose.Schema({
 entrySchema.path('content').discriminator('EntryFile', entryFileSchema)
 entrySchema.path('content').discriminator('EntryText', entryTextSchema)
 entrySchema.path('content').discriminator('EntryForum', entryForumSchema)
-entrySchema.path('content').discriminator('EntryExercise', entryExerciseSchema)
 let Entry = mongoose.model('Entry', entrySchema);
 exports.Entry = Entry;
 
