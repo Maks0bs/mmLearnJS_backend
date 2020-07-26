@@ -36,3 +36,31 @@ exports.validate = (req, res, next) => {
 
     next();
 }
+
+/**
+ *
+ * @param err the error object of mongoose error data (contains errors array and _message)
+ * @return falsy value if err is not a valid mongoose error data object,
+ * otherwise return the message of the first error
+ */
+exports.formatMongooseError = (err) => {
+    if (!err.errors){
+        return false;
+    }
+    let errorsValues = Object.keys(err.errors);
+    let firstError = err.errors[errorsValues[0]];
+    if (!firstError.properties){
+        return false;
+    }
+    let message = firstError.properties.message
+    if ( ((typeof message) === 'object') || (message instanceof Object)){
+        return JSON.stringify(message);
+    } else if ( ((typeof message) === 'string') || (message instanceof String)){
+        return {
+            message,
+            path: firstError
+        };
+    } else {
+        return false;
+    }
+}

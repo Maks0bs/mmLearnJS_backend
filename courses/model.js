@@ -49,9 +49,10 @@ let courseExerciseSchema = new mongoose.Schema({
 		type: Boolean,
 		required: true
 	},
-	weight: {
+	weight: {//TODO if no weight gets received in the update request, set to 1. Add this to schema methods
 		type: Number,
-		required: true
+		required: true,
+		default: 1
 	}
 }, {
 	discriminatorKey: 'kind'
@@ -61,30 +62,93 @@ let Exercise = mongoose.model('CourseExercise', courseExerciseSchema);
 exports.Exercise = Exercise;
 
 
-let oneChoiceExerciseSchema = new mongoose.Schema({
-	options: [
-		{
-			text: String,
-			key: String
+function choiceArrayValidator(arr){
+	return arr.length >= 1;
+}
+function oneChoiceCorrectAnsValidator(){
+	//console.log('one choice', this);
+	if (!this.correctAnswer){
+		return false;
+	}
+
+	for (let i of this.options){
+		if (i.key === this.correctAnswer){
+			return true;
 		}
-	],
-	correctAnswer: String //has to be one of the keys
+	}
+
+	return false;
+}
+let oneChoiceExerciseSchema = new mongoose.Schema({
+	options: {
+		_id: false,
+		type: [
+			{
+				text: String,
+				key: String
+			}
+		],
+		validate: {
+			validator: choiceArrayValidator,
+			message: `There should be at least one option in every one-choice exercise`
+		}
+	},
+	correctAnswer: {
+		type: String,
+		required: 'There should be a correct answer which is equal to one of the options in every one-choice exercise',
+		validate: {
+			validator: oneChoiceCorrectAnsValidator,
+			message: 'There should be a correct answer which is equal to one of the options in every one-choice exercise'
+		}
+	}
 })
 let OneChoiceExercise = ExerciseTask.discriminator('OneChoiceExercise', oneChoiceExerciseSchema);
 exports.OneChoiceExercise = OneChoiceExercise;
 
+function multipleChoiceCorrectAnsValidator(){
+	if (!this.correctAnswers){
+		return false;
+	}
+
+	let optionsSet = {};
+
+	for (let i of this.options){
+		optionsSet[i.key] = 1;
+	}
+
+	for (let i of this.correctAnswers){
+		if (!optionsSet[i]){
+			return false;
+		}
+	}
+
+	return true;
+}
 let multipleChoiceExerciseSchema = new mongoose.Schema({
-	options: [
-		{
-			text: String,
-			key: String
+	options: {
+		_id: false,
+		type: [
+			{
+				text: String,
+				key: String
+			}
+		],
+		validate: {
+			validator: choiceArrayValidator,
+			message: `There should be at least one option in every multiple-choice exercise`
 		}
-	],
-	correctAnswers: [
-		{
-			type: String //has to be one of the keys
+	},
+	correctAnswers: {
+		type: [
+			{
+				type: String
+			}
+		],
+		validate: {
+			validator: multipleChoiceCorrectAnsValidator,
+			message: 'Correct answers in multiple choice tasks should be the keys of other options of the given task'
 		}
-	],
+	},
 	onlyFull: Boolean // if true, score for this exercise gets counted if all options are selected correctly
 })
 let MultipleChoiceExercise = ExerciseTask.discriminator('MultipleChoiceExercise', multipleChoiceExerciseSchema);
@@ -383,7 +447,6 @@ courseSchema
 	.set(function(password){
 		this._password = password;
 		this.salt = uuidv1();
-		console.log('course salt',this.salt, 'uuid', uuidv1());
 		this.hashed_password = this.encryptPassword(password);
 	})
 	.get(function() {
@@ -398,7 +461,6 @@ courseSchema.methods = {
 	encryptPassword: function(password){
 		if (!password) return '';
 		try {
-			console.log('test salt ', this, 'password ', password);
 			return crypto.createHmac('sha1', this.salt)
 			.update(password)
 			.digest('hex');

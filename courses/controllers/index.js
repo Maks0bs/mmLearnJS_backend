@@ -3,6 +3,7 @@ let {
 } = require('../model')
 let User = require('../../users/model');
 let _ = require('lodash');
+const {formatMongooseError} = require("../../helpers");
 
 exports.courseById = (req, res, next, id) => {
 	Course.findOne({_id: id})
@@ -183,6 +184,14 @@ exports.updateCourse = async (req, res) => {
 	}
 	course = _.extend(course, newCourseData);
 
+	//TODO add new updates when a new exercise gets released. Display it only if it has available == true
+
+
+
+
+	//TODO if previously unavailable / hidden exercises or entries get published, also add updates for this
+
+
 	if (req.deletedEntries && req.deletedEntries.length > 0){
 		course.updates.push({
 			kind: 'UpdateDeletedEntries',
@@ -220,7 +229,7 @@ exports.updateCourse = async (req, res) => {
 		console.log(err);
 		return res.status(err.status || 400)
 			.json({
-				error: err
+				error: formatMongooseError(err) || err
 			})
 	}) 
 }
@@ -345,6 +354,7 @@ exports.getCoursesFiltered = async (req, res) => {
 					courses[i].students = undefined;
 					courses[i].creator = undefined;
 					courses[i].updates = undefined;
+					courses[i].exercises = undefined;
 					continue;
 				}
 
@@ -395,6 +405,7 @@ exports.getCoursesFiltered = async (req, res) => {
 				courses[i].sections = undefined;
 				courses[i].students = undefined;
 				courses[i].updates = undefined;
+				courses[i].exercises = undefined;
 			}
 
 			//Populating different fields in this loop
@@ -405,7 +416,11 @@ exports.getCoursesFiltered = async (req, res) => {
 					continue;
 				}
 
-
+				for (let i = 0; i < courses[c].exercises.length; i++){
+					if (!(userStatuses[c] === 'teacher' || userStatuses[c] === 'creator')){
+						courses[c].exercises[i].tasks = undefined;
+					}
+				}
 
 				for (let i = 0; i < courses[c].sections.length; i++){
 					for (let j = 0; j < courses[c].sections[i].entries.length; j++){
@@ -665,7 +680,7 @@ exports.getUpdatesNotifications = (req, res) => {
 			console.log(err);
 			res.status(err.status || 400)
 				.json({
-					error: err
+					error: formatMongooseError(err) || err
 				})
 		})
 }
