@@ -3,6 +3,58 @@ let { ObjectId } = mongoose.Schema;
 let { v1: uuidv1} = require('uuid');
 let crypto = require('crypto');
 
+let attemptAnswerSchema = new mongoose.Schema({
+	taskRef: {
+		type: ObjectId,
+		required: true
+	}
+}, {
+	discriminatorKey: 'kind'
+})
+
+let AttemptAnswer = mongoose.model('AttemptAnswer', attemptAnswerSchema);
+exports.AttemptAnswer = AttemptAnswer;
+
+let oneAttemptAnswerSchema = new mongoose.Schema({
+	value: String
+})
+
+let OneAttemptAnswer = AttemptAnswer.discriminator('OneAttemptAnswer', oneAttemptAnswerSchema);
+exports.OneAttemptAnswer = OneAttemptAnswer;
+
+let multipleAttemptAnswerSchema = new mongoose.Schema({
+	values: [
+		String
+	]
+})
+
+let MultipleAttemptAnswer = AttemptAnswer.discriminator('MultipleAttemptAnswer', multipleAttemptAnswerSchema);
+exports.MultipleAttemptAnswer = MultipleAttemptAnswer;
+
+
+let exerciseAttemptSchema = new mongoose.Schema({
+	startTime: {
+		type: Date,
+		default: Date.now
+	},
+	endTime: {
+		type: Date,
+		default: null
+	},
+	answers: [
+		attemptAnswerSchema
+	],
+	score: Number
+}, {
+	discriminatorKey: 'kind'
+})
+
+let ExerciseAttempt = mongoose.model('ExerciseAttempt', exerciseAttemptSchema);
+exports.ExerciseAttempt = ExerciseAttempt;
+
+exerciseAttemptSchema.path('answers').discriminator('OneAttemptAnswer', oneAttemptAnswerSchema)
+exerciseAttemptSchema.path('answers').discriminator('MultipleAttemptAnswers', multipleAttemptAnswerSchema)
+
 let exerciseTaskSchema = new mongoose.Schema({
 	description: String,
 	score: {
@@ -23,22 +75,12 @@ let courseExerciseSchema = new mongoose.Schema({
 	},
 	participants: [
 		{
-			student: {
+			user: {
 				type: ObjectId,
 				ref: 'User'
 			},
 			attempts: [
-				{
-					startTime: Date,
-					endTime: Date,
-					answers: [
-						{
-							type: Object
-							//TODO maybe add discriminators for each type of task
-						}
-					],
-					score: Number
-				}
+				exerciseAttemptSchema
 			]
 		}
 	],

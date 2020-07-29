@@ -41,6 +41,15 @@ let {
 } = require('./controllers/teachers')
 
 let {
+	getExerciseAttempts,
+	newExerciseAttempt,
+	attemptById,
+	exerciseById,
+	correctAttemptOwner,
+	getAttempt
+} = require('./controllers/exercises')
+
+let {
 	deleteFiles,
 	uploadFiles
 } = require('../files/controller');
@@ -121,9 +130,25 @@ router.post('/updates-notifications',
 	requireAuthentication,
 	getUpdatesNotifications
 )
+router.get('/:courseId/exercise/:exerciseId/user-attempts',
+	requireAuthentication,
+	getExerciseAttempts
+);
+router.post('/:courseId/exercise/:exerciseId/new-attempt',
+	requireAuthentication,
+	newExerciseAttempt
+)
+router.get('/:courseId/exercise/:exerciseId/attempt/:attemptId',
+	requireAuthentication,
+	userInCourse,
+	correctAttemptOwner,
+	getAttempt
+)
 
 
 router.param('courseId', courseById);
+router.param('exerciseId', exerciseById);
+router.param('attemptId', attemptById);
 router.param('entryId', entryById);
 router.param('topicId', topicById);
 router.param('postId', postById);

@@ -419,6 +419,7 @@ exports.getCoursesFiltered = async (req, res) => {
 				for (let i = 0; i < courses[c].exercises.length; i++){
 					if (!(userStatuses[c] === 'teacher' || userStatuses[c] === 'creator')){
 						courses[c].exercises[i].tasks = undefined;
+						courses[c].exercises[i].participants = undefined;
 					}
 				}
 
