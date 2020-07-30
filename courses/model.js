@@ -36,10 +36,12 @@ let exerciseAttemptSchema = new mongoose.Schema({
 	startTime: {
 		type: Date,
 		default: Date.now
+		//TODO maybe make required
 	},
 	endTime: {
 		type: Date,
 		default: null
+		//TODO maybe make required
 	},
 	answers: [
 		attemptAnswerSchema

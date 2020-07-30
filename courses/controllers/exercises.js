@@ -22,7 +22,7 @@ exports.exerciseById = (req, res, next, id) => {
     }
 }
 
-exports.attemptById = (req, res, next, id) => {
+exports.attemptById = async (req, res, next, id) => {
     let { exercise } = req;
     let { participants } = exercise.data;
     for (let p = 0; p < participants.length; p++) {
@@ -59,8 +59,6 @@ exports.getAttempt = (req, res) => {
 }
 
 exports.correctAttemptOwner = (req, res, next) => {
-
-    console.log(req.attempt.owner, req.auth._id);
     if (req.userCourseStatus === 'teacher' || req.userCourseStatus === 'creator'){
         return next();
     }
@@ -93,10 +91,99 @@ exports.getExerciseAttempts = (req, res) => {
     });
 }
 
+exports.updateAttempt = (req, res) => {
+    let newAttempt = req.body.attempt;
+    let oldAttempt = req.attempt.data;
+
+    if (newAttempt.answers.length !== oldAttempt.answers.length){
+        return res.status(400).json({
+            error: {
+                status: 400,
+                message: 'Wrong attempt data'
+            }
+        })
+    }
+
+    // Don't let modify startTime and score - can only be changed in finishAttempt
+    newAttempt.startTime = oldAttempt.startTime;
+    newAttempt.score = oldAttempt.score;
+    if (!newAttempt.endTime || (!oldAttempt.endTime && oldAttempt.endTime)){
+        newAttempt.endTime = null;
+    }
+
+    let { answers: oldAnswers } = oldAttempt;
+    let { answers: newAnswers } = newAttempt;
+
+    for (let i = 0; i < newAnswers.length; i++){
+        if (!newAnswers[i].taskRef.equals(oldAnswers.taskRef)){
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    message: 'Wrong attempt data'
+                }
+            })
+        }
+
+        switch(newAnswers[i].kind){
+            case 'MultipleAttemptAnswer': {
+                if (!newAnswers[i].values){
+                    newAnswers[i].values = [];
+                }
+                break;
+            }
+            case 'OneAttemptAnswer': {
+                if (newAnswers[i].value === undefined){
+                    newAnswers[i].value = null;
+                }
+                break;
+            }
+        }
+    }
+
+    newAttempt.answers = newAnswers;
+
+    let course = req.courseData;
+
+    course.exercises[req.exercise.pos]
+        .participants[req.attempt.participantPos]
+        .attempts[req.attempt.attemptPos]
+        = newAttempt;
+
+    return course.save()
+        .then(() => {
+            return res.json({
+                newAttempt: newAttempt
+            });
+        })
+        .catch(err => {
+            console.log(err);
+            return res.status(err.status || 400)
+                .json({
+                    error: err
+                })
+        })
+}
+
+exports.finishAttempt = (req, res) => {
+    //TODO update endTime
+
+    //TODO calculate score - check correct answers in exercise tasks
+}
+
 exports.newExerciseAttempt = async (req, res) => {
     let exercise = req.exercise.data;
     let { participants } = exercise;
     let participantPos;
+
+    if (!exercise.available){
+        return res.status(401).json({
+            error: {
+                status: 401,
+                message: 'You are not authorized to create a new attempt - the exercise is not available'
+            }
+        })
+    }
+
     for (let p = 0; p < participants.length; p++) {
         if (participants[p].user.equals(req.auth._id)){
             participantPos = p;

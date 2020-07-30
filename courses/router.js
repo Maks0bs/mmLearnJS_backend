@@ -46,7 +46,9 @@ let {
 	attemptById,
 	exerciseById,
 	correctAttemptOwner,
-	getAttempt
+	getAttempt,
+	updateAttempt,
+	finishAttempt
 } = require('./controllers/exercises')
 
 let {
@@ -143,6 +145,18 @@ router.get('/:courseId/exercise/:exerciseId/attempt/:attemptId',
 	userInCourse,
 	correctAttemptOwner,
 	getAttempt
+)
+router.put('/:courseId/exercise/:exerciseId/attempt/:attemptId',
+	requireAuthentication,
+	userInCourse,
+	correctAttemptOwner,
+	updateAttempt
+)
+router.post('/:courseId/exercise/:exerciseId/attempt/:attemptId/finish',
+	requireAuthentication,
+	userInCourse,
+	correctAttemptOwner,
+	finishAttempt
 )
 
 

@@ -44,12 +44,13 @@ exports.subscribe = (req, res) => {
 
 exports.unsubscribe = (req, res) => {
     let course = req.courseData;
+    let newSubscribers = [];
     let test = false;
     for (let i = 0; i < course.subscribers.length; i++){
         if (course.subscribers[i].equals(req.auth._id)){
-            course.subscribers.splice(i, 1);
             test = true;
-            break;
+        } else {
+            newSubscribers.push(course.subscribers[i]);
         }
     }
 
@@ -62,6 +63,8 @@ exports.unsubscribe = (req, res) => {
         })
     }
 
+    course.subscribers = newSubscribers;
+
     course.save()
         .then(c => {
             return User.findByIdAndUpdate(
@@ -69,10 +72,11 @@ exports.unsubscribe = (req, res) => {
                 {
                     $pull: {
                         subscribedCourses: {
-                            course: c
+                            course: c._id
                         }
                     }
-                }
+                },
+                {new: true}
             )
         })
         .then(() => {
