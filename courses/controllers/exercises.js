@@ -1,4 +1,5 @@
 let { ExerciseAttempt } = require('../model');
+let { assign } = require('lodash');
 
 exports.exerciseById = (req, res, next, id) => {
     let { exercises } = req.courseData;
@@ -20,6 +21,45 @@ exports.exerciseById = (req, res, next, id) => {
             }
         })
     }
+}
+
+exports.getExercise = (req, res) => {
+    let exercise = req.exercise.data;
+    let { participants } = exercise;
+    if (req.userCourseStatus === 'student'){
+        exercise.participants = undefined;
+    } else {
+        return res.json(exercise);
+    }
+    let hasActiveAttempt = false;
+
+    for (let p of participants){
+        if (p.user.equals(req.auth._id)){
+            for (let a of p.attempts){
+                if (!a.endTime){
+                    hasActiveAttempt = true;
+                    break;
+                }
+            }
+        }
+        if (hasActiveAttempt){
+            break;
+        }
+    }
+
+    if (!(hasActiveAttempt && exercise.available)){
+        //Don't send tasks data if user is not currently doing the exercise or if the exercise is not available
+        exercise.tasks = undefined;
+    } else {
+
+        //Otherwise remove correct answers from task data
+        for (let t = 0; t < exercise.tasks.length; t++){
+            exercise.tasks[t].correctAnswer = undefined;
+            exercise.tasks[t].correctAnswers = undefined;
+        }
+    }
+
+    return res.json(exercise);
 }
 
 exports.attemptById = async (req, res, next, id) => {
@@ -80,8 +120,12 @@ exports.getExerciseAttempts = (req, res) => {
     let exercise = req.exercise.data;
     for (let p of exercise.participants) {
         if (p.user.equals(req.auth._id)){
+            let attempts = p.attempts;
+            attempts.sort((a, b) => {
+                return b.startTime - a.startTime;
+            })
             return res.json({
-                attempts: p.attempts
+                attempts: attempts
             })
         }
     }
@@ -92,9 +136,10 @@ exports.getExerciseAttempts = (req, res) => {
 }
 
 exports.updateAttempt = (req, res) => {
-    let newAttempt = req.body.attempt;
+    let newAttempt = req.body;
     let oldAttempt = req.attempt.data;
 
+    //TODO put this part into model methods
     if (newAttempt.answers.length !== oldAttempt.answers.length){
         return res.status(400).json({
             error: {
@@ -115,7 +160,8 @@ exports.updateAttempt = (req, res) => {
     let { answers: newAnswers } = newAttempt;
 
     for (let i = 0; i < newAnswers.length; i++){
-        if (!newAnswers[i].taskRef.equals(oldAnswers.taskRef)){
+        if (newAnswers[i].taskRef != oldAnswers[i].taskRef){
+            //TODO validate taskRef AND position in array somehow
             return res.status(400).json({
                 error: {
                     status: 400,
@@ -144,10 +190,16 @@ exports.updateAttempt = (req, res) => {
 
     let course = req.courseData;
 
-    course.exercises[req.exercise.pos]
+    assign(course.exercises[req.exercise.pos]
+        .participants[req.attempt.participantPos]
+        .attempts[req.attempt.attemptPos],
+        newAttempt
+    )
+
+    console.log(course.exercises[req.exercise.pos]
         .participants[req.attempt.participantPos]
         .attempts[req.attempt.attemptPos]
-        = newAttempt;
+    )
 
     return course.save()
         .then(() => {
@@ -165,9 +217,75 @@ exports.updateAttempt = (req, res) => {
 }
 
 exports.finishAttempt = (req, res) => {
-    //TODO update endTime
+    let attempt = req.attempt.data;
+    let exercise = req.exercise.data;
+    attempt.endTime = new Date();
+
 
     //TODO calculate score - check correct answers in exercise tasks
+
+    let { tasks } = exercise;
+    let { answers } = attempt;
+    let score = 0;
+
+    for (let t = 0; t < tasks.length; t++){
+        let task = tasks[t];
+        switch (task.kind){
+            case 'OneChoiceExercise': {
+                if (answers[t].value === task.correctAnswer) {
+                    score += task.score;
+                }
+                break;
+            }
+            case 'TextExercise': {
+                if (task.correctAnswer.indexOf(answers[t].value) >= 0){
+                    score += task.score;
+                }
+                break;
+            }
+            case 'MultipleChoiceExercise': {
+                let cntCorrect = 0;
+                for (let v of answers[t].values){
+                    if (task.correctAnswers.indexOf(v) >= 0){
+                        cntCorrect++;
+                    }
+                }
+
+                if (!task.onlyFull){
+                    score += task.score * (cntCorrect / task.correctAnswers.length);
+                } else {
+                    if (cntCorrect === task.correctAnswers.length){
+                        score += task.score;
+                    }
+                }
+
+                break;
+            }
+        }
+    }
+
+    attempt.score = score;
+
+    let course = req.courseData;
+
+    course.exercises[req.exercise.pos]
+        .participants[req.attempt.participantPos]
+        .attempts[req.attempt.attemptPos]
+        = attempt;
+
+    return course.save()
+        .then(() => {
+            return res.json({
+                attempt: attempt
+            });
+        })
+        .catch(err => {
+            console.log(err);
+            return res.status(err.status || 400)
+                .json({
+                    error: err
+                })
+        })
 }
 
 exports.newExerciseAttempt = async (req, res) => {
@@ -232,7 +350,11 @@ exports.newExerciseAttempt = async (req, res) => {
         .then((result) => {
             let len = exercise.participants[participantPos].attempts.length
             return res.json({
-                newAttempt: result.exercises[req.exercise.pos].participants[participantPos].attempts[len - 1]
+                newAttempt:
+                    result
+                        .exercises[req.exercise.pos]
+                        .participants[participantPos]
+                        .attempts[len - 1]
             });
         })
         .catch(err => {

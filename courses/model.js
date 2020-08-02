@@ -55,7 +55,7 @@ let ExerciseAttempt = mongoose.model('ExerciseAttempt', exerciseAttemptSchema);
 exports.ExerciseAttempt = ExerciseAttempt;
 
 exerciseAttemptSchema.path('answers').discriminator('OneAttemptAnswer', oneAttemptAnswerSchema)
-exerciseAttemptSchema.path('answers').discriminator('MultipleAttemptAnswers', multipleAttemptAnswerSchema)
+exerciseAttemptSchema.path('answers').discriminator('MultipleAttemptAnswer', multipleAttemptAnswerSchema)
 
 let exerciseTaskSchema = new mongoose.Schema({
 	description: String,

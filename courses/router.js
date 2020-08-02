@@ -48,7 +48,8 @@ let {
 	correctAttemptOwner,
 	getAttempt,
 	updateAttempt,
-	finishAttempt
+	finishAttempt,
+	getExercise
 } = require('./controllers/exercises')
 
 let {
@@ -132,12 +133,19 @@ router.post('/updates-notifications',
 	requireAuthentication,
 	getUpdatesNotifications
 )
+router.get('/:courseId/exercise/:exerciseId',
+	requireAuthentication,
+	userInCourse,
+	getExercise
+)
 router.get('/:courseId/exercise/:exerciseId/user-attempts',
 	requireAuthentication,
+	userInCourse,
 	getExerciseAttempts
 );
 router.post('/:courseId/exercise/:exerciseId/new-attempt',
 	requireAuthentication,
+	userInCourse,
 	newExerciseAttempt
 )
 router.get('/:courseId/exercise/:exerciseId/attempt/:attemptId',

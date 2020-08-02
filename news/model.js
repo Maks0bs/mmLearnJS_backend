@@ -9,6 +9,7 @@ let newsEntriesSchema = new mongoose.Schema({
 		type: String,
 		required: true
 	},
+	//TODO maybe switch to buffer for smaller files
 	/*files: [
 		{
 			data: Buffer,
