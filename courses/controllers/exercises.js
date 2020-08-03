@@ -122,7 +122,7 @@ exports.getExerciseAttempts = (req, res) => {
         if (p.user.equals(req.auth._id)){
             let attempts = p.attempts;
             attempts.sort((a, b) => {
-                return b.startTime - a.startTime;
+                return a.startTime - b.startTime;
             })
             return res.json({
                 attempts: attempts
@@ -138,6 +138,15 @@ exports.getExerciseAttempts = (req, res) => {
 exports.updateAttempt = (req, res) => {
     let newAttempt = req.body;
     let oldAttempt = req.attempt.data;
+
+    if (oldAttempt.endTime){
+        return res.status(400).json({
+            error: {
+                status: 400,
+                message: 'Cannot update attempt, it is already finished'
+            }
+        })
+    }
 
     //TODO put this part into model methods
     if (newAttempt.answers.length !== oldAttempt.answers.length){
@@ -196,15 +205,11 @@ exports.updateAttempt = (req, res) => {
         newAttempt
     )
 
-    console.log(course.exercises[req.exercise.pos]
-        .participants[req.attempt.participantPos]
-        .attempts[req.attempt.attemptPos]
-    )
 
     return course.save()
         .then(() => {
             return res.json({
-                newAttempt: newAttempt
+                attempt: newAttempt
             });
         })
         .catch(err => {
@@ -238,23 +243,26 @@ exports.finishAttempt = (req, res) => {
                 break;
             }
             case 'TextExercise': {
-                if (task.correctAnswer.indexOf(answers[t].value) >= 0){
+                if (task.correctAnswers.indexOf(answers[t].value) >= 0){
                     score += task.score;
                 }
                 break;
             }
             case 'MultipleChoiceExercise': {
                 let cntCorrect = 0;
-                for (let v of answers[t].values){
-                    if (task.correctAnswers.indexOf(v) >= 0){
+                for (let v of task.options){
+                    let i1 = task.correctAnswers.indexOf(v.key) >= 0,
+                        i2 = answers[t].values.indexOf(v.key) >= 0;
+
+                    if (i1 ^ i2){
                         cntCorrect++;
                     }
                 }
 
                 if (!task.onlyFull){
-                    score += task.score * (cntCorrect / task.correctAnswers.length);
+                    score += task.score * (cntCorrect / task.options.length);
                 } else {
-                    if (cntCorrect === task.correctAnswers.length){
+                    if (cntCorrect === task.options.length){
                         score += task.score;
                     }
                 }
@@ -267,6 +275,8 @@ exports.finishAttempt = (req, res) => {
     attempt.score = score;
 
     let course = req.courseData;
+
+    console.log('attempt for burhs', attempt);
 
     course.exercises[req.exercise.pos]
         .participants[req.attempt.participantPos]
@@ -291,7 +301,7 @@ exports.finishAttempt = (req, res) => {
 exports.newExerciseAttempt = async (req, res) => {
     let exercise = req.exercise.data;
     let { participants } = exercise;
-    let participantPos;
+    let participantPos = -1;
 
     if (!exercise.available){
         return res.status(401).json({
@@ -308,7 +318,7 @@ exports.newExerciseAttempt = async (req, res) => {
         }
     }
 
-    if (!participantPos){
+    if (participantPos < 0){
         exercise.participants.push({
             user: req.auth._id,
             attempts: []
