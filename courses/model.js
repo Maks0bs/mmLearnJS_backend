@@ -7,6 +7,10 @@ let attemptAnswerSchema = new mongoose.Schema({
 	taskRef: {
 		type: ObjectId,
 		required: true
+	},
+	score: {
+		type: Number,
+		default: null
 	}
 }, {
 	discriminatorKey: 'kind'
@@ -46,7 +50,10 @@ let exerciseAttemptSchema = new mongoose.Schema({
 	answers: [
 		attemptAnswerSchema
 	],
-	score: Number
+	score: {
+		type: Number,
+		default: null
+	}
 }, {
 	discriminatorKey: 'kind'
 })

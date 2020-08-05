@@ -430,6 +430,12 @@ exports.getCoursesFiltered = async (req, res) => {
 						}
 					} else {
 						exercises.push(exercise);
+						for (let p of exercise.participants){
+							if (!usersToPopulateSet[p.user._id]){
+								usersToPopulateSet[p.user._id] = 1;
+								usersToPopulate.push(p.user._id);
+							}
+						}
 					}
 
 
@@ -550,6 +556,23 @@ exports.getCoursesFiltered = async (req, res) => {
 										];
 								}
 							}
+						}
+					}
+				}
+
+				for (let i = 0; i < courses[c].exercises.length; i++){
+					if (courses[c].exercises[i].participants){
+						for (let j = 0; j < courses[c].exercises[i].participants.length; j++){
+							courses[c]
+								.exercises[i]
+								.participants[j]
+								.user =
+								usersToPopulateSet[courses[c]
+									.exercises[i]
+									.participants[j]
+									.user
+									._id
+								];
 						}
 					}
 				}

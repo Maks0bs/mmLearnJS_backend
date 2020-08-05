@@ -1,9 +1,10 @@
 let { ExerciseAttempt } = require('../model');
 let { assign } = require('lodash');
+let User = require('../../users/model')
 
 exports.exerciseById = (req, res, next, id) => {
     let { exercises } = req.courseData;
-    for (let e = 0; e <exercises.length; e++){
+    for (let e = 0; e < exercises.length; e++){
         if (exercises[e]._id == id){
             req.exercise = {
                 data: exercises[e],
@@ -24,12 +25,12 @@ exports.exerciseById = (req, res, next, id) => {
 }
 
 exports.getExercise = (req, res) => {
+
     let exercise = req.exercise.data;
+    let usersToPopulate = [], usersToPopulateSet = {}
     let { participants } = exercise;
     if (req.userCourseStatus === 'student'){
         exercise.participants = undefined;
-    } else {
-        return res.json(exercise);
     }
     let hasActiveAttempt = false;
 
@@ -42,8 +43,10 @@ exports.getExercise = (req, res) => {
                 }
             }
         }
-        if (hasActiveAttempt){
-            break;
+
+        if (!usersToPopulateSet[p.user._id]){
+            usersToPopulateSet[p.user._id] = 1;
+            usersToPopulate.push(p.user._id);
         }
     }
 
@@ -59,8 +62,42 @@ exports.getExercise = (req, res) => {
         }
     }
 
-    return res.json(exercise);
+    if (!exercise.participants){
+        return res.json(exercise);
+    }
+
+    return User.find({
+        _id: {
+            $in: usersToPopulate
+        }
+    })
+        .then(users => {
+            for (let user of users){
+                user.hideFields();
+                usersToPopulateSet[user._id] = user;
+            }
+
+            for (let j = 0; j < exercise.participants.length; j++){
+                exercise.participants[j].user = usersToPopulateSet[exercise.participants[j].user._id];
+            }
+
+            return res.json(exercise);
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(err.status || 400)
+                .json({
+                    error: err
+                })
+        })
+
+
 }
+
+
+//TODO getGrades (for students)
+
+//TODO getGrades (for teachers). Order: each user->exercise data, (not vice versa, not like stored in db)
 
 exports.attemptById = async (req, res, next, id) => {
     let { exercise } = req;
@@ -139,7 +176,7 @@ exports.updateAttempt = (req, res) => {
     let newAttempt = req.body;
     let oldAttempt = req.attempt.data;
 
-    if (oldAttempt.endTime){
+    if (oldAttempt.endTime && req.userCourseStatus === 'student'){
         return res.status(400).json({
             error: {
                 status: 400,
@@ -178,6 +215,8 @@ exports.updateAttempt = (req, res) => {
                 }
             })
         }
+
+        newAnswers[i].score = oldAnswers[i].score;
 
         switch(newAnswers[i].kind){
             case 'MultipleAttemptAnswer': {
@@ -235,16 +274,19 @@ exports.finishAttempt = (req, res) => {
 
     for (let t = 0; t < tasks.length; t++){
         let task = tasks[t];
+        let taskScore = 0;
         switch (task.kind){
             case 'OneChoiceExercise': {
                 if (answers[t].value === task.correctAnswer) {
                     score += task.score;
+                    taskScore += task.score;
                 }
                 break;
             }
             case 'TextExercise': {
                 if (task.correctAnswers.indexOf(answers[t].value) >= 0){
                     score += task.score;
+                    taskScore += task.score;
                 }
                 break;
             }
@@ -260,23 +302,25 @@ exports.finishAttempt = (req, res) => {
                 }
 
                 if (!task.onlyFull){
-                    score += task.score * (cntCorrect / task.options.length);
+                    taskScore += task.score * (cntCorrect / task.options.length);
+                    score += taskScore;
                 } else {
                     if (cntCorrect === task.options.length){
                         score += task.score;
+                        taskScore += task.score;
                     }
                 }
 
                 break;
             }
         }
+
+        attempt.answers[t].score = taskScore;
     }
 
     attempt.score = score;
 
     let course = req.courseData;
-
-    console.log('attempt for burhs', attempt);
 
     course.exercises[req.exercise.pos]
         .participants[req.attempt.participantPos]
@@ -312,6 +356,15 @@ exports.newExerciseAttempt = async (req, res) => {
         })
     }
 
+    if (!(req.userCourseStatus === 'student')){
+        return res.status(401).json({
+            error: {
+                status: 401,
+                message: 'Not authorized! Only students can do exercises'
+            }
+        })
+    }
+
     for (let p = 0; p < participants.length; p++) {
         if (participants[p].user.equals(req.auth._id)){
             participantPos = p;
@@ -329,7 +382,7 @@ exports.newExerciseAttempt = async (req, res) => {
 
     let newAttempt = await new ExerciseAttempt;
     newAttempt.answers = [];
-    newAttempt.score = null;
+    //newAttempt.score = null;
 
     for (let i = 0; i < exercise.tasks.length; i++){
         let task = exercise.tasks[i];
