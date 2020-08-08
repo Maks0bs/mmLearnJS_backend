@@ -49,7 +49,9 @@ let {
 	getAttempt,
 	updateAttempt,
 	finishAttempt,
-	getExercise
+	getExercise,
+	configureExerciseSummary,
+	getExerciseSummary
 } = require('./controllers/exercises')
 
 let {
@@ -165,6 +167,12 @@ router.post('/:courseId/exercise/:exerciseId/attempt/:attemptId/finish',
 	userInCourse,
 	correctAttemptOwner,
 	finishAttempt
+)
+router.get('/:courseId/exercise-summary/:summaryParam',
+	requireAuthentication,
+	userInCourse,
+	configureExerciseSummary,
+	getExerciseSummary
 )
 
 

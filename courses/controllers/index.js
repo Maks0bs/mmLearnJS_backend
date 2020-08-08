@@ -480,6 +480,7 @@ exports.getCoursesFiltered = async (req, res) => {
 					courses[c].sections[i] = section;
 				}
 			}
+
 			return User.find({
 				_id: {
 					$in: usersToPopulate
