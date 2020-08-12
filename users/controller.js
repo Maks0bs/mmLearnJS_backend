@@ -204,3 +204,101 @@ exports.getUpdatesByDate = (req, res) => {
 			return res.json(updates);
 		})
 }
+
+exports.removeUserMentions = (req, res, next) => {
+	let filesToDelete = [], user = req.user;
+
+	if (user.photo){
+		filesToDelete.push(user.photo);
+	}
+
+	let teacherCourses = [];
+	if (user.teacherCourses){
+		teacherCourses = user.teacherCourses;
+	}
+
+	Course.find({ _id: { $in:
+				[...user.enrolledCourses, ...teacherCourses, ...user.subscribedCourses]
+		}})
+		.then((courses) => {
+			for (let c of courses){
+				if (c.creator.equals(user._id)){
+					let newCreator = null;
+					for (let t = 0; t < c.teachers.length; t++){
+						if (!c.teachers[t].equals(user._id)){
+							newCreator = c.teachers[t];
+							break;
+						}
+					}
+
+					if (newCreator){
+						c.creator = newCreator;
+					}
+
+					// if no new creator was found, then we leave the creator field to
+					// later detect a course with deleted creator to clean it up or do smth else
+				}
+				let index = -1;
+				for (let u = 0; u < c.subscribers.length; u++){
+					if (c.subscribers[u].equals(user._id)){
+						index = u;
+						break;
+					}
+				}
+				if (index >= 0){
+					c.subscribers.splice(index, 1);
+				}
+
+				index = -1;
+				for (let u = 0; u < c.students.length; u++){
+					if (c.students[u].equals(user._id)){
+						index = u;
+						break;
+					}
+				}
+				if (index >= 0){
+					c.students.splice(index, 1);
+				}
+
+				index = -1;
+				for (let u = 0; u < c.teachers.length; u++){
+					if (c.teachers[u].equals(user._id)){
+						index = u;
+						break;
+					}
+				}
+				if (index >= 0){
+					c.teachers.splice(index, 1);
+				}
+
+				c.save();
+			}
+		})
+		.catch(err => {
+			console.log(err);
+			res.status(err.status || 400)
+				.json({
+					error: err
+				})
+		})
+
+	req.filesToDelete = filesToDelete;
+	return next();
+}
+
+exports.deleteUser = (req, res) => {
+	User.deleteOne({ _id: req.user._id})
+		.then(() => {
+			res.json({
+				message: 'user deleted successfully'
+			})
+		})
+		.catch(err => {
+			console.log(err);
+			res.status(err.status || 400)
+				.json({
+					error: err
+				})
+		})
+
+}

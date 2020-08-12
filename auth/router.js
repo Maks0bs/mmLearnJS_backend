@@ -9,10 +9,25 @@ let {
 	sendActivationLink,
 	forgotPassword,
 	resetPassword
-} = require('./controller');
+} = require('./controllers');
+
+let {
+	passwordValidator,
+	userInfoValidator
+} = require('./controllers/validator')
+
+let {
+	validate
+} = require('../helpers')
+
 let router = require('express').Router()
 
-router.post('/signup', signup);
+router.post('/signup',
+	userInfoValidator,
+	passwordValidator("password"),
+	validate,
+	signup
+);
 router.post('/signin', signin);
 router.post('/activate', activateAccount);
 router.get('/cur-user', getAuthenticatedUser);

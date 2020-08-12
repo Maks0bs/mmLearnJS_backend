@@ -1,6 +1,6 @@
 let {
 	requireAuthentication,
-} = require('../auth/controller');
+} = require('../auth/controllers');
 let {
 	getUser,
 	userById,
@@ -9,29 +9,44 @@ let {
 	updateUser,
 	deserializeAndCleanData,
 	isAuthenticatedUser,
-	getUpdatesByDate
+	getUpdatesByDate,
+	deleteUser,
+	removeUserMentions
 } = require('./controller');
 let {
-	uploadFiles
+	uploadFiles,
+	deleteFiles
 } = require('../files/controller')
+let {
+	userInfoValidator
+} = require('../auth/controllers/validator')
 let router = require('express').Router()
 
 router.get('/:userId', getUser);
 //router.post('/notifications/', addNotifications);
 router.post('/filter', getUsersFiltered);
 
-router.param('userId', userById);
-
 router.put('/:userId',
 	requireAuthentication,
 	isAuthenticatedUser,
+	userInfoValidator,
 	uploadFiles,
 	deserializeAndCleanData,
+	deleteFiles,
 	updateUser
 );
+router.delete('/:userId',
+	requireAuthentication,
+	isAuthenticatedUser,
+	removeUserMentions,
+	deleteFiles,
+	deleteUser
+)
 router.post('/updates-by-date',
 	requireAuthentication,
 	getUpdatesByDate
 )
+
+router.param('userId', userById);
 
 module.exports = router;

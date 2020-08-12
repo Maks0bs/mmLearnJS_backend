@@ -19,7 +19,7 @@ let {
 let {
 	isTeacher,
 	requireAuthentication,
-} = require('../auth/controller')
+} = require('../auth/controllers')
 let router = require('express').Router()
 router.post('/upload', 
 	requireAuthentication,

@@ -1,7 +1,6 @@
 let { 
 	ForumTopicPost
 } = require('../model')
-let _ = require('lodash');
 let mongoose = require('mongoose');
 
 exports.topicById = (req, res, next, topicId) => {

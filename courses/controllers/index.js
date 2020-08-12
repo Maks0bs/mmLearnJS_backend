@@ -3,6 +3,7 @@ let {
 } = require('../model')
 let User = require('../../users/model');
 let _ = require('lodash');
+const {formatMongooseError} = require("../../helpers");
 
 exports.courseById = (req, res, next, id) => {
 	Course.findOne({_id: id})
@@ -28,7 +29,6 @@ exports.courseById = (req, res, next, id) => {
 }
 
 exports.createCourse = (req, res) => {
-	console.log('create course body', req.body)
 	let courseData = req.body;
 	courseData.creator = req.auth;
 	courseData.teachers = [req.auth];
@@ -184,6 +184,14 @@ exports.updateCourse = async (req, res) => {
 	}
 	course = _.extend(course, newCourseData);
 
+	//TODO add new updates when a new exercise gets released. Display it only if it has available == true
+
+
+
+
+	//TODO if previously unavailable / hidden exercises or entries get published, also add updates for this
+
+
 	if (req.deletedEntries && req.deletedEntries.length > 0){
 		course.updates.push({
 			kind: 'UpdateDeletedEntries',
@@ -221,13 +229,12 @@ exports.updateCourse = async (req, res) => {
 		console.log(err);
 		return res.status(err.status || 400)
 			.json({
-				error: err
+				error: formatMongooseError(err) || err
 			})
 	}) 
 }
 
 exports.enrollInCourse = (req, res) => {
-	console.log('req body enroll', req.body);
 	courseId = req.body._id;
 	let course = req.courseData;
 	if (course.hasPassword && !course.checkPassword(req.body.password)) {
@@ -268,7 +275,7 @@ exports.enrollInCourse = (req, res) => {
 exports.getCoursesFiltered = async (req, res) => {
 
 	//!!! add validation for sane request (e. g. can't post enrolled + teacher)
-	let filter = {}, usersToPopulate = [], usersToPopulateSet = {}, foundCourses;
+	let filter = {}, usersToPopulate = [], usersToPopulateSet = {}, courses;
 	let viewCourses = req.body.viewCourses;
 	if (req.body.courseId){
 		filter._id = req.body.courseId;
@@ -309,14 +316,24 @@ exports.getCoursesFiltered = async (req, res) => {
 				})
 		})
 	}
+	if (req.body.searchWord){
+		let reOptions = {
+			$regex: req.body.searchWord,
+			$options: 'i'
+		}
+		filter.$or = [
+			{ name: reOptions },
+			{ about: reOptions }
+		]
+	}
 	Course.find({...filter})
 	//maybe select only necessary info
 		.populate('students')
 		.populate('teachers')
 		.populate('creator')
 		.sort('name')//TODO optimize sorting - see bookmarks
-		.then(courses => {
-			foundCourses = courses;
+		.then(foundCourses => {
+			courses = foundCourses;
 			/*
 				So many checks are used here to provide privacy - users shouldn't see course data, which they aren't meant to receive
 			 */
@@ -337,6 +354,7 @@ exports.getCoursesFiltered = async (req, res) => {
 					courses[i].students = undefined;
 					courses[i].creator = undefined;
 					courses[i].updates = undefined;
+					courses[i].exercises = undefined;
 					continue;
 				}
 
@@ -387,6 +405,7 @@ exports.getCoursesFiltered = async (req, res) => {
 				courses[i].sections = undefined;
 				courses[i].students = undefined;
 				courses[i].updates = undefined;
+				courses[i].exercises = undefined;
 			}
 
 			//Populating different fields in this loop
@@ -397,17 +416,47 @@ exports.getCoursesFiltered = async (req, res) => {
 					continue;
 				}
 
+				let exercises = [];
+
+				for (let i = 0; i < courses[c].exercises.length; i++){
+					let exercise = courses[c].exercises[i];
+
+					if (!(userStatuses[c] === 'teacher' || userStatuses[c] === 'creator')){
+						exercise.tasks = undefined;
+						exercise.participants = undefined;
+
+						if (exercise.available){
+							exercises.push(exercise)
+						}
+					} else {
+						exercises.push(exercise);
+						for (let p of exercise.participants){
+							if (!usersToPopulateSet[p.user._id]){
+								usersToPopulateSet[p.user._id] = 1;
+								usersToPopulate.push(p.user._id);
+							}
+						}
+					}
+
+
+				}
+
+				courses[c].exercises = exercises;
+
 
 
 				for (let i = 0; i < courses[c].sections.length; i++){
+					let section = _.cloneDeep(courses[c].sections[i]);
+					section.entries = [];
 					for (let j = 0; j < courses[c].sections[i].entries.length; j++){
 						let entry = courses[c].sections[i].entries[j];
 
 						if (entry.access === 'teachers' &&
 							!(userStatuses[c] === 'teacher' || userStatuses[c] === 'creator')
 						){
-							courses[c].sections[i].entries[j] = undefined;
 							continue;
+						} else {
+							section.entries.push(entry);
 						}
 
 						if (entry.type === 'forum'){
@@ -428,8 +477,10 @@ exports.getCoursesFiltered = async (req, res) => {
 							}
 						}
 					}
+					courses[c].sections[i] = section;
 				}
 			}
+
 			return User.find({
 				_id: {
 					$in: usersToPopulate
@@ -442,31 +493,87 @@ exports.getCoursesFiltered = async (req, res) => {
 				usersToPopulateSet[user._id] = user;
 			}
 
-			for (let c = 0; c < foundCourses.length; c++){
-				if (!foundCourses[c].sections){
+			for (let c = 0; c < courses.length; c++){
+				if (!courses[c].sections){
 					continue;
 				}
 
-				for (let i = 0; i < foundCourses[c].sections.length; i++){
-					for (let j = 0; j < foundCourses[c].sections[i].entries.length; j++){
-						let entry = foundCourses[c].sections[i].entries[j];
+				for (let i = 0; i < courses[c].sections.length; i++){
+					for (let j = 0; j < courses[c].sections[i].entries.length; j++){
+						let entry = courses[c].sections[i].entries[j];
 
 						if (entry && entry.type === 'forum'){
 
 							//populate topic creators and posts creators
-							for (let t = 0; t < foundCourses[c].sections[i].entries[j].content.topics.length; t++){
-								foundCourses[c].sections[i].entries[j].content.topics[t].creator =
-									usersToPopulateSet[
-										foundCourses[c].sections[i].entries[j].content.topics[t].creator._id
-										];
+							for (let t = 0;
+								 t < courses[c]
+									 .sections[i]
+									 .entries[j]
+									 .content
+									 .topics
+									 .length;
+								 t++
+							){
+								courses[c]
+									.sections[i]
+									.entries[j]
+									.content
+									.topics[t]
+									.creator =
+									usersToPopulateSet[courses[c]
+										.sections[i]
+										.entries[j]
+										.content
+										.topics[t]
+										.creator
+										._id
+									];
 
-								for (let p = 0; p < foundCourses[c].sections[i].entries[j].content.topics[t].posts.length; p++){
-									foundCourses[c].sections[i].entries[j].content.topics[t].posts[p].creator =
-										usersToPopulateSet[
-											foundCourses[c].sections[i].entries[j].content.topics[t].posts[p].creator._id
-											];
+								for (let p = 0;
+									 p < courses[c]
+										 .sections[i]
+										 .entries[j]
+										 .content
+										 .topics[t]
+										 .posts
+										 .length;
+									 p++
+								){
+									courses[c]
+										.sections[i]
+										.entries[j]
+										.content
+										.topics[t]
+										.posts[p]
+										.creator =
+										usersToPopulateSet[courses[c]
+											.sections[i]
+											.entries[j]
+											.content
+											.topics[t]
+											.posts[p]
+											.creator
+											._id
+										];
 								}
 							}
+						}
+					}
+				}
+
+				for (let i = 0; i < courses[c].exercises.length; i++){
+					if (courses[c].exercises[i].participants){
+						for (let j = 0; j < courses[c].exercises[i].participants.length; j++){
+							courses[c]
+								.exercises[i]
+								.participants[j]
+								.user =
+								usersToPopulateSet[courses[c]
+									.exercises[i]
+									.participants[j]
+									.user
+									._id
+								];
 						}
 					}
 				}
@@ -477,7 +584,22 @@ exports.getCoursesFiltered = async (req, res) => {
 			})
 		})
 		.then(() => {
-			return res.json(foundCourses);
+			if (req.body.select){
+				let selectSet = {};
+				for (let s of req.body.select){
+					selectSet[s] = 1;
+				}
+				for (let i = 0; i < courses.length; i++){
+					for (let v of Object.keys(courses[i]._doc)){
+						if (!selectSet[v]){
+							courses[i][v] = undefined;
+						}
+					}
+				}
+			}
+
+
+			return res.json(courses);
 		})
 		.catch(err => {
 			console.log(err);
@@ -502,7 +624,81 @@ exports.deleteCourse = (req, res) => {
 				error: err
 			})
 	})
+	res.status(401).json({
+		error:{
+			message: 'kek',
 
+		}
+	})
+
+}
+
+exports.removeCourseMentions = (req, res, next) => {
+	let filesToDelete = [], course = req.courseData;
+
+	for (let s of course.sections){
+		for (let e of s.entries){
+			if (e.type === 'file'){
+				filesToDelete.push(e.content.id);
+			}
+		}
+	}
+
+	User.find({ _id: { $in:
+				[...course.subscribers, ...course.teachers, ...course.students]
+	}})
+		.then((users) => {
+			for (let u of users){
+				let index = -1;
+				for (let c = 0; c < u.subscribedCourses.length; c++){
+					if (u.subscribedCourses[c].course.equals(course._id)){
+						index = c;
+						break;
+					}
+				}
+				if (index >= 0){
+					u.subscribedCourses.splice(index, 1);
+				}
+
+				index = -1;
+				for (let c = 0; c < u.enrolledCourses.length; c++){
+					if (u.enrolledCourses[c].equals(course._id)){
+						index = c;
+						break;
+					}
+				}
+				if (index >= 0){
+					u.enrolledCourses.splice(index, 1);
+				}
+
+				if (u.teacherCourses){
+					index = -1;
+					for (let c = 0; c < u.teacherCourses.length; c++){
+						if (u.teacherCourses[c].equals(course._id)){
+							index = c;
+							break;
+						}
+					}
+					if (index >= 0){
+						u.teacherCourses.splice(index, 1);
+					}
+				}
+
+
+
+				u.save();
+			}
+		})
+		.catch(err => {
+			console.log(err);
+			res.status(err.status || 400)
+				.json({
+					error: err
+				})
+		})
+
+	req.filesToDelete = filesToDelete;
+	return next();
 }
 
 exports.entryById = (req, res, next, entryId) => {
@@ -561,7 +757,6 @@ exports.getUpdatesNotifications = (req, res) => {
 				}
 			}
 
-			console.log(result);
 
 			return res.json(result);
 		})
@@ -569,7 +764,7 @@ exports.getUpdatesNotifications = (req, res) => {
 			console.log(err);
 			res.status(err.status || 400)
 				.json({
-					error: err
+					error: formatMongooseError(err) || err
 				})
 		})
 }

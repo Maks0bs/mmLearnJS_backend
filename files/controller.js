@@ -18,6 +18,7 @@ let storage = new GridFSStorage({
                 if (err) {
                     return reject(err);
                 }
+                console.log('gfs', req.body);
                 let filename = buf.toString('hex');
                 let fileInfo = {
                     filename: filename,
@@ -75,7 +76,19 @@ exports.getFilesFiltered = (req, res) => {
 }
 
 exports.fileById = (req, res, next, id) => {
-	gfs.files.findOne({_id: mongoose.mongo.ObjectId(id)}, (err, file) => {
+	let fileId = '';
+	try {
+		fileId = mongoose.mongo.ObjectId(id);
+	} catch (err) {
+		return res.status(404).json({
+			error: {
+				status: 404,
+				message: err
+			}
+		})
+	}
+
+	gfs.files.findOne({_id: fileId}, (err, file) => {
 		if (err){
 			return res.status(400).json({
 				error: err

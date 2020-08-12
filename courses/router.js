@@ -4,7 +4,7 @@ let {
 	isCreator,
 	teacherInCourse,
 	userInCourse
-} = require('../auth/controller')
+} = require('../auth/controllers')
 
 let {
 	createCourse,
@@ -16,7 +16,8 @@ let {
 	getNewCourseData,
 	deleteCourse,
 	entryById,
-	getUpdatesNotifications
+	getUpdatesNotifications,
+	removeCourseMentions
 } = require('./controllers')
 
 let {
@@ -38,6 +39,20 @@ let {
 	addToInvitedList,
 	acceptTeacherInvite
 } = require('./controllers/teachers')
+
+let {
+	getExerciseAttempts,
+	newExerciseAttempt,
+	attemptById,
+	exerciseById,
+	correctAttemptOwner,
+	getAttempt,
+	updateAttempt,
+	finishAttempt,
+	getExercise,
+	configureExerciseSummary,
+	getExerciseSummary
+} = require('./controllers/exercises')
 
 let {
 	deleteFiles,
@@ -70,6 +85,8 @@ router.put('/update/:courseId',
 router.delete('/:courseId', 
 	requireAuthentication, 
 	isCreator,
+	removeCourseMentions,
+	deleteFiles,
 	deleteCourse
 );
 router.post('/send-teacher-invite/:courseId',
@@ -118,9 +135,50 @@ router.post('/updates-notifications',
 	requireAuthentication,
 	getUpdatesNotifications
 )
+router.get('/:courseId/exercise/:exerciseId',
+	requireAuthentication,
+	userInCourse,
+	getExercise
+)
+router.get('/:courseId/exercise/:exerciseId/user-attempts',
+	requireAuthentication,
+	userInCourse,
+	getExerciseAttempts
+);
+router.post('/:courseId/exercise/:exerciseId/new-attempt',
+	requireAuthentication,
+	userInCourse,
+	newExerciseAttempt
+)
+router.get('/:courseId/exercise/:exerciseId/attempt/:attemptId',
+	requireAuthentication,
+	userInCourse,
+	correctAttemptOwner,
+	getAttempt
+)
+router.put('/:courseId/exercise/:exerciseId/attempt/:attemptId',
+	requireAuthentication,
+	userInCourse,
+	correctAttemptOwner,
+	updateAttempt
+)
+router.post('/:courseId/exercise/:exerciseId/attempt/:attemptId/finish',
+	requireAuthentication,
+	userInCourse,
+	correctAttemptOwner,
+	finishAttempt
+)
+router.get('/:courseId/exercise-summary/:summaryParam',
+	requireAuthentication,
+	userInCourse,
+	configureExerciseSummary,
+	getExerciseSummary
+)
 
 
 router.param('courseId', courseById);
+router.param('exerciseId', exerciseById);
+router.param('attemptId', attemptById);
 router.param('entryId', entryById);
 router.param('topicId', topicById);
 router.param('postId', postById);

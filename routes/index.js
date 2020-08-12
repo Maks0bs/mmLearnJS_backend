@@ -4,7 +4,7 @@ let coursesRouter = require('../courses/router')
 let filesRouter = require('../files/router')
 let router = require('express').Router()
 let usersRouter = require('../users/router');
-let { extendSession, authenticate } = require('../auth/controller')
+let { extendSession, authenticate } = require('../auth/controllers')
 
 router.use('/news', newsRouter);
 router.use('/auth', authenticate, extendSession, authRouter);
