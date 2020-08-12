@@ -486,7 +486,6 @@ exports.getExerciseSummary = (req, res) => {
                 }
             }
 
-            console.log(usersSet);
 
             // Has only one loop through all exercises for efficiency
             for (let e of course.exercises){
