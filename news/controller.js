@@ -1,11 +1,14 @@
 let NewsEntry = require('./model')
 
 exports.getNews = (req, res) => {
-	res.json([
-		{
-			message: 'password for signing in as teacher : "testpass" '
-		}
-	])
+	//Fake delay for tests
+	setTimeout(() => {
+		res.json([
+			{message: `password for signing in as teacher : "testpass" `},
+			{message: `TODO use github api to fetch readme for this project`}
+		])
+	}, 500)
+
 }
 
 exports.createNewsEntry = (req, res) => {

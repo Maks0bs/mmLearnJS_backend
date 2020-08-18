@@ -190,8 +190,6 @@ exports.getUpdatesByDate = (req, res) => {
 			})
 
 
-			console.log(req.body);
-
 			let updates = [];
 			for (let i = req.body.starting;
 				 i < _.min([req.body.starting + req.body.cnt, preUpdates.length]);

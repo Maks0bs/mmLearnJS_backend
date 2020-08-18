@@ -515,7 +515,7 @@ exports.isCreator = (req, res, next) => {
 
 exports.getAuthenticatedUser = (req, res) => {
     if (!req.auth){
-        return res.json(null);
+        return res.json("Not authenticated");
     }
     User.findOne({ _id: req.auth._id })
         .select('-salt -hashed_password')
