@@ -29,12 +29,12 @@ exports.sendTeacherInvite = (req, res, next) => {
 			return sendEmail({
 	            from: "noreply@mmlearnjs.com",
 	            to: req.body.email,
-	            subject: "Teacher invitation to course on mmlearnjs",
-	            text: `You have been invited to be a teacher at the course "${req.courseData.name}" on mmlearnjs. Please sign up with this link to become a teacher at that course:
+	            subject: "Teacher invitation to course on mmLearnJS",
+	            text: `You have been invited to be a teacher at the course "${req.courseData.name}" on mmLearnJS. Please sign up with this link to become a teacher at that course:
 	            	${CLIENT_URL}/invite-signup/${token}?teacher=true&email=${req.body.email}`,
 	            html: `
 	            	<div>
-		                <p>You have been invited to be a teacher at the course "${req.courseData.name}" on mmlearnjs.</p> 
+		                <p>You have been invited to be a teacher at the course "${req.courseData.name}" on mmLearnJS.</p> 
 		                <p>Please sign up with this link to become a teacher at that course: </p>
 		                <p>${CLIENT_URL}/invite-signup/${token}?teacher=true&email=${req.body.email}</p>
 		            </div>
@@ -61,8 +61,8 @@ exports.sendTeacherInvite = (req, res, next) => {
 				{
 					type: COURSE_TEACHER_INVITATION,
 					title: 'You are invited to be a teacher',
-					text: `The creator of the course "${req.courseData.name}" has invited you
-						to be a teacher in their course. You can accept of decline this invitation`,
+					text: `The creator of the course "${req.courseData.name}" has invited you ` +
+						`to be a teacher in their course. You can accept of decline this invitation`,
 					data: {
 						courseId: req.courseData._id
 					}
@@ -162,9 +162,7 @@ exports.acceptTeacherInvite = (req, res) => {
 				$pull: {
 					notifications: {
 						type: COURSE_TEACHER_INVITATION,
-						data: {
-							courseId: req.courseData._id
-						}
+						'data.courseId': req.courseData._id
 					}
 				},
 				$push: {

@@ -1,5 +1,6 @@
 let jwt = require('jsonwebtoken');
 let User = require('../../users/model');
+let mongoose = require('mongoose');
 let { Course } = require('../../courses/model');
 let { sendEmail } = require('../../helpers');
 let _ = require('lodash')
@@ -192,7 +193,7 @@ exports.inviteSignup = (req, res) => {
                     text: `The creator of the course "${inviteData.courseName || inviteData.courseId}" has invited you
                         to be a teacher in their course. You can accept of decline this invitation`,
                     data: {
-                        courseId: inviteData.courseId
+                        courseId: mongoose.Types.ObjectId(inviteData.courseId)
                     }
                 })
             }
