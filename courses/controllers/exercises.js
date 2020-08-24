@@ -345,7 +345,7 @@ exports.finishAttempt = (req, res) => {
 exports.newExerciseAttempt = async (req, res) => {
     let exercise = req.exercise.data;
     let { participants } = exercise;
-    let participantPos = -1;
+    let participantPos = -1, hasRunningAttempt = false;
 
     if (!exercise.available){
         return res.status(401).json({
@@ -367,8 +367,24 @@ exports.newExerciseAttempt = async (req, res) => {
 
     for (let p = 0; p < participants.length; p++) {
         if (participants[p].user.equals(req.auth._id)){
+            for (let a of participants[p].attempts){
+                if (!a.endTime){
+                    hasRunningAttempt = true;
+                    break;
+                }
+            }
             participantPos = p;
         }
+    }
+
+    if (hasRunningAttempt){
+        return res.status(401).json({
+            error: {
+                status: 401,
+                message: 'You already have a running attempt on this course. ' +
+                    'Finish it and then you will be able to start a new one'
+            }
+        })
     }
 
     if (participantPos < 0){
