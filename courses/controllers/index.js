@@ -65,6 +65,8 @@ exports.createCourse = (req, res) => {
 exports.getNewCourseData = (req, res, next) => {
 	req.newCourseData = JSON.parse(req.body.newCourseData);
 	req.filesPositions = req.body.filesPositions && JSON.parse(req.body.filesPositions);
+	console.log('body', req.body);
+	console.log('filespos', req.filesPositions);
 	next();
 }
 
@@ -276,7 +278,6 @@ exports.getCoursesFiltered = async (req, res) => {
 
 	//!!! add validation for sane request (e. g. can't post enrolled + teacher)
 	let filter = {}, usersToPopulate = [], usersToPopulateSet = {}, courses;
-	let viewCourses = req.body.viewCourses;
 	if (req.body.courseId){
 		filter._id = req.body.courseId;
 	}
@@ -579,7 +580,7 @@ exports.getCoursesFiltered = async (req, res) => {
 				}
 			}
 
-			return new Promise((resolve, reject) => {
+			return new Promise((resolve) => {
 				resolve(true);
 			})
 		})

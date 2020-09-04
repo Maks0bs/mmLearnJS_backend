@@ -325,7 +325,7 @@ exports.activateAccount = (req, res) => {
 // make reset token with uuid
 
 exports.signin = (req, res) => {
-    let { _id, email, password } = req.body;
+    let { email, password } = req.body;
     User.findOne({ email })
         .then(user => {
             if (!user) throw {
@@ -365,16 +365,15 @@ exports.signin = (req, res) => {
                     error: err
                 })
         })
-
-
-
-
 };
 
 exports.authenticate = async (req, res, next) => {
     if (req.auth){
-        res.json({
-            securityError: 'auth is defined in req before obtaining it from cookies - that is illegal'
+        res.status(401).json({
+            error: {
+                status: 401,
+                message: 'Security error: auth is defined in req before obtaining it from cookies - that is illegal'
+            }
         })
     }
     let token = req.cookies['auth']
@@ -441,7 +440,7 @@ exports.isTeacher = (req, res, next) => {
             })
     }
 
-    next();
+    return next();
 }
 
 exports.userInCourse = (req, res, next) => {

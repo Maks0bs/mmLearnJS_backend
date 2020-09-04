@@ -99,7 +99,9 @@ exports.deserializeAndCleanData = (req, res, next) => {
 	 * Removing previous user avatar if new one gets uploaded
 	 */
 	let filesToDelete = [];
-	if (req.files && req.files[0] && req.user.photo){
+	if (req.files && req.files[0] && req.user.photo
+		&& req.newUserData.photo === 'new'
+	){
 		filesToDelete.push(req.user.photo);
 	}
 
@@ -118,7 +120,7 @@ exports.updateUser = (req, res) => {
 	/**
 	 * If new file is available, then user wants to change their avatar.
 	 */
-	if (req.files && req.files[0]){
+	if (req.files && req.files[0] && newData.photo === 'new'){
 		newData.photo = mongoose.Types.ObjectId(req.files[0].id.toString());
 	}
 
