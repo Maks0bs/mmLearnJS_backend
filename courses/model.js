@@ -303,35 +303,15 @@ let EntryForum = EntryContent.discriminator('EntryForum', entryForumSchema);
 exports.EntryForum = EntryForum;
 
 let entryFileSchema = new mongoose.Schema({
-	fieldname: String,
-	originalname: {
+	fileName: {
 		type: String,
 		required: true
 	},
-	encoding: String,
-	mimetype: String,
-	id: {
+	file: {
 		type: ObjectId,
 		ref: 'Uploads.File',
 		required: true
 	},
-	filename: {
-		type: String,
-		required: true
-	},
-	metadata: {},
-	bucketName: {
-		type: String,
-		required: true
-	},
-	chunkSize: Number,
-	size: Number,
-	md5: String,
-	uploadDate: Date,
-	contentType: {
-		type: String,
-		required: true
-	}
 }, {
 	discriminatorKey: 'kind'
 })

@@ -168,14 +168,11 @@ exports.deleteFiles = async (req, res, next) => {
 	for (let i of req.filesToDelete){
 		promises.push(new Promise((resolve => {
 			gfs.remove({_id: i, root: 'uploads'}, () => {
-				console.log('delete', i);
 				resolve(i)
 			})
 		})))
 	}
 
-	console.log('before', promises);
 	await Promise.all(promises);
-	console.log('after', promises);
 	return next();
 }

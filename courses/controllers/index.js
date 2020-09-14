@@ -137,11 +137,10 @@ exports.cleanupCourseData = (req, res, next) => {
 exports.updateCourse = async (req, res) => {
 	let newCourseData = req.newCourseData;
 
-
 	if (req.filesPositions){
 		for (let i = 0; i < req.filesPositions.length; i++){
 			let cur = req.filesPositions[i];
-			newCourseData.sections[cur.section].entries[cur.entry].content = req.files[i]
+			newCourseData.sections[cur.section].entries[cur.entry].content.file = req.files[i].id;
 		}
 	}
 
@@ -327,11 +326,12 @@ exports.getCoursesFiltered = async (req, res) => {
 			{ about: reOptions }
 		]
 	}
+	let basicUserFields = ['name', 'photo', 'role', 'activated', '_id', 'hiddenFields'];
 	Course.find({...filter})
 	//maybe select only necessary info
-		.populate('students')
-		.populate('teachers')
-		.populate('creator')
+		.populate({path: 'students', select: basicUserFields})
+		.populate({path: 'teachers', select: basicUserFields})
+		.populate({path: 'creator', select: basicUserFields})
 		.sort('name')//TODO optimize sorting - see bookmarks
 		.then(foundCourses => {
 			courses = foundCourses;

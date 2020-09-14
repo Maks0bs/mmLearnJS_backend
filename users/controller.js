@@ -143,6 +143,16 @@ exports.updateUser = (req, res) => {
 	let newUser = req.user;
 	_.extend(newUser, newData);
 	newUser.updated = Date.now();
+	if (!(Array.isArray(newUser.hiddenFields)
+		&& !newUser.hiddenFields.includes('name')
+	)){
+		return res.status(400).json({
+			error:{
+				status: 400,
+				message: 'Cannot make name a hidden field'
+			}
+		})
+	}
 
 	newUser.save()
 		.then((result) => {
@@ -200,6 +210,7 @@ exports.getUpdatesByDate = (req, res) => {
 				updates.push(preUpdates[i]);
 			}
 
+			console.log('test updates', updates)
 
 			return res.json(updates);
 		})
