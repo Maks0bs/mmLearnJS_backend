@@ -23,7 +23,7 @@ exports.courseById = (req, res, next, id) => {
 		console.log(err);
 		return res.status(err.status || 400)
 			.json({
-				error: err
+				error: formatMongooseError(err)
 			})
 	}) 
 }
@@ -140,7 +140,13 @@ exports.updateCourse = async (req, res) => {
 	if (req.filesPositions){
 		for (let i = 0; i < req.filesPositions.length; i++){
 			let cur = req.filesPositions[i];
-			newCourseData.sections[cur.section].entries[cur.entry].content.file = req.files[i].id;
+			if (req.files[i] && req.files[i].id){
+				newCourseData.sections[cur.section].entries[cur.entry].content.file = req.files[i].id
+			} else {
+				newCourseData.sections[cur.section].entries[cur.entry].content.file = null;
+				newCourseData.sections[cur.section].entries[cur.entry].content.fileName = 'No file yet';
+			}
+
 		}
 	}
 
@@ -222,9 +228,7 @@ exports.updateCourse = async (req, res) => {
 
 	course.save()
 	.then((result) => {
-		return res.json({
-			message: 'course updated successfully'
-		})
+		return res.json(result);
 	})
 	.catch(err => {
 		console.log(err);
@@ -236,7 +240,6 @@ exports.updateCourse = async (req, res) => {
 }
 
 exports.enrollInCourse = (req, res) => {
-	courseId = req.body._id;
 	let course = req.courseData;
 	if (course.hasPassword && !course.checkPassword(req.body.password)) {
 		return res.status(401).json({
@@ -248,12 +251,12 @@ exports.enrollInCourse = (req, res) => {
 	}
 	course.students.push(req.auth);
 	course.save()
-	.then(course => {
+	.then(() => {
 		return User.findByIdAndUpdate(
 			req.auth._id,
 			{
 				$push: {
-					enrolledCourses: { _id: courseId }
+					enrolledCourses: { _id: course._id }
 				}
 			},
 			{new: true}
@@ -419,10 +422,12 @@ exports.getCoursesFiltered = async (req, res) => {
 
 				let exercises = [];
 
+
 				for (let i = 0; i < courses[c].exercises.length; i++){
 					let exercise = courses[c].exercises[i];
 
 					if (!(userStatuses[c] === 'teacher' || userStatuses[c] === 'creator')){
+
 						exercise.tasks = undefined;
 						exercise.participants = undefined;
 
@@ -441,6 +446,7 @@ exports.getCoursesFiltered = async (req, res) => {
 
 
 				}
+
 
 				courses[c].exercises = exercises;
 

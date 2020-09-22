@@ -39,7 +39,7 @@ module.exports = {
 		JWT_SECRET: process.env.JWT_SECRET
 	},
 	client: {
-		NO_ACTION_LOGOUT_TIME: 5 * 60 * 1000,
+		NO_ACTION_LOGOUT_TIME: 10 * 60 * 1000,
 		DEFAULT_COOKIE_OPTIONS: defaultCookieOptions,
 		CLIENT_URL: clientUrl
 	},

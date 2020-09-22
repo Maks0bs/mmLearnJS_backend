@@ -25,7 +25,9 @@ let {
 	answerTopicPost,
 	topicById,
 	postById,
-	deleteTopicPost
+	deleteTopicPost,
+	forumById,
+	getForumById
 } = require('./controllers/forums')
 
 let {
@@ -101,7 +103,11 @@ router.post('/accept-teacher-invite/:courseId',
 	isTeacher,
 	acceptTeacherInvite
 )
-//router.get('/:courseId', getCourse);
+router.get('/:courseId/forum/:forumId',
+	requireAuthentication,
+	userInCourse,
+	getForumById
+)
 router.post('/:courseId/forum/:entryId/new-topic',
 	requireAuthentication,
 	userInCourse,
@@ -180,6 +186,7 @@ router.param('courseId', courseById);
 router.param('exerciseId', exerciseById);
 router.param('attemptId', attemptById);
 router.param('entryId', entryById);
+router.param('forumId', forumById);
 router.param('topicId', topicById);
 router.param('postId', postById);
 

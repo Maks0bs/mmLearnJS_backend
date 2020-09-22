@@ -2,6 +2,78 @@ let {
 	ForumTopicPost
 } = require('../model')
 let mongoose = require('mongoose');
+let User = require('../../users/model');
+const {formatMongooseError} = require("../../helpers");
+
+exports.forumById = (req, res, next, forumId) => {
+	let len = 0;
+	if (req.courseData.sections){
+		len = req.courseData.sections.length
+	}
+	for (let section = 0; section < len; section++){
+		for (let i = 0; i < req.courseData.sections[section].entries.length; i++){
+			let entry = req.courseData.sections[section].entries[i];
+			if(entry._id == forumId){
+				req.forum = entry;
+				return next();
+			}
+		}
+	}
+
+	return res.status(404).json({
+		error: {
+			status: 404,
+			message: "No entry with this id was found"
+		}
+	})
+}
+
+exports.getForumById = (req, res) => {
+	let usersToPopulate = [], usersToPopulateSet = {}
+	let { forum } = req;
+	for (let t of forum.content.topics){
+		if (!usersToPopulateSet[t.creator._id]){
+			usersToPopulateSet[t.creator._id] = 1;
+			usersToPopulate.push(t.creator._id);
+		}
+		for (let p of t.posts){
+			if (!usersToPopulateSet[p.creator._id]){
+				usersToPopulateSet[p.creator._id] = 1;
+				usersToPopulate.push(p.creator._id);
+			}
+		}
+	}
+	return User.find({
+		_id: {
+			$in: usersToPopulate
+		}
+	})
+		.select('_id name photo hiddenFields')
+		.then((users) => {
+			for (let user of users){
+				user.hideFields();
+				user.hiddenFields = undefined;
+				usersToPopulateSet[user._id] = user;
+			}
+			for (let t of forum.content.topics){
+				t.creator = usersToPopulateSet[t.creator._id]
+				for (let p of t.posts){
+					p.creator = usersToPopulateSet[t.creator._id];
+				}
+			}
+			return new Promise((resolve) => {
+				resolve(true);
+			})
+		})
+		.then(() => res.json(forum))
+		.catch(err => {
+			console.log(err);
+			res.status(err.status || 400)
+				.json({
+					error: formatMongooseError(err)
+				})
+		})
+}
 
 exports.topicById = (req, res, next, topicId) => {
 	let len = 0;
@@ -59,7 +131,6 @@ exports.postById = (req, res, next, postId) => {
 // }
 exports.createForumTopic = (req, res) => {
 	let entry = req.entry.data;
-	console.log('entry', entry);
 	if (req.userCourseStatus === 'student' && entry.content.teachersOnly){
 		return res.status(401).json({
 			error: {
