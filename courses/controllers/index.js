@@ -23,7 +23,7 @@ exports.courseById = (req, res, next, id) => {
 		console.log(err);
 		return res.status(err.status || 400)
 			.json({
-				error: err
+				error: formatMongooseError(err)
 			})
 	}) 
 }
@@ -65,6 +65,8 @@ exports.createCourse = (req, res) => {
 exports.getNewCourseData = (req, res, next) => {
 	req.newCourseData = JSON.parse(req.body.newCourseData);
 	req.filesPositions = req.body.filesPositions && JSON.parse(req.body.filesPositions);
+	console.log('body', req.body);
+	console.log('filespos', req.filesPositions);
 	next();
 }
 
@@ -135,11 +137,16 @@ exports.cleanupCourseData = (req, res, next) => {
 exports.updateCourse = async (req, res) => {
 	let newCourseData = req.newCourseData;
 
-
 	if (req.filesPositions){
 		for (let i = 0; i < req.filesPositions.length; i++){
 			let cur = req.filesPositions[i];
-			newCourseData.sections[cur.section].entries[cur.entry].content = req.files[i]
+			if (req.files[i] && req.files[i].id){
+				newCourseData.sections[cur.section].entries[cur.entry].content.file = req.files[i].id
+			} else {
+				newCourseData.sections[cur.section].entries[cur.entry].content.file = null;
+				newCourseData.sections[cur.section].entries[cur.entry].content.fileName = 'No file yet';
+			}
+
 		}
 	}
 
@@ -221,9 +228,7 @@ exports.updateCourse = async (req, res) => {
 
 	course.save()
 	.then((result) => {
-		return res.json({
-			message: 'course updated successfully'
-		})
+		return res.json(result);
 	})
 	.catch(err => {
 		console.log(err);
@@ -235,7 +240,6 @@ exports.updateCourse = async (req, res) => {
 }
 
 exports.enrollInCourse = (req, res) => {
-	courseId = req.body._id;
 	let course = req.courseData;
 	if (course.hasPassword && !course.checkPassword(req.body.password)) {
 		return res.status(401).json({
@@ -247,12 +251,12 @@ exports.enrollInCourse = (req, res) => {
 	}
 	course.students.push(req.auth);
 	course.save()
-	.then(course => {
+	.then(() => {
 		return User.findByIdAndUpdate(
 			req.auth._id,
 			{
 				$push: {
-					enrolledCourses: { _id: courseId }
+					enrolledCourses: { _id: course._id }
 				}
 			},
 			{new: true}
@@ -276,7 +280,6 @@ exports.getCoursesFiltered = async (req, res) => {
 
 	//!!! add validation for sane request (e. g. can't post enrolled + teacher)
 	let filter = {}, usersToPopulate = [], usersToPopulateSet = {}, courses;
-	let viewCourses = req.body.viewCourses;
 	if (req.body.courseId){
 		filter._id = req.body.courseId;
 	}
@@ -326,11 +329,12 @@ exports.getCoursesFiltered = async (req, res) => {
 			{ about: reOptions }
 		]
 	}
+	let basicUserFields = ['name', 'photo', 'role', 'activated', '_id', 'hiddenFields'];
 	Course.find({...filter})
 	//maybe select only necessary info
-		.populate('students')
-		.populate('teachers')
-		.populate('creator')
+		.populate({path: 'students', select: basicUserFields})
+		.populate({path: 'teachers', select: basicUserFields})
+		.populate({path: 'creator', select: basicUserFields})
 		.sort('name')//TODO optimize sorting - see bookmarks
 		.then(foundCourses => {
 			courses = foundCourses;
@@ -418,10 +422,12 @@ exports.getCoursesFiltered = async (req, res) => {
 
 				let exercises = [];
 
+
 				for (let i = 0; i < courses[c].exercises.length; i++){
 					let exercise = courses[c].exercises[i];
 
 					if (!(userStatuses[c] === 'teacher' || userStatuses[c] === 'creator')){
+
 						exercise.tasks = undefined;
 						exercise.participants = undefined;
 
@@ -440,6 +446,7 @@ exports.getCoursesFiltered = async (req, res) => {
 
 
 				}
+
 
 				courses[c].exercises = exercises;
 
@@ -579,7 +586,7 @@ exports.getCoursesFiltered = async (req, res) => {
 				}
 			}
 
-			return new Promise((resolve, reject) => {
+			return new Promise((resolve) => {
 				resolve(true);
 			})
 		})

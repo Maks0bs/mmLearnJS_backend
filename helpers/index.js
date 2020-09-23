@@ -45,12 +45,12 @@ exports.validate = (req, res, next) => {
  */
 exports.formatMongooseError = (err) => {
     if (!err.errors){
-        return false;
+        return 'Error';
     }
     let errorsValues = Object.keys(err.errors);
     let firstError = err.errors[errorsValues[0]];
     if (!firstError.properties){
-        return false;
+        return 'Error';
     }
     let message = firstError.properties.message
     if ( ((typeof message) === 'object') || (message instanceof Object)){

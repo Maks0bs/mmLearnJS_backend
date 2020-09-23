@@ -2,6 +2,7 @@ let mongoose = require('mongoose');
 let { v1: uuidv1 } = require('uuid');
 let crypto = require('crypto');
 let { ObjectId } = mongoose.Schema;
+
 let userSchema = new mongoose.Schema({
 	name: {
 		type: String,
@@ -25,7 +26,8 @@ let userSchema = new mongoose.Schema({
 	updated: Date,
 	about: {
 		type: String,
-		trim: true
+		trim: true,
+		default: ''
 	},
 	notifications: [
 		{

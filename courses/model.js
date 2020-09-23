@@ -19,21 +19,26 @@ let attemptAnswerSchema = new mongoose.Schema({
 let AttemptAnswer = mongoose.model('AttemptAnswer', attemptAnswerSchema);
 exports.AttemptAnswer = AttemptAnswer;
 
-let oneAttemptAnswerSchema = new mongoose.Schema({
+let oneChoiceTaskAttemptSchema = new mongoose.Schema({
 	value: String
 })
 
-let OneAttemptAnswer = AttemptAnswer.discriminator('OneAttemptAnswer', oneAttemptAnswerSchema);
-exports.OneAttemptAnswer = OneAttemptAnswer;
+let OneChoiceTaskAttempt = AttemptAnswer.discriminator(
+	'OneChoiceTaskAttempt', oneChoiceTaskAttemptSchema);
+exports.OneChoiceTaskAttempt = OneChoiceTaskAttempt;
 
-let multipleAttemptAnswerSchema = new mongoose.Schema({
-	values: [
-		String
-	]
+// text tasks only have one answer option, the same as one choice tasks
+let TextTaskAttempt = AttemptAnswer.discriminator(
+	'TextTaskAttempt', oneChoiceTaskAttemptSchema);
+exports.TextTaskAttempt = TextTaskAttempt;
+
+let multipleChoiceTaskAttemptSchema = new mongoose.Schema({
+	values: [ String ]
 })
 
-let MultipleAttemptAnswer = AttemptAnswer.discriminator('MultipleAttemptAnswer', multipleAttemptAnswerSchema);
-exports.MultipleAttemptAnswer = MultipleAttemptAnswer;
+let MultipleChoiceTaskAttempt = AttemptAnswer.discriminator(
+	'MultipleChoiceTaskAttempt', multipleChoiceTaskAttemptSchema);
+exports.MultipleChoiceTaskAttempt = MultipleChoiceTaskAttempt;
 
 
 let exerciseAttemptSchema = new mongoose.Schema({
@@ -61,8 +66,9 @@ let exerciseAttemptSchema = new mongoose.Schema({
 let ExerciseAttempt = mongoose.model('ExerciseAttempt', exerciseAttemptSchema);
 exports.ExerciseAttempt = ExerciseAttempt;
 
-exerciseAttemptSchema.path('answers').discriminator('OneAttemptAnswer', oneAttemptAnswerSchema)
-exerciseAttemptSchema.path('answers').discriminator('MultipleAttemptAnswer', multipleAttemptAnswerSchema)
+exerciseAttemptSchema.path('answers').discriminator('OneChoiceTaskAttempt', oneChoiceTaskAttemptSchema)
+exerciseAttemptSchema.path('answers').discriminator('MultipleChoiceTaskAttempt', multipleChoiceTaskAttemptSchema)
+exerciseAttemptSchema.path('answers').discriminator('TextTaskAttempt', oneChoiceTaskAttemptSchema)
 
 let exerciseTaskSchema = new mongoose.Schema({
 	description: String,
@@ -117,7 +123,7 @@ function choiceArrayValidator(arr){
 	return arr.length >= 1;
 }
 function oneChoiceCorrectAnsValidator(){
-	//console.log('one choice', this);
+	console.log('one choice', this);
 	if (!this.correctAnswer){
 		return false;
 	}
@@ -130,7 +136,7 @@ function oneChoiceCorrectAnsValidator(){
 
 	return false;
 }
-let oneChoiceExerciseSchema = new mongoose.Schema({
+let oneChoiceTaskSchema = new mongoose.Schema({
 	options: {
 		_id: false,
 		type: [
@@ -153,8 +159,8 @@ let oneChoiceExerciseSchema = new mongoose.Schema({
 		}
 	}
 })
-let OneChoiceExercise = ExerciseTask.discriminator('OneChoiceExercise', oneChoiceExerciseSchema);
-exports.OneChoiceExercise = OneChoiceExercise;
+let OneChoiceTask = ExerciseTask.discriminator('OneChoiceTask', oneChoiceTaskSchema);
+exports.OneChoiceTask = OneChoiceTask;
 
 function multipleChoiceCorrectAnsValidator(){
 	if (!this.correctAnswers){
@@ -175,7 +181,7 @@ function multipleChoiceCorrectAnsValidator(){
 
 	return true;
 }
-let multipleChoiceExerciseSchema = new mongoose.Schema({
+let multipleChoiceTaskSchema = new mongoose.Schema({
 	options: {
 		_id: false,
 		type: [
@@ -202,10 +208,10 @@ let multipleChoiceExerciseSchema = new mongoose.Schema({
 	},
 	onlyFull: Boolean // if true, score for this exercise gets counted if all options are selected correctly
 })
-let MultipleChoiceExercise = ExerciseTask.discriminator('MultipleChoiceExercise', multipleChoiceExerciseSchema);
-exports.MultipleChoiceExercise = MultipleChoiceExercise;
+let MultipleChoiceTask = ExerciseTask.discriminator('MultipleChoiceTask', multipleChoiceTaskSchema);
+exports.MultipleChoiceTask = MultipleChoiceTask;
 
-let textExerciseSchema = new mongoose.Schema({
+let textTaskSchema = new mongoose.Schema({
 	correctAnswers: [
 		{
 			type: String //has to be one of the keys
@@ -213,15 +219,12 @@ let textExerciseSchema = new mongoose.Schema({
 	],
 	interpretMath: Boolean //TODO for future: interpret the answer as a math statement
 })
-let TextExercise = ExerciseTask.discriminator('TextExercise', textExerciseSchema);
-exports.TextExercise = TextExercise;
+let TextTask = ExerciseTask.discriminator('TextTask', textTaskSchema);
+exports.TextTask = TextTask;
 
-
-
-courseExerciseSchema.path('tasks').discriminator('OneChoiceExercise', oneChoiceExerciseSchema)
-courseExerciseSchema.path('tasks').discriminator('MultipleChoiceExercise', multipleChoiceExerciseSchema)
-courseExerciseSchema.path('tasks').discriminator('TextExercise', textExerciseSchema)
-
+courseExerciseSchema.path('tasks').discriminator('OneChoiceTask', oneChoiceTaskSchema)
+courseExerciseSchema.path('tasks').discriminator('MultipleChoiceTask', multipleChoiceTaskSchema)
+courseExerciseSchema.path('tasks').discriminator('TextTask', textTaskSchema)
 
 let entryContentSchema = new mongoose.Schema({
 	info: {}
@@ -303,35 +306,14 @@ let EntryForum = EntryContent.discriminator('EntryForum', entryForumSchema);
 exports.EntryForum = EntryForum;
 
 let entryFileSchema = new mongoose.Schema({
-	fieldname: String,
-	originalname: {
+	fileName: {
 		type: String,
 		required: true
 	},
-	encoding: String,
-	mimetype: String,
-	id: {
+	file: {
 		type: ObjectId,
-		ref: 'Uploads.File',
-		required: true
+		ref: 'Uploads.File'
 	},
-	filename: {
-		type: String,
-		required: true
-	},
-	metadata: {},
-	bucketName: {
-		type: String,
-		required: true
-	},
-	chunkSize: Number,
-	size: Number,
-	md5: String,
-	uploadDate: Date,
-	contentType: {
-		type: String,
-		required: true
-	}
 }, {
 	discriminatorKey: 'kind'
 })

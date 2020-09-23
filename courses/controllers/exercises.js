@@ -159,7 +159,7 @@ exports.getExerciseAttempts = (req, res) => {
         if (p.user.equals(req.auth._id)){
             let attempts = p.attempts;
             attempts.sort((a, b) => {
-                return a.startTime - b.startTime;
+                return b.startTime - a.startTime;
             })
             return res.json({
                 attempts: attempts
@@ -219,13 +219,14 @@ exports.updateAttempt = (req, res) => {
         newAnswers[i].score = oldAnswers[i].score;
 
         switch(newAnswers[i].kind){
-            case 'MultipleAttemptAnswer': {
+            case 'MultipleChoiceTaskAttempt': {
                 if (!newAnswers[i].values){
                     newAnswers[i].values = [];
                 }
                 break;
             }
-            case 'OneAttemptAnswer': {
+            case 'TextTaskAttempt':
+            case 'OneChoiceTaskAttempt': {
                 if (newAnswers[i].value === undefined){
                     newAnswers[i].value = null;
                 }
@@ -276,27 +277,27 @@ exports.finishAttempt = (req, res) => {
         let task = tasks[t];
         let taskScore = 0;
         switch (task.kind){
-            case 'OneChoiceExercise': {
+            case 'OneChoiceTask': {
                 if (answers[t].value === task.correctAnswer) {
                     score += task.score;
                     taskScore += task.score;
                 }
                 break;
             }
-            case 'TextExercise': {
+            case 'TextTask': {
                 if (task.correctAnswers.indexOf(answers[t].value) >= 0){
                     score += task.score;
                     taskScore += task.score;
                 }
                 break;
             }
-            case 'MultipleChoiceExercise': {
+            case 'MultipleChoiceTask': {
                 let cntCorrect = 0;
                 for (let v of task.options){
                     let i1 = task.correctAnswers.indexOf(v.key) >= 0,
                         i2 = answers[t].values.indexOf(v.key) >= 0;
 
-                    if (i1 ^ i2){
+                    if (!(i1 ^ i2)){
                         cntCorrect++;
                     }
                 }
@@ -345,7 +346,7 @@ exports.finishAttempt = (req, res) => {
 exports.newExerciseAttempt = async (req, res) => {
     let exercise = req.exercise.data;
     let { participants } = exercise;
-    let participantPos = -1;
+    let participantPos = -1, hasRunningAttempt = false;
 
     if (!exercise.available){
         return res.status(401).json({
@@ -367,8 +368,24 @@ exports.newExerciseAttempt = async (req, res) => {
 
     for (let p = 0; p < participants.length; p++) {
         if (participants[p].user.equals(req.auth._id)){
+            for (let a of participants[p].attempts){
+                if (!a.endTime){
+                    hasRunningAttempt = true;
+                    break;
+                }
+            }
             participantPos = p;
         }
+    }
+
+    if (hasRunningAttempt){
+        return res.status(401).json({
+            error: {
+                status: 401,
+                message: 'You already have a running attempt on this course. ' +
+                    'Finish it and then you will be able to start a new one'
+            }
+        })
     }
 
     if (participantPos < 0){
@@ -385,23 +402,22 @@ exports.newExerciseAttempt = async (req, res) => {
     //newAttempt.score = null;
 
     for (let i = 0; i < exercise.tasks.length; i++){
-        let task = exercise.tasks[i];
+        let task = exercise.tasks[i], curAns;
         switch (task.kind){
-            case 'MultipleChoiceExercise':{
-                newAttempt.answers.push({
-                    kind: 'MultipleAttemptAnswer',
-                    values: []
-                })
+            case 'MultipleChoiceTask':{
+                curAns = { kind: 'MultipleChoiceTaskAttempt', values: [] }
                 break;
             }
-            default: {
-                newAttempt.answers.push({
-                    kind: 'OneAttemptAnswer',
-                    value: null
-                })
+            case 'OneChoiceTask':{
+                curAns = { kind: 'OneChoiceTaskAttempt', value: null }
+                break;
+            }
+            case 'TextTask': {
+                curAns = { kind: 'TextTaskAttempt', value: null }
+                break;
             }
         }
-
+        newAttempt.answers.push(curAns);
         newAttempt.answers[i].taskRef = task._id;
     }
 
@@ -481,7 +497,8 @@ exports.getExerciseSummary = (req, res) => {
         .then((users) => {
             for (let u of users) {
                 usersSet[u._id] = {
-                    name: u.name,
+                    userId: u._id,
+                    userName: u.name,
                     exercises: []
                 }
             }
@@ -493,7 +510,8 @@ exports.getExerciseSummary = (req, res) => {
                     if (!usersSet[p.user._id]){
                         continue;
                     }
-                    // remove answers in the final response, they are irrelevant for this request
+                    // remove answers in the final response,
+                    // they are irrelevant for this request
                     for (let a = 0; a < p.attempts.length; a++){
                         p.attempts[a].answers = undefined;
                     }
@@ -508,10 +526,7 @@ exports.getExerciseSummary = (req, res) => {
             let result = [];
 
             for (let k of Object.keys(usersSet)){
-                result.push({
-                    id: k,
-                    ...usersSet[k]
-                })
+                result.push(usersSet[k])
             }
 
             return res.json(result);

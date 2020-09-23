@@ -18,7 +18,6 @@ let storage = new GridFSStorage({
                 if (err) {
                     return reject(err);
                 }
-                console.log('gfs', req.body);
                 let filename = buf.toString('hex');
                 let fileInfo = {
                     filename: filename,
@@ -153,7 +152,7 @@ exports.deleteFile = (req, res) => {
 			})
 		}
 		else{
-			res.json({
+			return res.json({
 				message: 'file deleted successfully'
 			})
 		}
@@ -165,18 +164,15 @@ exports.deleteFiles = async (req, res, next) => {
 	if (!req.filesToDelete || req.filesToDelete.length === 0){
 		return next();
 	}
+	let promises = [];
 	for (let i of req.filesToDelete){
-		await gfs.remove(
-			{
-				_id: i,
-				root: 'uploads'
-			},
-			(err, gridStore) => {
-				return console.log('deleted file in deleteFiles route', i);
-			}
-		)
+		promises.push(new Promise((resolve => {
+			gfs.remove({_id: i, root: 'uploads'}, () => {
+				resolve(i)
+			})
+		})))
 	}
 
-	next();
-	
+	await Promise.all(promises);
+	return next();
 }

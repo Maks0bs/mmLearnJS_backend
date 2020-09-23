@@ -2,6 +2,7 @@ let {
     Course
 } = require('../model')
 let User = require('../../users/model');
+const {formatMongooseError} = require("../../helpers");
 
 exports.subscribe = (req, res) => {
     let course = req.courseData;
@@ -88,7 +89,7 @@ exports.unsubscribe = (req, res) => {
             console.log(err);
             return res.status(err.status || 400)
                 .json({
-                    error: err
+                    error: formatMongooseError(err)
                 })
         })
 }
