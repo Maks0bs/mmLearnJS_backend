@@ -3,6 +3,24 @@ let { v1: uuidv1 } = require('uuid');
 let crypto = require('crypto');
 let { ObjectId } = mongoose.Schema;
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - name
+ *         - email
+ *       properties:
+ *         name:
+ *           type: string
+ *         email:
+ *           type: string
+ *           format: email
+ *         activated:
+ *           type: boolean
+ */
 let userSchema = new mongoose.Schema({
 	name: {
 		type: String,
