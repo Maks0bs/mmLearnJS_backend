@@ -10,7 +10,8 @@ exports.userInfoValidator = [
             min: 4,
             max: 2000
         }),
-    body("email", "Email must follow the pattern example@example.example").matches(/.+@.+\..+/)
+    body("email", "Email must follow the pattern example@example.example")
+        .matches(/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/)
 ]
 
 exports.passwordValidator = (field) => [
@@ -20,4 +21,3 @@ exports.passwordValidator = (field) => [
     body(field, "Password must contain a number").notEmpty()
         .matches(/\d/)
 ]
-

@@ -5,6 +5,17 @@ let mongoose = require('mongoose');
 let crypto = require('crypto');
 let constants = require('../constants');
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Upload.File:
+ *       type: object
+ *       description: >
+ *         File type. Files are stored in MongoDB via GridFS in this API.
+ *         See GridFS and Multer docs for details.
+ */
+
 let gfs;
 mongoose.connection.on('open', () => {
     gfs = GridFS(mongoose.connection.db, mongoose.mongo);

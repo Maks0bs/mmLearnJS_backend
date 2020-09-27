@@ -1,10 +1,12 @@
 let {
-	isTeacher,
-	requireAuthentication,
-	isCreator,
+	requireAuthentication
+} = require('../users/controllers/auth')
+let {
+	isCourseTeacher,
+	isCourseCreator,
 	teacherInCourse,
 	userInCourse
-} = require('../auth/controllers')
+} = require('../users/controllers/util')
 
 let {
 	createCourse,
@@ -63,20 +65,21 @@ let {
 
 let {
 	addNotifications
-} = require('../users/controller')
+} = require('../users/controllers/main')
 
 let router = require('express').Router()
 
 router.post('/create', 
 	requireAuthentication,
-	isTeacher,
+	isCourseTeacher,
 	createCourse
 );
+
 router.post('/enroll/:courseId', requireAuthentication, enrollInCourse);
 router.post('/filter', getCoursesFiltered)
 router.put('/update/:courseId', 
 	requireAuthentication, 
-	isTeacher,
+	isCourseTeacher,
 	teacherInCourse,
 	uploadFiles,
 	getNewCourseData,
@@ -86,21 +89,21 @@ router.put('/update/:courseId',
 );
 router.delete('/:courseId', 
 	requireAuthentication, 
-	isCreator,
+	isCourseCreator,
 	removeCourseMentions,
 	deleteFiles,
 	deleteCourse
 );
 router.post('/send-teacher-invite/:courseId',
 	requireAuthentication,
-	isCreator,
+	isCourseCreator,
 	sendTeacherInvite,
 	addNotifications,
 	addToInvitedList//send notification to teacher and add them to invitedTeacher array in db
 )
 router.post('/accept-teacher-invite/:courseId',
 	requireAuthentication,
-	isTeacher,
+	isCourseTeacher,
 	acceptTeacherInvite
 )
 router.get('/:courseId/forum/:forumId',

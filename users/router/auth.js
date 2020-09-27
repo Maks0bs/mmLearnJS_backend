@@ -1,32 +1,32 @@
 let {
-	signup,
-	activateAccount,
-	signin,
-	getAuthenticatedUser,
-	requireAuthentication,
-	logout,
-	inviteSignup,
-	sendActivationLink,
-	forgotPassword,
-	resetPassword
-} = require('./controllers');
+    signup,
+    activateAccount,
+    signin,
+    getAuthenticatedUser,
+    requireAuthentication,
+    logout,
+    inviteSignup,
+    sendActivationLink,
+    forgotPassword,
+    resetPassword
+} = require('../controllers/auth');
 
 let {
-	passwordValidator,
-	userInfoValidator
-} = require('./controllers/validator')
+    passwordValidator,
+    userInfoValidator
+} = require('../controllers/validators')
 
 let {
-	validate
-} = require('../helpers')
+    validate
+} = require('../../helpers')
 
 let router = require('express').Router()
 
 router.post('/signup',
-	userInfoValidator,
-	passwordValidator("password"),
-	validate,
-	signup
+    userInfoValidator,
+    passwordValidator("password"),
+    validate,
+    signup
 );
 router.post('/signin', signin);
 router.post('/activate', activateAccount);

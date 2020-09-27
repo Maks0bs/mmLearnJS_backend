@@ -62,3 +62,5 @@ let port = constants.network.PORT || 8080
 app.listen(
 	port, () => console.log(`App listening on port ${port}`)
 )
+
+module.exports = app;

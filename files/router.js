@@ -17,9 +17,9 @@ let {
 	deleteFiles
 } = require('./controller');
 let {
-	isTeacher,
+	isCourseTeacher,
 	requireAuthentication,
-} = require('../auth/controllers')
+} = require('../users/controllers/auth')
 let router = require('express').Router()
 router.post('/upload', 
 	requireAuthentication,

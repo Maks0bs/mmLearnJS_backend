@@ -1,5 +1,7 @@
 require('dotenv').config();
-
+// various config constants
+// you should only use variables from this file
+// accessing process.env is discouraged
 let clientUrl = process.env.CLIENT_URL;
 let apiUrl = process.env.API_URL;
 let defaultCookieOptions
@@ -44,7 +46,10 @@ module.exports = {
 				}
 			]
 		},
-		apis: ["./routes/*.js", "./users/*.js"]
+		apis: [
+			"./*.js", "./routes/*.js", "./users/*/*.js", "./courses/*.js", "./courses/*/*.js",
+			"./files/*.js"
+		]
 	},
 	environment: process.env.NODE_ENV,
 	users: {
@@ -52,10 +57,12 @@ module.exports = {
 		TEACHER_PASSWORD: 'testpass'
 	},
 	network: {
-		PORT: process.env.PORT || 8080
+		PORT: process.env.NODE_ENV === 'test' ?
+			9000 : (process.env.PORT || 8080)
 	},
 	database: {
-		MONGODB_URI: process.env.MONGODB_URI,
+		MONGODB_URI: process.env.NODE_ENV === 'test' ?
+			process.env.MONGODB_TEST_URI : process.env.MONGODB_URI,
 		FILES_UPLOAD_LIMIT: 50
 	},
 	auth: {
@@ -71,3 +78,34 @@ module.exports = {
 		COURSE_TEACHER_INVITATION: 'USER_NOTIFICATION_TEACHER_INVITATION'
 	}
 }
+
+/**
+ * @namespace models
+ */
+/**
+ * @namespace routers
+ */
+/**
+ * @namespace controllers
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Date:
+ *       type: object
+ *       description: >
+ *         Date type. The Date BSON type is used in MongoDB. Internally it is a 64-bit integer.
+ *         See MongoDB docs for details
+ */
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     ObjectID:
+ *       type: object
+ *       description: >
+ *         ObjectID type. The ObjectID BSON type is used in MongoDB to represent refs to other objects in the
+ *         Database. See MongoDB docs for details
+ */

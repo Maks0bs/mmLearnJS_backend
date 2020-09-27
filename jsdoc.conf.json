@@ -1,0 +1,30 @@
+{
+  "tags": {
+    "allowUnknownTags": ["component", "category", "subcategory", "service"],
+    "dictionaries": ["jsdoc", "closure"]
+  },
+  "source": {
+    "include": ["./"],
+    "includePattern": ".+\\.js(doc|x)?$",
+    "excludePattern": ""
+  },
+  "plugins": [
+    "plugins/markdown",
+    "node_modules/better-docs/component",
+    "node_modules/better-docs/category"],
+  "templates": {
+    "search": true,
+    "better-docs": {
+      "name": "mmLearnJS API",
+      "title": "",
+      "navLinks": []
+    }
+  },
+  "recurseDepth": 15,
+  "opts": {
+    "template": "node_modules/better-docs",
+    "destination": "docs",
+    "recurse": true,
+    "readme": "README.md"
+  }
+}

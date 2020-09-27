@@ -1,5 +1,5 @@
-let { Course } = require('../courses/model')
-let User = require('./model');
+let { Course } = require('../../courses/model')
+let User = require('../model');
 let _ = require('lodash');
 let mongoose = require('mongoose');
 
@@ -49,8 +49,26 @@ exports.getUser = (req, res) => {
 	return res.json(user);
 }
 
-exports.getUsersFiltered = (req, res) => {
+exports.configUsersFilter = (req, res, next) => {
+	req.usersFilter = req.query;
+	return next();
+}
 
+//TODO if we find users by a certain param and this param is in the hiddenFields array, don't include this user
+//TODO however still include, if they could be found by another param, which is not hidden
+exports.getUsersFiltered = (req, res) => {
+	let { usersFilter: filter } = req;
+	return User.find({filter})
+		.then((users) => (
+			res.json(users)
+		))
+		.catch(err => {
+			console.log(err);
+			return res.status(err.status || 400)
+				.json({
+					error: err
+				})
+		})
 }
 
 exports.isAuthenticatedUser = (req, res, next) => {

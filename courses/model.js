@@ -404,6 +404,18 @@ let updateNewInfoSchema = new mongoose.Schema({
 let UpdateNewInfo = CourseUpdate.discriminator('UpdateNewInfo', updateNewInfoSchema);
 exports.UpdateNewInfo = UpdateNewInfo;
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Course:
+ *       type: object
+ *       required:
+ *         - _id
+ *       properties:
+ *         _id:
+ *           $ref: '#/components/schemas/ObjectID'
+ */
 let courseSchema = new mongoose.Schema({
 	name: {
 		type: String,
