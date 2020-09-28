@@ -3,6 +3,28 @@ let { v1: uuidv1 } = require('uuid');
 let { ObjectId } = mongoose.Schema;
 
 /**
+ * @typedef User
+ * @memberOf models
+ * @name User
+ * @type Object
+ * @property {ObjectId} _id
+ * @property {string} name
+ * @property {string} email
+ * @property {boolean} activated
+ * @property {string} hashed_password
+ * @property {string} salt
+ * @property {?string} [about]
+ * @property {string} role
+ * @property {BSONDate} created
+ * @property {BSONDate} updated
+ * @property {ObjectId[]|models.Course[]} enrolledCourses
+ * @property {ObjectId[]|models.Course[]} [teacherCourses]
+ * @property {{course: ObjectId|models.Course, lastVisited: BSONDate}[]} subscribedCourses
+ * @property {?ObjectId|?models.GridFSFile} photo
+ * @property {string[]} hiddenFields
+ * @property {{type: string, title: string, ?text: string, created: BSONDate}} notifications
+ */
+/**
  * @memberOf models
  * @swagger
  * components:
@@ -19,7 +41,7 @@ let { ObjectId } = mongoose.Schema;
  *         - role
  *       properties:
  *         _id:
- *           $ref: '#/components/schemas/ObjectID'
+ *           $ref: '#/components/schemas/ObjectId'
  *         name:
  *           type: string
  *           example: nickname
@@ -67,13 +89,13 @@ let { ObjectId } = mongoose.Schema;
  *           items:
  *             oneOf:
  *               - $ref: '#/components/schemas/Course'
- *               - $ref: '#/components/schemas/ObjectID'
+ *               - $ref: '#/components/schemas/ObjectId'
  *         teacherCourses:
  *           type: array
  *           items:
  *             oneOf:
  *               - $ref: '#/components/schemas/Course'
- *               - $ref: '#/components/schemas/ObjectID'
+ *               - $ref: '#/components/schemas/ObjectId'
  *         subscribedCourses:
  *           type: array
  *           items:
@@ -82,14 +104,14 @@ let { ObjectId } = mongoose.Schema;
  *               course:
  *                 oneOf:
  *                   - $ref: '#/components/schemas/Course'
- *                   - $ref: '#/components/schemas/ObjectID'
+ *                   - $ref: '#/components/schemas/ObjectId'
  *               lastVisited:
  *                 $ref: '#/components/schemas/Date'
  *         photo:
  *           oneOf:
  *             - type: 'null'
  *             - $ref: '#/components/schemas/Upload.File'
- *             - $ref: '#/components/schemas/ObjectID'
+ *             - $ref: '#/components/schemas/ObjectId'
  *         hiddenFields:
  *           type: array
  *           items:
@@ -135,17 +157,6 @@ let userSchema = new mongoose.Schema({
     hashed_password: {
         type: String,
         required: [true, 'Password is required'],
-        validate: {
-            validator: function() {
-                if ((typeof this._password) !== 'string') return false;
-                let isLongEnough = this._password.length >= 6;
-                let containsDigit = /\d/.test(this._password);
-                return isLongEnough && containsDigit;
-            },
-            message:
-                'The password should be at least 6 characters long ' +
-                'and should contain a number'
-        }
     },
     salt: {
         type: String,
@@ -206,7 +217,8 @@ let userSchema = new mongoose.Schema({
     ],
     photo: {
         type: ObjectId,
-        ref: 'Uploads.File'
+        ref: 'Uploads.File',
+        default: null
     },
     hiddenFields: [
         String
@@ -230,10 +242,24 @@ let userSchema = new mongoose.Schema({
     ]
 });
 
+// when setting the password, the validation occurs right away (before saving document to database)
+// Because of that, always wrap the operation, where you try to set the password in a try...catch block
+// to catch error, which are thrown in the setter for password if it is not acceptable.
 userSchema
     .virtual('password')
     .set(function(password){
+        if ((typeof password) !== 'string'){
+            throw new Error('Password should be a string');
+        }
+        let isLongEnough = password.length >= 6;
+        let containsDigit = /\d/.test(password);
+        if (!(isLongEnough && containsDigit)){
+            throw new Error(
+                'Password should be at least 6 characters long and should contain a digit'
+            )
+        }
         this._password = password;
+        // we should generate a new salt each time a password gets reset
         this.salt = uuidv1();
         this.hashed_password = this.encryptPassword(password);
     })

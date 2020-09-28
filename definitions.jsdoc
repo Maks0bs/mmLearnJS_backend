@@ -1,0 +1,53 @@
+/**
+ * @namespace models
+ */
+/**
+ * @namespace routers
+ */
+/**
+ * @namespace controllers
+ */
+/**
+ * @typedef BSONDate
+ * @type Object|number
+ * @description the BSON date type, which is used in MongoDB. Internally it is a 64-bit integer.
+ * See MongoDB docs for details
+ */
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Date:
+ *       type: object
+ *       description: >
+ *         Date type. The Date BSON type is used in MongoDB. Internally it is a 64-bit integer.
+ *         See MongoDB docs for details
+ */
+/**
+ * @typedef ObjectId
+ * @type Object|string
+ * @description contains a ref to another object in the database and can be populated with the
+ * fields of the given object. See MongoDB docs for details
+ */
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     ObjectId:
+ *       type: object
+ *       description: >
+ *         ObjectID type. The ObjectID BSON type is used in MongoDB to represent refs to other objects in the
+ *         Database. See MongoDB docs for details
+ */
+
+/**
+ * @typedef GridFSFile
+ * @memberOf models
+ * @name GridFSFile
+ * @type Object|File
+ */
+
+
+
+
+

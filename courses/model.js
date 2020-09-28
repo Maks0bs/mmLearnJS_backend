@@ -405,6 +405,15 @@ let UpdateNewInfo = CourseUpdate.discriminator('UpdateNewInfo', updateNewInfoSch
 exports.UpdateNewInfo = UpdateNewInfo;
 
 /**
+ * @typedef Course
+ * @memberOf models
+ * @name Course
+ * @type Object
+ * @property {ObjectId} _id
+ * @property {string} name
+ * @property {models.User}
+ */
+/**
  * @swagger
  * components:
  *   schemas:

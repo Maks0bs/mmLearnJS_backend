@@ -13,7 +13,7 @@ let {
 
 let {
     passwordValidator,
-    userInfoValidator
+    userDataValidator
 } = require('../controllers/validators')
 
 let {
@@ -23,8 +23,7 @@ let {
 let router = require('express').Router()
 
 router.post('/signup',
-    userInfoValidator,
-    passwordValidator("password"),
+    userDataValidator(null, 'name', 'password', 'email'),
     validate,
     signup
 );

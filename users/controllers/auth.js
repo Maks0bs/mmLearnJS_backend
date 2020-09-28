@@ -369,7 +369,7 @@ exports.signin = (req, res) => {
 
 exports.authenticate = async (req, res, next) => {
     if (req.auth){
-        res.status(401).json({
+        return res.status(401).json({
             error: {
                 status: 401,
                 message: 'Security error: auth is defined in req before obtaining it from cookies - that is illegal'

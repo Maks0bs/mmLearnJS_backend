@@ -132,6 +132,7 @@ exports.updateUser = (req, res) => {
 	let newData = {
 		...req.newUserData,
 		newPassword: undefined,
+		password:undefined,
 		oldPassword: undefined
 	};
 
@@ -142,12 +143,12 @@ exports.updateUser = (req, res) => {
 		newData.photo = mongoose.Types.ObjectId(req.files[0].id.toString());
 	}
 
-	/**
+	/*
 	 * Check if given password is equal to current one and set new password only in this case
 	 */
-	if (req.newUserData.newPassword){
+	if (req.newUserData.password){
 		if (req.user.checkCredentials(req.newUserData.oldPassword)){
-			newData.password = req.newUserData.newPassword;
+			newData.password = req.newUserData.password;
 		} else {
 			return res.status(401).json({
 				error:{
@@ -159,7 +160,19 @@ exports.updateUser = (req, res) => {
 	}
 
 	let newUser = req.user;
-	_.extend(newUser, newData);
+	try {
+		_.extend(newUser, newData);
+	} catch (err){
+		console.log(err.message);
+		return res.status(err.status || 400)
+			.json({
+				error: {
+					status: err.status || 400,
+					message: err.message || err
+				}
+			})
+	}
+
 	newUser.updated = Date.now();
 	if (!(Array.isArray(newUser.hiddenFields)
 		&& !newUser.hiddenFields.includes('name')

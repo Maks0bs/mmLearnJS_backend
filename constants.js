@@ -47,7 +47,7 @@ module.exports = {
 			]
 		},
 		apis: [
-			"./*.js", "./routes/*.js", "./users/*/*.js", "./courses/*.js", "./courses/*/*.js",
+			"./*.js", "./*.jsdoc", "./routes/*.js", "./users/*/*.js", "./courses/*.js", "./courses/*/*.js",
 			"./files/*.js"
 		]
 	},
@@ -78,34 +78,3 @@ module.exports = {
 		COURSE_TEACHER_INVITATION: 'USER_NOTIFICATION_TEACHER_INVITATION'
 	}
 }
-
-/**
- * @namespace models
- */
-/**
- * @namespace routers
- */
-/**
- * @namespace controllers
- */
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     Date:
- *       type: object
- *       description: >
- *         Date type. The Date BSON type is used in MongoDB. Internally it is a 64-bit integer.
- *         See MongoDB docs for details
- */
-/**
- * @swagger
- * components:
- *   schemas:
- *     ObjectID:
- *       type: object
- *       description: >
- *         ObjectID type. The ObjectID BSON type is used in MongoDB to represent refs to other objects in the
- *         Database. See MongoDB docs for details
- */

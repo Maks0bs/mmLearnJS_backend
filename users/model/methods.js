@@ -34,7 +34,9 @@ module.exports = {
      * @memberOf models.User
      */
     encryptPassword: function(password){
-        if (!password) return "";
+        // we return "" because errors are caught inside this func.
+        // if we try to set the wrongly encrypted password, it would cause a mongoose error
+        if ((typeof password !== 'string') || !password) return "";
         try {
             return crypto.createHmac('sha1', this.salt)
                 .update(password)

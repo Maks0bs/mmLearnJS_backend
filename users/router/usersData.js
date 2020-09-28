@@ -6,6 +6,7 @@ let {
     userById,
     addNotifications,
     getUsersFiltered,
+    //TODO add validator with !!!all!!! params
     updateUser,
     deserializeAndCleanData,
     isAuthenticatedUser,
@@ -18,7 +19,7 @@ let {
     deleteFiles
 } = require('../../files/controller')
 let {
-    userInfoValidator
+    userDataValidator
 } = require('../controllers/validators')
 let router = require('express').Router()
 
@@ -30,7 +31,7 @@ router.post('/filter', getUsersFiltered);
 router.put('/:userId',
     requireAuthentication,
     isAuthenticatedUser,
-    userInfoValidator,
+    userDataValidator,
     uploadFiles,
     deserializeAndCleanData,
     deleteFiles,
