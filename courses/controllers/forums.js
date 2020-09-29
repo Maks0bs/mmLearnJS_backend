@@ -120,7 +120,7 @@ exports.postById = (req, res, next, postId) => {
 	return res.status(404).json({
 		error: {
 			status: 404,
-			message: "No post with this id was found"
+			message: "No POST with this id was found"
 		}
 	})
 }
@@ -207,7 +207,7 @@ exports.deleteTopicPost = (req, res) => {
 	if (req.userCourseStatus === 'teacher' || req.userCourseStatus === 'creator' 
 	){
 		/*course.sections[req.entry.section].entries[req.entry.pos].content
-			.topics[req.topic.pos].posts[req.post.pos] = undefined;*/
+			.topics[req.topic.pos].posts[req.POST.pos] = undefined;*/
 
 		let postsMap = {};
 		for (let post of course.sections[req.entry.section]
@@ -241,7 +241,7 @@ exports.deleteTopicPost = (req, res) => {
 
 		let newPosts = [];
 
-		//TODO delete references to the deleted post in the parent post
+		//TODO delete references to the deleted POST in the parent POST
 
 		for (let i = 0; i < req.topic.data.posts.length; i++){
 			let post = course.sections[req.entry.section].entries[req.entry.pos]
@@ -267,7 +267,7 @@ exports.deleteTopicPost = (req, res) => {
 			return res.status(401).json({
 				error: {
 					status: 401,
-					message: 'You are not the creator of the post'
+					message: 'You are not the creator of the POST'
 				}
 			})
 		} else {
@@ -281,7 +281,7 @@ exports.deleteTopicPost = (req, res) => {
 			} else {
 				let newPosts = [];
 
-				//TODO delete references to the deleted post in the parent post
+				//TODO delete references to the deleted POST in the parent POST
 				for (let i = 0; i < req.topic.data.posts.length; i++){
 					let post = req.topic.data.posts[i];
 					if (!post._id.equals(req.post.data._id)){
@@ -312,7 +312,7 @@ exports.deleteTopicPost = (req, res) => {
 	course.save()
 	.then((result) => {
 		return res.json({
-			message: 'forum post(s) deleted successfully'
+			message: 'forum POST(s) deleted successfully'
 		})
 	})
 	.catch(err => {

@@ -196,7 +196,7 @@ exports.updateCourse = async (req, res) => {
 
 
 
-	//TODO if previously unavailable / hidden exercises or entries get published, also add updates for this
+	//TODO if previously unavailable / hidden exercises or entries GET published, also add updates for this
 
 
 	if (req.deletedEntries && req.deletedEntries.length > 0){
@@ -278,7 +278,7 @@ exports.enrollInCourse = (req, res) => {
 
 exports.getCoursesFiltered = async (req, res) => {
 
-	//!!! add validation for sane request (e. g. can't post enrolled + teacher)
+	//!!! add validation for sane request (e. g. can't POST enrolled + teacher)
 	let filter = {}, usersToPopulate = [], usersToPopulateSet = {}, courses;
 	if (req.body.courseId){
 		filter._id = req.body.courseId;

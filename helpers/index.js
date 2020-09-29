@@ -1,7 +1,6 @@
 const nodeMailer = require('nodemailer');
-let {
-    validationResult
-} = require('express-validator');
+let { validationResult } = require('express-validator');
+let { gmailClientCredentials } = require('../constants').mail
  
 exports.sendEmail = emailData => {
     const transporter = nodeMailer.createTransport({
@@ -9,10 +8,7 @@ exports.sendEmail = emailData => {
         port: 587,
         secure: false,
         requireTLS: true,
-        auth: {
-            user: "maksthebro173@gmail.com",
-            pass: "pdkxgrrcdduoffjc"
-        }
+        auth: gmailClientCredentials
     });
     return (
         transporter
@@ -22,6 +18,13 @@ exports.sendEmail = emailData => {
     );
 };
 
+/**
+ *
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {function} next
+ * @return {*}
+ */
 exports.validate = (req, res, next) => {
     let { errors } = validationResult(req);
     if (errors.length > 0){
@@ -33,8 +36,11 @@ exports.validate = (req, res, next) => {
             }
         })
     }
+    return next();
+}
 
-    next();
+exports.handleError = (err, options) => {
+    //TODO
 }
 
 /**

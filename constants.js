@@ -41,9 +41,7 @@ module.exports = {
 				}
 			},
 			servers: [
-				{
-					url: apiUrl
-				}
+				{ url: apiUrl }
 			]
 		},
 		apis: [
@@ -54,11 +52,18 @@ module.exports = {
 	environment: process.env.NODE_ENV,
 	users: {
 		USER_HIDDEN: 'USER_HIDDEN',
-		TEACHER_PASSWORD: 'testpass'
+		TEACHER_PASSWORD: 'testpass',
+		ACTIVATION_TIME_PERIOD: 24 * 60 * 60
 	},
 	network: {
 		PORT: process.env.NODE_ENV === 'test' ?
 			9000 : (process.env.PORT || 8080)
+	},
+	mail: {
+		gmailClientCredentials: {
+			user: "maksthebro173@gmail.com",
+			pass: "pdkxgrrcdduoffjc"
+		}
 	},
 	database: {
 		MONGODB_URI: process.env.NODE_ENV === 'test' ?

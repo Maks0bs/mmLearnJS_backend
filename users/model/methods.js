@@ -2,8 +2,9 @@ let crypto = require('crypto');
 
 module.exports = {
     /**
-     * returns true if the given password in plain text is the correct one
-     * for the given user (this password was originally hashed and saved)
+     * @function checkCredentials
+     * @description returns true if the given password in plain text is the correct one
+     * for the given users (this password was originally hashed and saved)
      * @param {string} plain
      * @return {boolean}
      *
@@ -13,8 +14,8 @@ module.exports = {
         return this.encryptPassword(plain) === this.hashed_password
     },
     /**
-     * hides the fields, specified in the array of user's hidden fields.
-     * Note: don't perform call this method if you haven't populated the user
+     * @description hides the fields, specified in the array of users's hidden fields.
+     * Note: don't perform call this method if you haven't populated the users
      * Object with the hidden fields prop or if this array is undefined.
      * @return undefined
      *
@@ -26,11 +27,10 @@ module.exports = {
         }
     },
     /**
-     * returns a hashed password, see {@link crypto}
-     * @param password
+     * @description returns a hashed password, see {@link crypto}. The key for hashing the salt,
+     * which is saved in the users document.
+     * @param {string} password
      * @return {string}
-     * @memberOf User
-     *
      * @memberOf models.User
      */
     encryptPassword: function(password){
@@ -46,4 +46,17 @@ module.exports = {
             return "";
         }
     },
+    /**
+     * @param {UserNotification} notification
+     * @return undefined
+     * @memberOf models.User
+     * @inner
+     */
+    addNotification: function(notification){
+        if (!Array.isArray(this.notifications)){
+            this.notifications = [];
+        }
+        this.notifications.push(notification);
+    }
 }
+

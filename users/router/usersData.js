@@ -25,7 +25,7 @@ let router = require('express').Router()
 
 router.get('/', getUsersFiltered)
 router.get('/:userId', getUser);
-//router.post('/notifications/', addNotifications);
+//router.POST('/notifications/', addNotifications);
 router.post('/filter', getUsersFiltered);
 
 router.put('/:userId',

@@ -11,11 +11,11 @@ exports.userById = (req, res, next, id) => {
 			if (!user) throw {
 				status: 404,
 				error: {
-					message: 'user not found'
+					message: 'users not found'
 				}
 			}
 
-			req.user = user;//may need to change req.user to req.userById to avoid conflicts
+			req.user = user;//may need to change req.users to req.userById to avoid conflicts
 			next();
 		})
 		.catch(err => {
@@ -32,7 +32,7 @@ exports.getUser = (req, res) => {
 		res.status(404).json({
 			error: {
 				status: 404,
-				message: 'user not found'
+				message: 'users not found'
 			}
 		})
 	}
@@ -42,7 +42,7 @@ exports.getUser = (req, res) => {
 	user.salt = undefined;
 	user.hashed_password = undefined;
 
-	// TODO if user != auth user then hide hiddenFields, specified in user object
+	// TODO if users != auth users then hide hiddenFields, specified in users object
 	if (!req.auth || !user._id.equals(req.auth._id)){
 		user.hideFields();
 	}
@@ -54,7 +54,7 @@ exports.configUsersFilter = (req, res, next) => {
 	return next();
 }
 
-//TODO if we find users by a certain param and this param is in the hiddenFields array, don't include this user
+//TODO if we find users by a certain param and this param is in the hiddenFields array, don't include this users
 //TODO however still include, if they could be found by another param, which is not hidden
 exports.getUsersFiltered = (req, res) => {
 	let { usersFilter: filter } = req;
@@ -75,7 +75,7 @@ exports.isAuthenticatedUser = (req, res, next) => {
 	if (!req.auth._id.equals(req.user._id)){
 		return res.status(401)
 			.json({
-				message: 'You cannot perform this action, log in as the correct user'
+				message: 'You cannot perform this action, log in as the correct users'
 			})
 	}
 
@@ -83,7 +83,7 @@ exports.isAuthenticatedUser = (req, res, next) => {
 }
 
 exports.addNotifications = (req, res, next) => {
-	// req.notificationsToAdd: {data: [array of notifications], user: _id}
+	// req.notificationsToAdd: {data: [array of notifications], users: _id}
 	let notifications = req.notificationsToAdd.data;
 	let user = req.notificationsToAdd.user;
 	User.findByIdAndUpdate(
@@ -114,7 +114,7 @@ exports.deserializeAndCleanData = (req, res, next) => {
 	req.newUserData = JSON.parse(req.body.newUserData);
 
 	/**
-	 * Removing previous user avatar if new one gets uploaded
+	 * Removing previous users avatar if new one gets uploaded
 	 */
 	let filesToDelete = [];
 	if (req.files && req.files[0] && req.user.photo
@@ -137,7 +137,7 @@ exports.updateUser = (req, res) => {
 	};
 
 	/**
-	 * If new file is available, then user wants to change their avatar.
+	 * If new file is available, then users wants to change their avatar.
 	 */
 	if (req.files && req.files[0] && newData.photo === 'new'){
 		newData.photo = mongoose.Types.ObjectId(req.files[0].id.toString());
@@ -188,7 +188,7 @@ exports.updateUser = (req, res) => {
 	newUser.save()
 		.then((result) => {
 			return res.json({
-				message: 'user updated successfully'
+				message: 'users updated successfully'
 			})
 		})
 		.catch(err => {
@@ -332,7 +332,7 @@ exports.deleteUser = (req, res) => {
 	User.deleteOne({ _id: req.user._id})
 		.then(() => {
 			res.json({
-				message: 'user deleted successfully'
+				message: 'users deleted successfully'
 			})
 		})
 		.catch(err => {

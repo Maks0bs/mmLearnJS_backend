@@ -1,12 +1,8 @@
-let {
-    body,
-} = require('express-validator')
-
+let { body } = require('express-validator')
 let userDataValidatorsSet = {}
-
 /**
  * @param {string} [fieldName]
- * @return function - the validator for the user's name, which is located in the request body
+ * @return function - the validator for the users's name, which is located in the request body
  */
 let userNameValidator = (fieldName) =>
     body(fieldName || "name", "Name is required").notEmpty().isString()
@@ -14,7 +10,7 @@ userDataValidatorsSet['name'] = userNameValidator;
 exports.userNameValidator = userNameValidator;
 /**
  * @param {string} [fieldName]
- * @return function - the validator for the user's email, which is located in the request body
+ * @return function - the validator for the users's email, which is located in the request body
  */
 let userEmailValidator = (fieldName) => [
     body(fieldName || "email", "Email is required").notEmpty().isString(),
@@ -27,7 +23,7 @@ userDataValidatorsSet['email'] = userEmailValidator
 exports.userEmailValidator = userEmailValidator;
 /**
  * @param {string} [fieldName]
- * @return function - the validator for the user's password, which is located in the request body
+ * @return function - the validator for the users's password, which is located in the request body
  */
 let userPasswordValidator = (fieldName) => [
     body(fieldName || 'password', "Password is required").notEmpty().isString(),
@@ -42,7 +38,7 @@ exports.userPasswordValidator = userPasswordValidator;
 /**
  * @param {Object.<string, string>} options - this param maps a {@link models.User} property to
  * its name in the body. For example, you want to set a new password
- * for the user, but this password is located under the `newPassword` property in the body.
+ * for the users, but this password is located under the `newPassword` property in the body.
  * In this case you should pass `{password: 'newPassword'}` under the options param.
  * Pass a falsy value if you don't need any conversion, described above
  * @param {...string} fields - the fields that should be validated for correctness.

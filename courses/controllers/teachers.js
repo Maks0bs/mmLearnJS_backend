@@ -84,7 +84,7 @@ exports.sendTeacherInvite = (req, res, next) => {
 	.then((data) => {
 		if (newUser){
 			return res.json({
-				message: 'invitation sent to unregistered user'
+				message: 'invitation sent to unregistered users'
 			})
 		}
 		return next();

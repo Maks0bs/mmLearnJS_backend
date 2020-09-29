@@ -21,6 +21,18 @@ let {
 	requireAuthentication,
 } = require('../users/controllers/auth')
 let router = require('express').Router()
+
+/**
+ * @swagger
+ * tags:
+ *   name: Files
+ *   description: >
+ *     API endpoints for handling files. They are saved in MongoDB via GridFS
+ *   externalDocs:
+ *     url: "https://docs.mongodb.com/manual/core/gridfs/"
+ *     description: Find out more about GridFS
+ */
+
 router.post('/upload', 
 	requireAuthentication,
 	uploadFiles, 

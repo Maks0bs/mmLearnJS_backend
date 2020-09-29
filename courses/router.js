@@ -116,12 +116,12 @@ router.post('/:courseId/forum/:entryId/new-topic',
 	userInCourse,
 	createForumTopic,
 )
-router.post('/:courseId/forum/:entryId/topic/:topicId/post/:postId/answer',
+router.post('/:courseId/forum/:entryId/topic/:topicId/POST/:postId/answer',
 	requireAuthentication,
 	userInCourse,
 	answerTopicPost
 )
-router.delete('/:courseId/forum/:entryId/topic/:topicId/post/:postId',
+router.delete('/:courseId/forum/:entryId/topic/:topicId/POST/:postId',
 	requireAuthentication,
 	userInCourse,
 	deleteTopicPost
@@ -149,7 +149,7 @@ router.get('/:courseId/exercise/:exerciseId',
 	userInCourse,
 	getExercise
 )
-router.get('/:courseId/exercise/:exerciseId/user-attempts',
+router.get('/:courseId/exercise/:exerciseId/users-attempts',
 	requireAuthentication,
 	userInCourse,
 	getExerciseAttempts

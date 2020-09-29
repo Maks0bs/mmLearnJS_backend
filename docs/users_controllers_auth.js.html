@@ -1,4 +1,99 @@
-let jwt = require('jsonwebtoken');
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> users/controllers/auth.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">mmLearnJS API</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+                <div class="search-wrapper">
+                    <input id="search" type="text" placeholder="Search docs..." class="input">
+                </div>
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#formatMongooseError">formatMongooseError</a></li><li><a href="global.html#gfs">gfs</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#sendActivationLink">sendActivationLink</a></li><li><a href="global.html#signup">signup</a></li><li><a href="global.html#updateDeletedEntriesSchema">updateDeletedEntriesSchema</a></li><li><a href="global.html#updateNewEntriesSchema">updateNewEntriesSchema</a></li><li><a href="global.html#updateNewInfoSchema">updateNewInfoSchema</a></li><li><a href="global.html#userDataValidator">userDataValidator</a></li><li><a href="global.html#userEmailValidator">userEmailValidator</a></li><li><a href="global.html#userNameValidator">userNameValidator</a></li><li><a href="global.html#userPasswordValidator">userPasswordValidator</a></li><li><a href="global.html#validate">validate</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>users/controllers/auth.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>let jwt = require('jsonwebtoken');
 let User = require('../model');
 let mongoose = require('mongoose');
 let { Course } = require('../../courses/model');
@@ -28,12 +123,12 @@ let { ACTIVATE_ACCOUNT, COURSE_TEACHER_INVITATION } = require('../../constants')
 exports.signup = (req, res) => {
     User.findOne({ email: req.body.email })
         .then(  user => {
-            // users with the given email already exists
+            // user with the given email already exists
             if (user) throw {
                 status: 403,
                 message: 'Email is taken'
             }
-            if (req.body.teacher && req.body.teacherPassword === TEACHER_PASSWORD){
+            if (req.body.teacher &amp;&amp; req.body.teacherPassword === TEACHER_PASSWORD){
                 req.body.role = 'teacher'
             } else if (req.body.teacher) throw {
                 status: 401,
@@ -41,7 +136,7 @@ exports.signup = (req, res) => {
             }
             return new User(req.body)
         })
-        .then( /** @param {models.User & any} user*/user => {
+        .then( /** @param {models.User &amp; any} user*/user => {
             user.addNotification({
                 type: ACTIVATE_ACCOUNT,
                 title: 'Activate your account',
@@ -58,7 +153,7 @@ exports.signup = (req, res) => {
             req.emailData = { email: user.email, token: token }
             return user.save()
         })
-        .then( /** @param {models.User & any} user*/user => {
+        .then( /** @param {models.User &amp; any} user*/user => {
             req.newUser = user;
             return sendEmail({
                 from: "noreply@mmlearnjs.com",
@@ -68,8 +163,8 @@ exports.signup = (req, res) => {
                     `Please use the following link to activate your account: ` +
                     `${CLIENT_URL}/activate-account/${req.emailData.token}`,
                 html: `
-                    <p> Please use the following link to activate your account: </p> 
-                    <p> ${CLIENT_URL}/activate-account/${req.emailData.token} </p>
+                    &lt;p> Please use the following link to activate your account: &lt;/p> 
+                    &lt;p> ${CLIENT_URL}/activate-account/${req.emailData.token} &lt;/p>
                 `
             });
         })
@@ -90,10 +185,10 @@ exports.signup = (req, res) => {
 }
 
 /**
- * It is only possible to send activation to current authenticated users. That's why there is no users id parameter in this service
- * @param req has info about authenticated users
- * @param res sends activation link to authenticated users's email
- * @returns {any} sends activation link to authenticated users's email
+ * It is only possible to send activation to current authenticated user. That's why there is no user id parameter in this service
+ * @param req has info about authenticated user
+ * @param res sends activation link to authenticated user's email
+ * @returns {any} sends activation link to authenticated user's email
  */
 exports.sendActivationLink = (req, res) => {
     if (req.auth.activated){
@@ -122,8 +217,8 @@ exports.sendActivationLink = (req, res) => {
         subject: "Account activation instructions",
         text: `Please use the following link to activate your account: ${CLIENT_URL}/activate-account/${token}`,
         html: `
-            <p> Please use the following link to activate your account: </p> 
-            <p> ${CLIENT_URL}/activate-account/${token} </p>
+            &lt;p> Please use the following link to activate your account: &lt;/p> 
+            &lt;p> ${CLIENT_URL}/activate-account/${token} &lt;/p>
         `
     })
         .then(result => {
@@ -180,10 +275,10 @@ exports.inviteSignup = (req, res) => {
                 message: 'Email is taken'
             }
 
-            if (inviteData.teacher || (req.body.teacher && req.body.teacherPassword === TEACHER_PASSWORD)){
+            if (inviteData.teacher || (req.body.teacher &amp;&amp; req.body.teacherPassword === TEACHER_PASSWORD)){
                 req.body.role = 'teacher'
             }
-            else if (req.body.teacher && req.body.teacherPassword !== TEACHER_PASSWORD) throw {
+            else if (req.body.teacher &amp;&amp; req.body.teacherPassword !== TEACHER_PASSWORD) throw {
                 status: 401,
                 message: 'Wrong teacher password'
             }
@@ -246,8 +341,8 @@ exports.inviteSignup = (req, res) => {
                 subject: "Account activation instructions",
                 text: `Please use the following link to activate your account: ${CLIENT_URL}/activate-account/${emailData.token}`,
                 html: `
-                    <p> Please use the following link to activate your account: </p> 
-                    <p> ${CLIENT_URL}/activate-account/${emailData.token} </p>
+                    &lt;p> Please use the following link to activate your account: &lt;/p> 
+                    &lt;p> ${CLIENT_URL}/activate-account/${emailData.token} &lt;/p>
                 `
             });
         })
@@ -294,7 +389,7 @@ exports.activateAccount = (req, res) => {
         .then(user => {
             if (!user) throw {
                 status: 403,
-                message: 'Cannot activate users with this token'
+                message: 'Cannot activate user with this token'
             }
             if (user.activated){
                 return res.json({
@@ -303,7 +398,7 @@ exports.activateAccount = (req, res) => {
             }
             user.activated = true;
             if (user.notifications){
-                for (let i = 0; i < user.notifications.length; i++) {
+                for (let i = 0; i &lt; user.notifications.length; i++) {
                     let cur = user.notifications[i];
                     if (cur.type === ACTIVATE_ACCOUNT){
                         user.notifications.splice(i, 1);
@@ -344,7 +439,7 @@ exports.signin = (req, res) => {
 
             if (!user.checkCredentials(password)) throw {
                 status: 401,
-                message: 'Wrong password for this users'
+                message: 'Wrong password for this user'
             }
 
             let token = jwt.sign(
@@ -478,7 +573,7 @@ exports.forgotPassword = (req, res) => {
     let { email } = req.body;
 
     /*
-     * Find users based on email
+     * Find user based on email
      */
     User.findOne({ email })
         .then(user => {
@@ -487,7 +582,7 @@ exports.forgotPassword = (req, res) => {
                     error: "User with that email does not exist!"
                 });
 
-            // generate a token with users id and secret
+            // generate a token with user id and secret
             let token = jwt.sign(
                 {
                     _id: user._id,
@@ -507,8 +602,8 @@ exports.forgotPassword = (req, res) => {
                 subject: "Password Reset Instructions",
                 text: `Please use the following link to reset your password: ${CLIENT_URL}/reset-password/${token}`,
                 html: `
-                        <p>Please use the following link to reset your password:</p> 
-                        <p>${CLIENT_URL}/reset-password/${token}</p>
+                        &lt;p>Please use the following link to reset your password:&lt;/p> 
+                        &lt;p>${CLIENT_URL}/reset-password/${token}&lt;/p>
                 `
             };
 
@@ -574,3 +669,34 @@ exports.resetPassword = (req, res) => {
         })
 
 }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+<script src="scripts/search.js"> </script>
+
+</body>
+</html>

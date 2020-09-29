@@ -1,0 +1,314 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> files/controller.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">mmLearnJS API</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+                <div class="search-wrapper">
+                    <input id="search" type="text" placeholder="Search docs..." class="input">
+                </div>
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#formatMongooseError">formatMongooseError</a></li><li><a href="global.html#gfs">gfs</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#sendActivationLink">sendActivationLink</a></li><li><a href="global.html#signup">signup</a></li><li><a href="global.html#updateDeletedEntriesSchema">updateDeletedEntriesSchema</a></li><li><a href="global.html#updateNewEntriesSchema">updateNewEntriesSchema</a></li><li><a href="global.html#updateNewInfoSchema">updateNewInfoSchema</a></li><li><a href="global.html#userDataValidator">userDataValidator</a></li><li><a href="global.html#userEmailValidator">userEmailValidator</a></li><li><a href="global.html#userNameValidator">userNameValidator</a></li><li><a href="global.html#userPasswordValidator">userPasswordValidator</a></li><li><a href="global.html#validate">validate</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>files/controller.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>let GridFS = require('gridfs-stream');
+let GridFSStorage = require('multer-gridfs-storage');
+let multer = require('multer');
+let mongoose = require('mongoose');
+let crypto = require('crypto');
+let constants = require('../constants');
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Upload.File:
+ *       type: object
+ *       description: >
+ *         File type. Files are stored in MongoDB via GridFS in this API.
+ *         See GridFS and Multer docs for details.
+ */
+
+let gfs;
+mongoose.connection.on('open', () => {
+    gfs = GridFS(mongoose.connection.db, mongoose.mongo);
+    gfs.collection('uploads');
+})
+let storage = new GridFSStorage({
+    url: constants.database.MONGODB_URI,
+    file: (req, file) => {
+        return new Promise((resolve, reject) => {
+            crypto.randomBytes(16, (err, buf) => {
+                if (err) {
+                    return reject(err);
+                }
+                let filename = buf.toString('hex');
+                let fileInfo = {
+                    filename: filename,
+                    bucketName: 'uploads',
+                    metadata: {
+                    	uploadedBy: req.auth._id
+                    }
+                }
+                resolve(fileInfo);
+            })
+        })
+    }
+})
+let upload = multer({ storage });
+
+exports.uploadFiles = upload.any()
+/*.fields([
+	{
+		name: 'files', 
+		maxCount: constants.database.FILES_UPLOAD_LIMIT
+	}
+])*/
+
+exports.sendFiles = (req, res) => {
+	res.json({
+		files: req.files
+	})
+}
+
+exports.getFilesFiltered = (req, res) => {
+	let filter = {}
+	if (req.body.fileId){
+		filter._id = mongoose.mongo.ObjectId(req.body.fileId);
+	}
+	gfs.files.find(filter).toArray((err, files) =>{
+		if (err) {
+			return res.status(400).json({
+				error: err
+			})
+		}
+
+		if (!files || files.length === 0){
+			return res.status(404).json({
+				error: {
+					status: 404,
+					message: 'files do not exist'
+				}
+			})
+		}
+
+		console.log('files', files);
+
+		res.json(files);
+	}) 
+}
+
+exports.fileById = (req, res, next, id) => {
+	let fileId = '';
+	try {
+		fileId = mongoose.mongo.ObjectId(id);
+	} catch (err) {
+		return res.status(404).json({
+			error: {
+				status: 404,
+				message: err
+			}
+		})
+	}
+
+	gfs.files.findOne({_id: fileId}, (err, file) => {
+		if (err){
+			return res.status(400).json({
+				error: err
+			})
+		}
+
+		if (!file || file.length === 0){
+			return res.status(404).json({
+				status: 404,
+				error: 'no such file exists'
+			})
+		}
+
+		req.file = file;
+		next();
+	})
+}
+
+exports.allowModifyFile = (req, res, next) => {
+	// may need to cast to ObjectId
+	if (req.file.metadata.postedBy !== req.auth._id){
+		res.status(401).json({
+			error: 'you are not authorized to modify this file'
+		})
+	}
+}
+
+exports.setFilename = (req, res, next, filename) => {
+	req.originalname = filename;
+	next();
+}
+
+exports.configStream = (req, res, next) => {
+	console.log('req file', req.file, 'req or name', req.originalname);
+	res.set({
+		'Content-Type': req.file.contentType,
+		'Content-Disposition': `inline; filename=${req.originalname || 'unknown_name'}`
+	})
+	next();
+}
+
+exports.configDownload = (req, res, next) => {
+	res.set({
+		'Content-Length': req.file.length,
+		//'Content-Type': `attachment; filename=${req.originalname || 'unknown_name'}`
+		'Content-Type': `application/octet-stream filename=${req.originalname || 'unknown_name'}`
+	})
+	next();
+}
+
+exports.streamFile = (req, res) => {
+	let readStream = gfs.createReadStream(req.file.filename);
+	readStream.pipe(res);
+}
+
+exports.deleteFile = (req, res) => {
+	let objId = mongoose.mongo.ObjectId(req.file._id);
+	gfs.remove({_id: objId, root: 'uploads'}, (err, gridStore) => {
+		if (err) {
+			return res.status(404).json({
+				err: err
+			})
+		}
+		else{
+			return res.json({
+				message: 'file deleted successfully'
+			})
+		}
+	});
+}
+
+exports.deleteFiles = async (req, res, next) => {
+	let cnt = 0;
+	if (!req.filesToDelete || req.filesToDelete.length === 0){
+		return next();
+	}
+	let promises = [];
+	for (let i of req.filesToDelete){
+		promises.push(new Promise((resolve => {
+			gfs.remove({_id: i, root: 'uploads'}, () => {
+				resolve(i)
+			})
+		})))
+	}
+
+	await Promise.all(promises);
+	return next();
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+<script src="scripts/search.js"> </script>
+
+</body>
+</html>

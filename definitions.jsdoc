@@ -1,4 +1,5 @@
 /**
+ * @external models
  * @namespace models
  */
 /**
@@ -6,6 +7,14 @@
  */
 /**
  * @namespace controllers
+ */
+/**
+ * @typedef UserNotification
+ * @type Object
+ * @property {string} title
+ * @property {string} [text]
+ * @property {string} type
+ * @property {BSONDate} created
  */
 /**
  * @typedef BSONDate
@@ -38,6 +47,33 @@
  *       description: >
  *         ObjectID type. The ObjectID BSON type is used in MongoDB to represent refs to other objects in the
  *         Database. See MongoDB docs for details
+ */
+/**
+ * @typedef Error
+ * @type Object
+ * @property {string} message
+ * @property {number} status
+ * @property {any} error
+ */
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Error:
+ *       type: object
+ *       description: >
+ *         the error object that is returned (sent as response) if an an error has occurred
+ *         on the server while running certain middleware
+ *       properties:
+ *         message:
+ *           type: string
+ *         status:
+ *           type: number
+ *         error:
+ *           type: object
+ *           description: >
+ *             This object is optional and is discouraged to be used.
+ *             Only use `error` if there is no other way to describe the occurred error.
  */
 
 /**
