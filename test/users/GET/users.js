@@ -1,13 +1,13 @@
 process.env.NODE_ENV = 'test';
 
-let { app, chai, expect } = require('../../common');
+let { app, expect, request } = require('../../common');
 
 describe('GET /users/', () => {
     it('check with empty users list', (done) => {
-        chai.request(app)
+        request(app)
             .get('/users')
+            .expect(200)
             .end((err, res) => {
-                res.should.have.status(200);
                 expect(res.body).to.be.a('array');
                 expect(res.body.length).to.be.eql(0);
                 done();

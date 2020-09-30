@@ -1,12 +1,12 @@
 process.env.NODE_ENV = 'test';
 
-let { app, chai, expect, User } = require('../../common');
+let { app, expect, User, request } = require('../../common');
 
 describe('GET /users/:userId', () => {
     it('it should GET a users by the given id', (done) => {
         let user = new User({ name: 'test', email: 'm@m.com', password: 'passw1'});
         user.save((err, user) => {
-            chai.request(app)
+            request(app)
                 .get(`/users/${user._id}`)
                 .end((err, res) => {
                     res.should.have.status(200);

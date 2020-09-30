@@ -21,30 +21,24 @@ describe('POST /auth/signup', () => {
     }
     let agent = request.agent(app);
     let invoke = () => agent.post(url);
-    it('checks validation for user name', () => {
-        return invoke()
-            .send({...userData, name: ''})
-            .expect(callback(400))
-    });
-    it('checks validation for user email', () => {
-        return invoke()
-            .send({...userData, email: 'm.com'})
-            .expect(callback(400))
-    });
-    it('checks validation for user password (too short)', () => {
-        return invoke()
-            .send({...userData, password: 'pass1'})
-            .expect(callback(400))
-    });
-    it('checks validation for user password (no digit)', () => {
-        return invoke()
-            .send({...userData, password: 'passwordIsLong'})
-            .expect(callback(400))
-    });
-    it('checks validation; checks if user password was entered correctly', () => {
-        return invoke()
-            .send({...userData, teacher: true, teacherPassword: 'wrongPassword'})
-            .expect(callback(401))
+    it('it should throw errors when user data is invalid', () => {
+        return Promise.all([
+            invoke()
+                .send({...userData, name: ''})
+                .expect(callback(400)),
+            invoke()
+                .send({...userData, email: 'm.com'})
+                .expect(callback(400)),
+            invoke()
+                .send({...userData, password: 'pass1'})
+                .expect(callback(400)),
+            invoke()
+                .send({...userData, password: 'passwordIsLong'})
+                .expect(callback(400)),
+            invoke()
+                .send({...userData, teacher: true, teacherPassword: 'wrongPassword'})
+                .expect(callback(401))
+        ])
     });
     it('it should not accept short password', () => {
         // TODO test for correct password
