@@ -9,6 +9,15 @@
  * @namespace controllers
  */
 /**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     cookieAuth:
+ *       type: apiKey
+ *       in: cookie
+ *       name: auth
+ */
+/**
  * @typedef UserNotification
  * @type Object
  * @property {string} title

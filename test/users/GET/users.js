@@ -3,7 +3,7 @@ process.env.NODE_ENV = 'test';
 let { app, expect, request } = require('../../common');
 
 describe('GET /users/', () => {
-    it('check with empty users list', (done) => {
+    it('return empty list if no users are available', (done) => {
         request(app)
             .get('/users')
             .expect(200)
