@@ -21,6 +21,8 @@ let { ACTIVATE_ACCOUNT, COURSE_TEACHER_INVITATION } = require('../../constants')
  * @property {string} [teacherPassword]
  */
 /**
+ * @description creates a new user with properties, given in the `req.body`
+ * See {@link models.User} for details on this props.
  * @param {e.Request} req
  * @param {SignupData} req.body
  * @param {e.Response} res
@@ -93,7 +95,7 @@ exports.signup = (req, res) => {
  * It is only possible to send activation to current authenticated users. That's why there is no users id parameter in this service
  * @param req has info about authenticated users
  * @param res sends activation link to authenticated users's email
- * @returns {any} sends activation link to authenticated users's email
+ * @return {any} sends activation link to authenticated users's email
  */
 exports.sendActivationLink = (req, res) => {
     if (req.auth.activated){
