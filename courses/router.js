@@ -1,12 +1,10 @@
 let {
-	requireAuthentication
-} = require('../users/controllers/auth')
-let {
 	isCourseTeacher,
 	isCourseCreator,
 	teacherInCourse,
-	userInCourse
-} = require('../users/controllers/util')
+	userInCourse,
+	requireAuthentication
+} = require('../users/controllers')
 
 let {
 	createCourse,

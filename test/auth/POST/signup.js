@@ -1,23 +1,19 @@
 process.env.NODE_ENV = 'test';
 
-let { app, expect, request } = require('../../common');
+let { app, expect, request, errCallback, User } = require('../../common');
 let { TEACHER_PASSWORD } = require('../../../constants').users
 
 
 describe('POST /auth/signup', () => {
+    beforeEach(() => {
+        return User.remove({});
+    })
     let userData = {
         name: 'test',
         email: 'maksthepro123@gmail.com',
         password: 'passw1'
     }
     let url = '/auth/signup';
-    let errCallback = (status) => (res) => {
-        res.should.have.status(status);
-        let { body } = res;
-        expect(body).to.be.an('object');
-        expect(body.error).to.be.an('object');
-        expect(body.error.message).to.be.a('string');
-    }
     let agent = request.agent(app);
     let invoke = () => agent.post(url);
     it('throw errors when user data is invalid', () => {
@@ -40,6 +36,7 @@ describe('POST /auth/signup', () => {
         ])
     });
     it('create account correctly', () => {
+        //let emailSpy = sinon.spy(require('../../../helpers').sendEmail);
         return invoke()
             .send(userData)
             .expect(200)
@@ -80,7 +77,6 @@ describe('POST /auth/signup', () => {
     it('not create accounts with duplicate email', () => {
         return invoke()
             .send(userData)
-            .expect(200)
             .then(() => invoke()
                 .send(userData)
                 .expect(errCallback(403))

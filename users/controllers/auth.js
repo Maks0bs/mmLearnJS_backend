@@ -2,7 +2,7 @@ let jwt = require('jsonwebtoken');
 let User = require('../model');
 let mongoose = require('mongoose');
 let { Course } = require('../../courses/model');
-let { sendEmail } = require('../../helpers');
+let { sendEmail, handleError } = require('../../helpers');
 let constants = require('../../constants');
 let { JWT_SECRET } = constants.auth,
     { CLIENT_URL, DEFAULT_COOKIE_OPTIONS, NO_ACTION_LOGOUT_TIME } = constants.client,
@@ -29,7 +29,7 @@ let { JWT_SECRET } = constants.auth,
  * @param {e.Response} res
  */
 exports.signup = (req, res) => {
-    User.findOne({ email: req.body.email })
+    return User.findOne({ email: req.body.email })
         .then(  user => {
             // users with the given email already exists
             if (user) throw {
@@ -69,20 +69,16 @@ exports.signup = (req, res) => {
                     <p> Please use the following link to activate your account: </p> 
                     <p> ${CLIENT_URL}/activate-account/${req.emailData.token} </p>
                 `
-            });
+            })
         })
         .then(() => {
-            return res.json({
+            res.json({
                 message: `Signup success for user ${req.body.email}. Please check email for activation`,
                 user: req.newUser
             })
         })
-        .catch(err => {
-            // TODO replace with helpers/handleError
-            console.log(err);
-            res.status(err.status || 400)
-                .json({ error: err })
-        })
+        .catch(err => {handleError(err, res)})
+
 }
 /**
  * @description authenticates the user, sending a cookie with the
@@ -93,8 +89,7 @@ exports.signup = (req, res) => {
  */
 exports.signin = (req, res) => {
     let { email, password } = req.body;
-    //TODO add tests for this
-    User.findOne({ email })
+    return User.findOne({ email })
         .then(/** @type models.User */user => {
             if (!user) throw {
                 status: 400,
@@ -118,27 +113,8 @@ exports.signin = (req, res) => {
                 message: `User ${user.email} signed in successfully`
             })
         })
-        .catch(err => {
-            res.status(err.status || 400)
-                .json({ error: err })
-        })
+        .catch(err => handleError(err, res))
 };
-/**
- * @description lets subsequent middleware be invoked if the user is authenticated
- * @param {e.Request} req
- * @param {models.User} [req.auth]
- * @param {e.Response} res
- * @param {function} next
- */
-exports.requireAuthentication = (req, res, next) => {
-    if (!req.auth){
-        return res.status(401).json({
-            error: { status: 401, message: 'Unauthorized' }
-        })
-    }
-    return next();
-}
-
 /**
  * @description Sends the account activation link to the authenticated user's email
  * if their account is not yet activated
@@ -147,7 +123,6 @@ exports.requireAuthentication = (req, res, next) => {
  * @param {e.Response} res
  */
 exports.sendActivationLink = (req, res) => {
-    //TODO add tests for this
     if (req.auth.activated){
         return res.status(403).json({
             error: { status: 403, message: 'Your account is already activated'}
@@ -175,11 +150,55 @@ exports.sendActivationLink = (req, res) => {
                 message: 'Activation link sent successfully'
             })
         })
-        .catch(err => {
-            console.log(err);
-            res.status(err.status || 400)
-                .json({ error: err })
+        .catch(err => {handleError(err, res)})
+}
+
+/**
+ * @description Activates the account
+ * @param {e.Request} req
+ * @param {object} req.params
+ * @param {string} req.params.activationToken
+ * @param {e.Response} res
+ */
+exports.activateAccount = (req, res) => {
+    //TODO add tests
+    let token = req.params.activationToken, userData;
+    try {
+        userData = jwt.verify(token, JWT_SECRET)
+    }
+    catch (err) {
+        return res.status(401).json({
+            error: {
+                status: 401,
+                message: (err.name === 'TokenExpiredError') ?
+                    'Activation link expired' :
+                    `Activation token error: ${err.message || err.name}`
+            }
         })
+    }
+    return User.findOne({ _id: userData._id })
+        .then(/** @type models.User & any */user => {
+            if (!user) throw {
+                status: 404,
+                message: 'The user with the given token could not be found'
+            }
+            if (user.activated){
+                return res.json({
+                    message: `Account for user with email ${userData.email} is already activated`
+                })
+            }
+            user.activated = true;
+            //remove notifications that reminds the user to activate the account
+            user.notifications =
+                user.notifications.filter(n => n.type !== ACTIVATE_ACCOUNT);
+            return user.save();
+        })
+        .then(() => {
+            return res.json({
+                message: `Account with email ${userData.email} successfully activated`
+            })
+        })
+        .catch(err => handleError(err, res));
 }
 
 exports.inviteSignup = (req, res) => {
@@ -308,153 +327,6 @@ exports.inviteSignup = (req, res) => {
         })
 }
 
-exports.activateAccount = (req, res) => {
-    let token = req.body.token;
-    let userData;
-    try {
-        userData = jwt.verify(token, JWT_SECRET)
-    }
-    catch (err) {
-        if (err.name === 'TokenExpiredError'){
-            res.status(401)
-                .json({
-                    error: {
-                        status: 401,
-                        message: 'Activation link expired. Try getting a new activation link'
-                    }
-                })
-        }
-        else{
-            res.status(400)
-                .json({
-                    error: err
-                })
-        }
-    }
-
-    User.findOne({ _id: userData._id })
-        .then(user => {
-            if (!user) throw {
-                status: 403,
-                message: 'Cannot activate users with this token'
-            }
-            if (user.activated){
-                return res.json({
-                    message: `Account for user with email ${userData.email} is already activated`
-                })
-            }
-            user.activated = true;
-            if (user.notifications){
-                for (let i = 0; i < user.notifications.length; i++) {
-                    let cur = user.notifications[i];
-                    if (cur.type === ACTIVATE_ACCOUNT){
-                        user.notifications.splice(i, 1);
-                        break;
-                    }
-                }
-            }
-
-            return user.save();
-        })
-        .then(data => {
-            res.json({
-                message: `Account with email ${userData.email} successfully activated`,
-                auth: req.auth
-            })
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(err.status || 400)
-                .json({
-                    error: err
-                })
-        })
-}
-
-
-exports.authenticate = async (req, res, next) => {
-    if (req.auth){
-        return res.status(401).json({
-            error: {
-                status: 401,
-                message: 'Security error: auth is defined in req before obtaining it from cookies - that is illegal'
-            }
-        })
-    }
-    let token = req.cookies['auth']
-    if (!token){
-        return next();
-    }
-    let userData = undefined;
-    try {
-        userData = jwt.verify(token, JWT_SECRET);
-        delete userData.iat;
-        req.auth = await User.findOne({_id: userData._id})
-        return next();
-    }
-    catch(err) {
-        console.log(err);
-        return next();
-    }
-}
-
-// change name
-// this middleware should be called every time we perform an action on /classroom to check authentication
-exports.extendSession = (req, res, next) => {
-    if (!req.auth){
-        return next()
-    }
-    try {
-        let updatedToken = jwt.sign(
-            {
-                _id: req.auth._id,
-                role: req.auth.role,
-                email: req.auth.email
-            },
-            JWT_SECRET);
-        res.cookie(
-            'auth',
-            updatedToken,
-            {
-                ...DEFAULT_COOKIE_OPTIONS,
-                maxAge: NO_ACTION_LOGOUT_TIME
-            }
-        )
-    }
-    catch (err) {
-        console.log(err);
-    }
-
-    return next()
-}
-
-
-
-exports.getAuthenticatedUser = (req, res) => {
-    if (!req.auth){
-        return res.json("Not authenticated");
-    }
-    User.findOne({ _id: req.auth._id })
-        .select('-salt -hashed_password')
-        .populate('subscribedCourses.course', '_id name')
-        .then(user => {
-            res.json(user);
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(err.status || 400)
-                .json({
-                    error: err
-                })
-        })
-}
-
-exports.logout = (req, res) => {
-    res.clearCookie('auth', {...DEFAULT_COOKIE_OPTIONS});
-    res.json({
-        message: 'logout successful'
-    })
-}
 
 
 
@@ -542,7 +414,6 @@ exports.resetPassword = (req, res) => {
         }
     }
 
-    console.log('data', data);
 
     User.findOne({ email: data.email })
         .then(user => {

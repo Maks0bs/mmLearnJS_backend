@@ -19,7 +19,7 @@ let {
 let {
 	isCourseTeacher,
 	requireAuthentication,
-} = require('../users/controllers/auth')
+} = require('../users/controllers')
 let router = require('express').Router()
 
 /**

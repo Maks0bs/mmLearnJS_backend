@@ -74,7 +74,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#formatMongooseError">formatMongooseError</a></li><li><a href="global.html#gfs">gfs</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#sendActivationLink">sendActivationLink</a></li><li><a href="global.html#signup">signup</a></li><li><a href="global.html#updateDeletedEntriesSchema">updateDeletedEntriesSchema</a></li><li><a href="global.html#updateNewEntriesSchema">updateNewEntriesSchema</a></li><li><a href="global.html#updateNewInfoSchema">updateNewInfoSchema</a></li><li><a href="global.html#userDataValidator">userDataValidator</a></li><li><a href="global.html#userEmailValidator">userEmailValidator</a></li><li><a href="global.html#userNameValidator">userNameValidator</a></li><li><a href="global.html#userPasswordValidator">userPasswordValidator</a></li><li><a href="global.html#validate">validate</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#activateAccount">activateAccount</a></li><li><a href="global.html#authenticate">authenticate</a></li><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#extendSession">extendSession</a></li><li><a href="global.html#formatMongooseError">formatMongooseError</a></li><li><a href="global.html#gfs">gfs</a></li><li><a href="global.html#handleError">handleError</a></li><li><a href="global.html#requireAuthentication">requireAuthentication</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#sendActivationLink">sendActivationLink</a></li><li><a href="global.html#sendEmail">sendEmail</a></li><li><a href="global.html#signin">signin</a></li><li><a href="global.html#signup">signup</a></li><li><a href="global.html#updateDeletedEntriesSchema">updateDeletedEntriesSchema</a></li><li><a href="global.html#updateNewEntriesSchema">updateNewEntriesSchema</a></li><li><a href="global.html#updateNewInfoSchema">updateNewInfoSchema</a></li><li><a href="global.html#userDataValidator">userDataValidator</a></li><li><a href="global.html#userEmailValidator">userEmailValidator</a></li><li><a href="global.html#userNameValidator">userNameValidator</a></li><li><a href="global.html#userPasswordValidator">userPasswordValidator</a></li><li><a href="global.html#validate">validate</a></li></ul></div>
                 
             </nav>
         </div>
@@ -871,7 +871,7 @@
     
     <div class="description">
         <p>returns true if the given password in plain text is the correct one
-for the given user (this password was originally hashed and saved)</p>
+for the given users (this password was originally hashed and saved)</p>
     </div>
     
 
@@ -1047,7 +1047,7 @@ for the given user (this password was originally hashed and saved)</p>
     
     <div class="description">
         <p>returns a hashed password, see crypto. The key for hashing the salt,
-which is saved in the user document.</p>
+which is saved in the users document.</p>
     </div>
     
 
@@ -1222,8 +1222,8 @@ which is saved in the user document.</p>
     
     
     <div class="description">
-        <p>hides the fields, specified in the array of user's hidden fields.
-Note: don't perform call this method if you haven't populated the user
+        <p>hides the fields, specified in the array of users's hidden fields.
+Note: don't perform call this method if you haven't populated the users
 Object with the hidden fields prop or if this array is undefined.</p>
     </div>
     

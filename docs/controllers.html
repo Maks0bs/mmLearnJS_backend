@@ -74,7 +74,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#formatMongooseError">formatMongooseError</a></li><li><a href="global.html#gfs">gfs</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#sendActivationLink">sendActivationLink</a></li><li><a href="global.html#signup">signup</a></li><li><a href="global.html#updateDeletedEntriesSchema">updateDeletedEntriesSchema</a></li><li><a href="global.html#updateNewEntriesSchema">updateNewEntriesSchema</a></li><li><a href="global.html#updateNewInfoSchema">updateNewInfoSchema</a></li><li><a href="global.html#userDataValidator">userDataValidator</a></li><li><a href="global.html#userEmailValidator">userEmailValidator</a></li><li><a href="global.html#userNameValidator">userNameValidator</a></li><li><a href="global.html#userPasswordValidator">userPasswordValidator</a></li><li><a href="global.html#validate">validate</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#activateAccount">activateAccount</a></li><li><a href="global.html#authenticate">authenticate</a></li><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#extendSession">extendSession</a></li><li><a href="global.html#formatMongooseError">formatMongooseError</a></li><li><a href="global.html#gfs">gfs</a></li><li><a href="global.html#handleError">handleError</a></li><li><a href="global.html#requireAuthentication">requireAuthentication</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#sendActivationLink">sendActivationLink</a></li><li><a href="global.html#sendEmail">sendEmail</a></li><li><a href="global.html#signin">signin</a></li><li><a href="global.html#signup">signup</a></li><li><a href="global.html#updateDeletedEntriesSchema">updateDeletedEntriesSchema</a></li><li><a href="global.html#updateNewEntriesSchema">updateNewEntriesSchema</a></li><li><a href="global.html#updateNewInfoSchema">updateNewInfoSchema</a></li><li><a href="global.html#userDataValidator">userDataValidator</a></li><li><a href="global.html#userEmailValidator">userEmailValidator</a></li><li><a href="global.html#userNameValidator">userNameValidator</a></li><li><a href="global.html#userPasswordValidator">userPasswordValidator</a></li><li><a href="global.html#validate">validate</a></li></ul></div>
                 
             </nav>
         </div>
@@ -166,6 +166,395 @@
 
     
 
+    
+        <div class='vertical-section'>
+            <h1>Methods</h1>
+            <div class="members">
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id=".getAuthenticatedUser">
+        <a class="href-link" href="#.getAuthenticatedUser">#</a>
+        
+            
+                <span class='tag'>static</span>
+            
+        
+        <span class="code-name">
+            
+                getAuthenticatedUser<span class="signature">(req, res)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    
+    <div class="description">
+        <p>lets subsequent middleware be invoked if the user is authenticated</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">e.Request</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+  
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>auth</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="models.User.html">models.User</a></span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+  
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>res</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">e.Response</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="users_controllers_util.js.html" class="button">View Source</a>
+            <span>
+                <a href="users_controllers_util.js.html">users/controllers/util.js</a>, <a href="users_controllers_util.js.html#line101">line 101</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id=".logout">
+        <a class="href-link" href="#.logout">#</a>
+        
+            
+                <span class='tag'>static</span>
+            
+        
+        <span class="code-name">
+            
+                logout<span class="signature">(req, res)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    
+    <div class="description">
+        <p>Clears the cookie that is responsible for authenticating the user.
+This is necessary, because all cookies have the
+<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies">HttpOnly</a> property</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">e.Request</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>res</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">e.Response</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="users_controllers_util.js.html" class="button">View Source</a>
+            <span>
+                <a href="users_controllers_util.js.html">users/controllers/util.js</a>, <a href="users_controllers_util.js.html#line120">line 120</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+            
+            </div>
+        </div>
     
 
     

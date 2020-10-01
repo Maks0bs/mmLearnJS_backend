@@ -1,8 +1,13 @@
 const nodeMailer = require('nodemailer');
 let { validationResult } = require('express-validator');
 let { gmailClientCredentials } = require('../constants').mail
- 
+
+/**
+ * @param emailData
+ * @return {Promise<string>}
+ */
 exports.sendEmail = emailData => {
+
     const transporter = nodeMailer.createTransport({
         host: 'smtp.gmail.com',
         port: 587,
@@ -10,37 +15,48 @@ exports.sendEmail = emailData => {
         requireTLS: true,
         auth: gmailClientCredentials
     });
-    return (
+    return new Promise((resolve, reject) => {
         transporter
-            .sendMail(emailData)
-            .then(info => console.log(`Message sent: ${info.response}`))
-            .catch(err => console.log(`Problem sending email: ${err}`))
-    );
+            .sendMail(emailData, (err, info) => {
+                if (err){
+                    console.log(`Problem sending email: ${JSON.stringify(err)}`)
+                    reject(err);
+                } else {
+                    console.log(`Message sent: ${info.response}`);
+                    resolve(`Email sent: ${info.response}`);
+                }
+            })
+    })
 };
 
 /**
- *
  * @param {e.Request} req
  * @param {e.Response} res
  * @param {function} next
- * @return {*}
  */
 exports.validate = (req, res, next) => {
     let { errors } = validationResult(req);
     if (errors.length > 0){
         let firstError = errors.map((error) => error.msg)[0];
         return res.status(400).json({
-            error: {
-                status: 400,
-                message: firstError
-            }
+            error: { status: 400, message: firstError}
         })
     }
     return next();
 }
 
-exports.handleError = (err, options) => {
-    //TODO
+/**
+ * @description finished the middleware invocation and sends an error to the client.
+ * By default the `error` object has 2 keys: `status` and `message`. Customize
+ * it with the `option` param.
+ * @param {any} err
+ * @param {e.Response} res
+ * @param {Object} [options] - specify here how the given error is structured
+ */
+exports.handleError = (err, res, options) => {
+    console.log(err);
+    return res.status(err.status || 400)
+        .json({ error: err })
 }
 
 /**

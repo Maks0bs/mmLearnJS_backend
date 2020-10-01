@@ -76,7 +76,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#formatMongooseError">formatMongooseError</a></li><li><a href="global.html#gfs">gfs</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#sendActivationLink">sendActivationLink</a></li><li><a href="global.html#signup">signup</a></li><li><a href="global.html#updateDeletedEntriesSchema">updateDeletedEntriesSchema</a></li><li><a href="global.html#updateNewEntriesSchema">updateNewEntriesSchema</a></li><li><a href="global.html#updateNewInfoSchema">updateNewInfoSchema</a></li><li><a href="global.html#userDataValidator">userDataValidator</a></li><li><a href="global.html#userEmailValidator">userEmailValidator</a></li><li><a href="global.html#userNameValidator">userNameValidator</a></li><li><a href="global.html#userPasswordValidator">userPasswordValidator</a></li><li><a href="global.html#validate">validate</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#activateAccount">activateAccount</a></li><li><a href="global.html#authenticate">authenticate</a></li><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#extendSession">extendSession</a></li><li><a href="global.html#formatMongooseError">formatMongooseError</a></li><li><a href="global.html#gfs">gfs</a></li><li><a href="global.html#handleError">handleError</a></li><li><a href="global.html#requireAuthentication">requireAuthentication</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#sendActivationLink">sendActivationLink</a></li><li><a href="global.html#sendEmail">sendEmail</a></li><li><a href="global.html#signin">signin</a></li><li><a href="global.html#signup">signup</a></li><li><a href="global.html#updateDeletedEntriesSchema">updateDeletedEntriesSchema</a></li><li><a href="global.html#updateNewEntriesSchema">updateNewEntriesSchema</a></li><li><a href="global.html#updateNewInfoSchema">updateNewInfoSchema</a></li><li><a href="global.html#userDataValidator">userDataValidator</a></li><li><a href="global.html#userEmailValidator">userEmailValidator</a></li><li><a href="global.html#userNameValidator">userNameValidator</a></li><li><a href="global.html#userPasswordValidator">userPasswordValidator</a></li><li><a href="global.html#validate">validate</a></li></ul></div>
                 
             </nav>
         </div>
@@ -97,7 +97,7 @@
 let userDataValidatorsSet = {}
 /**
  * @param {string} [fieldName]
- * @return function - the validator for the user's name, which is located in the request body
+ * @return function - the validator for the users's name, which is located in the request body
  */
 let userNameValidator = (fieldName) =>
     body(fieldName || "name", "Name is required").notEmpty().isString()
@@ -105,7 +105,7 @@ userDataValidatorsSet['name'] = userNameValidator;
 exports.userNameValidator = userNameValidator;
 /**
  * @param {string} [fieldName]
- * @return function - the validator for the user's email, which is located in the request body
+ * @return function - the validator for the users's email, which is located in the request body
  */
 let userEmailValidator = (fieldName) => [
     body(fieldName || "email", "Email is required").notEmpty().isString(),
@@ -118,7 +118,7 @@ userDataValidatorsSet['email'] = userEmailValidator
 exports.userEmailValidator = userEmailValidator;
 /**
  * @param {string} [fieldName]
- * @return function - the validator for the user's password, which is located in the request body
+ * @return function - the validator for the users's password, which is located in the request body
  */
 let userPasswordValidator = (fieldName) => [
     body(fieldName || 'password', "Password is required").notEmpty().isString(),
@@ -133,7 +133,7 @@ exports.userPasswordValidator = userPasswordValidator;
 /**
  * @param {Object.&lt;string, string>} options - this param maps a {@link models.User} property to
  * its name in the body. For example, you want to set a new password
- * for the user, but this password is located under the `newPassword` property in the body.
+ * for the users, but this password is located under the `newPassword` property in the body.
  * In this case you should pass `{password: 'newPassword'}` under the options param.
  * Pass a falsy value if you don't need any conversion, described above
  * @param {...string} fields - the fields that should be validated for correctness.

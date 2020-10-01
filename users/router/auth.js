@@ -1,9 +1,8 @@
 let {
     signup, activateAccount, signin, getAuthenticatedUser,
     requireAuthentication, logout, inviteSignup, sendActivationLink,
-    forgotPassword, resetPassword
+    forgotPassword, resetPassword, userDataValidator
 } = require('../controllers');
-let {userDataValidator} = require('../controllers/validators')
 let {validate} = require('../../helpers')
 /**
  * @swagger
@@ -19,7 +18,6 @@ let {validate} = require('../../helpers')
  *     so that it would last 10 minutes, starting from the moment when the client
  *     receives the response. If no `auth` cookie is present, nothing happens.
  */
-
 let router = require('express').Router()
 
 /**
@@ -161,7 +159,57 @@ router.post('/signup',
  *              schema:
  *                $ref: '#/components/schemas/Error'
  */
-router.post('/signin', signin); //TODO add tests for this
+router.post('/signin', signin);
+
+/**
+ * @swagger
+ * path:
+ *  /auth/logout:
+ *    get:
+ *      summary: >
+ *        Clears the cookie that is responsible for authenticating the user if it is present.
+ *        This is necessary, because all cookies have the
+ *        [HttpOnly](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies) property
+ *      tags:
+ *        - "/auth/..."
+ *      responses:
+ *        "200":
+ *          description: Cookies cleared successfully
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ */
+router.get('/logout', logout);
+
+/**
+ * @swagger
+ * path:
+ *  /auth/cur-user:
+ *    get:
+ *      summary: >
+ *        Get the current authenticated, depending on the authentication
+ *        token in the `auth` cookie
+ *      security:
+ *        - cookieAuth: []
+ *      tags:
+ *        - "/auth/..."
+ *      responses:
+ *        "200":
+ *          description: >
+ *            The authenticated user if the authorization cookie was present
+ *            in the headers, `"Not authenticated"` otherwise
+ *          content:
+ *            application/json:
+ *              schema:
+ *                oneOf:
+ *                  - $ref: '#/components/schemas/User'
+ *                  - type: string
+ */
+router.get('/cur-user', getAuthenticatedUser);
 
 /**
  * @swagger
@@ -198,15 +246,58 @@ router.post('/signin', signin); //TODO add tests for this
  *              schema:
  *                $ref: '#/components/schemas/Error'
  */
-router.post('/send-activation', //TODO add tests for this
+router.post('/send-activation',//TODO finish tests, check if email is sent with sinon/or smth else
     requireAuthentication,
     sendActivationLink
 )
 
+/**
+ * @swagger
+ * path:
+ *  /auth/activate/:activationToken:
+ *    get:
+ *      summary: >
+ *        Activates the user, who is encrypted in
+ *        the token in the `activationToken` param
+ *      tags:
+ *        - "/auth/..."
+ *      parameters:
+ *        - name: activationToken
+ *          in: path
+ *          description: >
+ *            the token that contains
+ *            encrypted user data
+ *          required: true
+ *          type: string
+ *      responses:
+ *        "200":
+ *          description: >
+ *            Successfully activated account if it is not activated.
+ *            Do nothing if account was activated beforehand.
+ *            If not activated before, remove a reminder /
+ *            notification to activate the account for the user
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *        "401":
+ *          description: The activation token is invalid
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *        "404":
+ *          description: User with given token could not be found
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
+router.get('/activate/:activationToken', activateAccount); //TODO add tests
 
-router.post('/activate', activateAccount);
-router.get('/cur-users', getAuthenticatedUser);
-router.get('/logout', logout);
 router.post('/invite-signup', inviteSignup);
 
 router.post('/forgot-password', forgotPassword)

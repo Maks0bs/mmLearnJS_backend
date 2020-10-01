@@ -27,6 +27,8 @@
   },
   "homepage": "https://github.com/Maks0bs/mmLearnJS_backend#readme",
   "dependencies": {
+    "@types/nodemailer": "^6.4.0",
+    "@types/sinon": "^9.0.7",
     "@types/supertest": "^2.0.10",
     "async": "^3.2.0",
     "body-parser": "^1.19.0",
@@ -58,6 +60,7 @@
     "mocha": "^8.1.3",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.4",
+    "sinon": "^9.1.0",
     "superagent": "^6.1.0",
     "supertest": "^5.0.0"
   }

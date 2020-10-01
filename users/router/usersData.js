@@ -1,7 +1,5 @@
 let {
     requireAuthentication,
-} = require('../controllers/auth');
-let {
     getUser,
     userById,
     addNotifications,
@@ -13,7 +11,7 @@ let {
     getUpdatesByDate,
     deleteUser,
     removeUserMentions
-} = require('../controllers/main');
+} = require('../controllers');
 let {
     uploadFiles,
     deleteFiles
