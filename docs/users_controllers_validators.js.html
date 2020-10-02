@@ -76,7 +76,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#activateAccount">activateAccount</a></li><li><a href="global.html#authenticate">authenticate</a></li><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#extendSession">extendSession</a></li><li><a href="global.html#formatMongooseError">formatMongooseError</a></li><li><a href="global.html#gfs">gfs</a></li><li><a href="global.html#handleError">handleError</a></li><li><a href="global.html#requireAuthentication">requireAuthentication</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#sendActivationLink">sendActivationLink</a></li><li><a href="global.html#sendEmail">sendEmail</a></li><li><a href="global.html#signin">signin</a></li><li><a href="global.html#signup">signup</a></li><li><a href="global.html#updateDeletedEntriesSchema">updateDeletedEntriesSchema</a></li><li><a href="global.html#updateNewEntriesSchema">updateNewEntriesSchema</a></li><li><a href="global.html#updateNewInfoSchema">updateNewInfoSchema</a></li><li><a href="global.html#userDataValidator">userDataValidator</a></li><li><a href="global.html#userEmailValidator">userEmailValidator</a></li><li><a href="global.html#userNameValidator">userNameValidator</a></li><li><a href="global.html#userPasswordValidator">userPasswordValidator</a></li><li><a href="global.html#validate">validate</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#formatMongooseError">formatMongooseError</a></li><li><a href="global.html#gfs">gfs</a></li><li><a href="global.html#handleError">handleError</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#sendEmail">sendEmail</a></li><li><a href="global.html#updateDeletedEntriesSchema">updateDeletedEntriesSchema</a></li><li><a href="global.html#updateNewEntriesSchema">updateNewEntriesSchema</a></li><li><a href="global.html#updateNewInfoSchema">updateNewInfoSchema</a></li></ul></div>
                 
             </nav>
         </div>
@@ -96,18 +96,22 @@
             <pre class="prettyprint source linenums"><code>let { body } = require('express-validator')
 let userDataValidatorsSet = {}
 /**
+ * @type function
  * @param {string} [fieldName]
  * @return function - the validator for the users's name, which is located in the request body
+ * @memberOf controllers
  */
-let userNameValidator = (fieldName) =>
+const userNameValidator = (fieldName) =>
     body(fieldName || "name", "Name is required").notEmpty().isString()
 userDataValidatorsSet['name'] = userNameValidator;
 exports.userNameValidator = userNameValidator;
 /**
+ * @type function
  * @param {string} [fieldName]
  * @return function - the validator for the users's email, which is located in the request body
+ * @memberOf controllers
  */
-let userEmailValidator = (fieldName) => [
+const userEmailValidator = (fieldName) => [
     body(fieldName || "email", "Email is required").notEmpty().isString(),
     body(fieldName || "email", "Email must be at least 4 characters long")
         .isLength({ min: 4, max: 2000}),
@@ -117,10 +121,12 @@ let userEmailValidator = (fieldName) => [
 userDataValidatorsSet['email'] = userEmailValidator
 exports.userEmailValidator = userEmailValidator;
 /**
+ * @type function
  * @param {string} [fieldName]
  * @return function - the validator for the users's password, which is located in the request body
+ * @memberOf controllers
  */
-let userPasswordValidator = (fieldName) => [
+const userPasswordValidator = (fieldName) => [
     body(fieldName || 'password', "Password is required").notEmpty().isString(),
     body(fieldName || 'password', "Password must contain at least 6 characters")
         .isLength({min : 6}),
@@ -131,6 +137,7 @@ userDataValidatorsSet['password'] = userPasswordValidator;
 exports.userPasswordValidator = userPasswordValidator;
 
 /**
+ * @type function
  * @param {Object.&lt;string, string>} options - this param maps a {@link models.User} property to
  * its name in the body. For example, you want to set a new password
  * for the users, but this password is located under the `newPassword` property in the body.
@@ -139,10 +146,11 @@ exports.userPasswordValidator = userPasswordValidator;
  * @param {...string} fields - the fields that should be validated for correctness.
  * See {@link models.User} for the list of all acceptable fields. Read-only fields
  * (like `_id` or `updated`) cannot be used here
- * @return function[] - returns the array with validator middleware to use in the router
+ * @return {function[]} - returns the array with validator middleware to use in the router
  * See {@link https://express-validator.github.io/docs/index.html express-validator docs}
+ * @memberOf controllers
  */
-exports.userDataValidator = (options, ...fields) => {
+const userDataValidator = (options, ...fields) => {
     let middleware = [], hasOptions = options &amp;&amp; ((typeof options) === 'object')
     for (let f of fields){
         let fieldName = (hasOptions &amp;&amp; options[f]) ? options[f] : f;
@@ -154,7 +162,8 @@ exports.userDataValidator = (options, ...fields) => {
         }
     }
     return middleware;
-}</code></pre>
+}
+exports.userDataValidator = userDataValidator;</code></pre>
         </article>
     </section>
 

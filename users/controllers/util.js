@@ -6,6 +6,7 @@ let { JWT_SECRET } = constants.auth,
     { DEFAULT_COOKIE_OPTIONS, NO_ACTION_LOGOUT_TIME } = constants.client
 
 /**
+ * @type function
  * @description this middleware doesn't affect the flow of others if used once.
  * If the cookie with the authentication token is provided, adds the `auth` property
  * to the `req` object which contains exhaustive data about the authenticated user
@@ -13,8 +14,9 @@ let { JWT_SECRET } = constants.auth,
  * @param {models.User} [req.auth]
  * @param {e.Response} res
  * @param {function} next
+ * @memberOf controllers
  */
-exports.authenticate = async (req, res, next) => {
+const authenticate = async (req, res, next) => {
     if (req.auth){
         return res.status(401).json({
             error: {
@@ -41,16 +43,19 @@ exports.authenticate = async (req, res, next) => {
         return next();
     }
 }
+exports.authenticate = authenticate
 
 /**
+ * @type function
  * @description if the user was authenticated via {@link authenticate}, set the new
  * authentication cookie for the user to allow them use the site longer
  * @param {e.Request} req
  * @param {models.User} [req.auth]
  * @param {e.Response} res
  * @param {function} next
+ * @memberOf controllers
  */
-exports.extendSession = (req, res, next) => {
+const extendSession = (req, res, next) => {
     if (!req.auth){
         return next()
     }
@@ -74,15 +79,18 @@ exports.extendSession = (req, res, next) => {
         return next()
     }
 }
+exports.extendSession = extendSession;
 /**
+ * @type function
  * @description lets subsequent middleware be invoked if the user is authenticated.
  * Stops the middleware flow otherwise.
  * @param {e.Request} req
  * @param {models.User} [req.auth]
  * @param {e.Response} res
  * @param {function} next
+ * @memberOf controllers
  */
-exports.requireAuthentication = (req, res, next) => {
+const requireAuthentication = (req, res, next) => {
     if (!req.auth){
         return res.status(401).json({
             error: { status: 401, message: 'Unauthorized' }
@@ -90,8 +98,10 @@ exports.requireAuthentication = (req, res, next) => {
     }
     return next();
 }
+exports.requireAuthentication = requireAuthentication
 
 /**
+ * @type function
  * @description lets subsequent middleware be invoked if the user is authenticated
  * @param {e.Request} req
  * @param {models.User} req.auth
@@ -102,7 +112,7 @@ const getAuthenticatedUser = (req, res) => {
     if (!req.auth){
         return res.json("Not authenticated");
     }
-    User.findOne({ _id: req.auth._id })
+    return User.findOne({ _id: req.auth._id })
         .select('-salt -hashed_password')
         .populate('subscribedCourses.course', '_id name')
         .then(user => res.json(user))
@@ -110,6 +120,7 @@ const getAuthenticatedUser = (req, res) => {
 }
 exports.getAuthenticatedUser = getAuthenticatedUser;
 /**
+ * @type function
  * @description Clears the cookie that is responsible for authenticating the user.
  * This is necessary, because all cookies have the
  * [HttpOnly](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies) property

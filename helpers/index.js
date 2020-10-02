@@ -3,10 +3,14 @@ let { validationResult } = require('express-validator');
 let { gmailClientCredentials } = require('../constants').mail
 
 /**
- * @param emailData
+ * @param {object} emailData
+ * @param {string} emailData.from
+ * @param {string} emailData.to
+ * @param {string} emailData.text
+ * @param {string} [emailData.html]
  * @return {Promise<string>}
  */
-exports.sendEmail = emailData => {
+const sendEmail = emailData => {
 
     const transporter = nodeMailer.createTransport({
         host: 'smtp.gmail.com',
@@ -28,13 +32,16 @@ exports.sendEmail = emailData => {
             })
     })
 };
+exports.sendEmail = sendEmail;
 
 /**
+ * @type function
  * @param {e.Request} req
  * @param {e.Response} res
  * @param {function} next
+ * @memberOf controllers
  */
-exports.validate = (req, res, next) => {
+const validate = (req, res, next) => {
     let { errors } = validationResult(req);
     if (errors.length > 0){
         let firstError = errors.map((error) => error.msg)[0];
@@ -44,6 +51,7 @@ exports.validate = (req, res, next) => {
     }
     return next();
 }
+exports.validate = validate;
 
 /**
  * @description finished the middleware invocation and sends an error to the client.
@@ -53,19 +61,23 @@ exports.validate = (req, res, next) => {
  * @param {e.Response} res
  * @param {Object} [options] - specify here how the given error is structured
  */
-exports.handleError = (err, res, options) => {
-    console.log(err);
+const handleError = (err, res, options) => {
     return res.status(err.status || 400)
-        .json({ error: err })
+        .json({
+            error: {
+                message: err.message,
+                status: err.status
+            }
+        })
 }
+exports.handleError = handleError;
 
 /**
- *
  * @param err the error object of mongoose error data (contains errors array and _message)
  * @return falsy value if err is not a valid mongoose error data object,
  * otherwise return the message of the first error
  */
-exports.formatMongooseError = (err) => {
+const formatMongooseError = (err) => {
     if (!err.errors){
         return 'Error';
     }
@@ -86,3 +98,4 @@ exports.formatMongooseError = (err) => {
         return false;
     }
 }
+exports.formatMongooseError = formatMongooseError;

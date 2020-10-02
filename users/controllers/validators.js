@@ -1,18 +1,22 @@
 let { body } = require('express-validator')
 let userDataValidatorsSet = {}
 /**
+ * @type function
  * @param {string} [fieldName]
  * @return function - the validator for the users's name, which is located in the request body
+ * @memberOf controllers
  */
-let userNameValidator = (fieldName) =>
+const userNameValidator = (fieldName) =>
     body(fieldName || "name", "Name is required").notEmpty().isString()
 userDataValidatorsSet['name'] = userNameValidator;
 exports.userNameValidator = userNameValidator;
 /**
+ * @type function
  * @param {string} [fieldName]
  * @return function - the validator for the users's email, which is located in the request body
+ * @memberOf controllers
  */
-let userEmailValidator = (fieldName) => [
+const userEmailValidator = (fieldName) => [
     body(fieldName || "email", "Email is required").notEmpty().isString(),
     body(fieldName || "email", "Email must be at least 4 characters long")
         .isLength({ min: 4, max: 2000}),
@@ -22,10 +26,12 @@ let userEmailValidator = (fieldName) => [
 userDataValidatorsSet['email'] = userEmailValidator
 exports.userEmailValidator = userEmailValidator;
 /**
+ * @type function
  * @param {string} [fieldName]
  * @return function - the validator for the users's password, which is located in the request body
+ * @memberOf controllers
  */
-let userPasswordValidator = (fieldName) => [
+const userPasswordValidator = (fieldName) => [
     body(fieldName || 'password', "Password is required").notEmpty().isString(),
     body(fieldName || 'password', "Password must contain at least 6 characters")
         .isLength({min : 6}),
@@ -36,6 +42,7 @@ userDataValidatorsSet['password'] = userPasswordValidator;
 exports.userPasswordValidator = userPasswordValidator;
 
 /**
+ * @type function
  * @param {Object.<string, string>} options - this param maps a {@link models.User} property to
  * its name in the body. For example, you want to set a new password
  * for the users, but this password is located under the `newPassword` property in the body.
@@ -44,10 +51,11 @@ exports.userPasswordValidator = userPasswordValidator;
  * @param {...string} fields - the fields that should be validated for correctness.
  * See {@link models.User} for the list of all acceptable fields. Read-only fields
  * (like `_id` or `updated`) cannot be used here
- * @return function[] - returns the array with validator middleware to use in the router
+ * @return {function[]} - returns the array with validator middleware to use in the router
  * See {@link https://express-validator.github.io/docs/index.html express-validator docs}
+ * @memberOf controllers
  */
-exports.userDataValidator = (options, ...fields) => {
+const userDataValidator = (options, ...fields) => {
     let middleware = [], hasOptions = options && ((typeof options) === 'object')
     for (let f of fields){
         let fieldName = (hasOptions && options[f]) ? options[f] : f;
@@ -60,3 +68,4 @@ exports.userDataValidator = (options, ...fields) => {
     }
     return middleware;
 }
+exports.userDataValidator = userDataValidator;

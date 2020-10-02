@@ -76,7 +76,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#activateAccount">activateAccount</a></li><li><a href="global.html#authenticate">authenticate</a></li><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#extendSession">extendSession</a></li><li><a href="global.html#formatMongooseError">formatMongooseError</a></li><li><a href="global.html#gfs">gfs</a></li><li><a href="global.html#handleError">handleError</a></li><li><a href="global.html#requireAuthentication">requireAuthentication</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#sendActivationLink">sendActivationLink</a></li><li><a href="global.html#sendEmail">sendEmail</a></li><li><a href="global.html#signin">signin</a></li><li><a href="global.html#signup">signup</a></li><li><a href="global.html#updateDeletedEntriesSchema">updateDeletedEntriesSchema</a></li><li><a href="global.html#updateNewEntriesSchema">updateNewEntriesSchema</a></li><li><a href="global.html#updateNewInfoSchema">updateNewInfoSchema</a></li><li><a href="global.html#userDataValidator">userDataValidator</a></li><li><a href="global.html#userEmailValidator">userEmailValidator</a></li><li><a href="global.html#userNameValidator">userNameValidator</a></li><li><a href="global.html#userPasswordValidator">userPasswordValidator</a></li><li><a href="global.html#validate">validate</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#formatMongooseError">formatMongooseError</a></li><li><a href="global.html#gfs">gfs</a></li><li><a href="global.html#handleError">handleError</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#sendEmail">sendEmail</a></li><li><a href="global.html#updateDeletedEntriesSchema">updateDeletedEntriesSchema</a></li><li><a href="global.html#updateNewEntriesSchema">updateNewEntriesSchema</a></li><li><a href="global.html#updateNewInfoSchema">updateNewInfoSchema</a></li></ul></div>
                 
             </nav>
         </div>
@@ -98,10 +98,14 @@ let { validationResult } = require('express-validator');
 let { gmailClientCredentials } = require('../constants').mail
 
 /**
- * @param emailData
+ * @param {object} emailData
+ * @param {string} emailData.from
+ * @param {string} emailData.to
+ * @param {string} emailData.text
+ * @param {string} [emailData.html]
  * @return {Promise&lt;string>}
  */
-exports.sendEmail = emailData => {
+const sendEmail = emailData => {
 
     const transporter = nodeMailer.createTransport({
         host: 'smtp.gmail.com',
@@ -123,13 +127,16 @@ exports.sendEmail = emailData => {
             })
     })
 };
+exports.sendEmail = sendEmail;
 
 /**
+ * @type function
  * @param {e.Request} req
  * @param {e.Response} res
  * @param {function} next
+ * @memberOf controllers
  */
-exports.validate = (req, res, next) => {
+const validate = (req, res, next) => {
     let { errors } = validationResult(req);
     if (errors.length > 0){
         let firstError = errors.map((error) => error.msg)[0];
@@ -139,6 +146,7 @@ exports.validate = (req, res, next) => {
     }
     return next();
 }
+exports.validate = validate;
 
 /**
  * @description finished the middleware invocation and sends an error to the client.
@@ -148,19 +156,23 @@ exports.validate = (req, res, next) => {
  * @param {e.Response} res
  * @param {Object} [options] - specify here how the given error is structured
  */
-exports.handleError = (err, res, options) => {
-    console.log(err);
+const handleError = (err, res, options) => {
     return res.status(err.status || 400)
-        .json({ error: err })
+        .json({
+            error: {
+                message: err.message,
+                status: err.status
+            }
+        })
 }
+exports.handleError = handleError;
 
 /**
- *
  * @param err the error object of mongoose error data (contains errors array and _message)
  * @return falsy value if err is not a valid mongoose error data object,
  * otherwise return the message of the first error
  */
-exports.formatMongooseError = (err) => {
+const formatMongooseError = (err) => {
     if (!err.errors){
         return 'Error';
     }
@@ -180,7 +192,8 @@ exports.formatMongooseError = (err) => {
     } else {
         return false;
     }
-}</code></pre>
+}
+exports.formatMongooseError = formatMongooseError;</code></pre>
         </article>
     </section>
 

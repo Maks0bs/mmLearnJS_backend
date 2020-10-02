@@ -423,7 +423,7 @@ exports.UpdateNewInfo = UpdateNewInfo;
  *         - _id
  *       properties:
  *         _id:
- *           $ref: '#/components/schemas/ObjectID'
+ *           $ref: '#/components/schemas/ObjectId'
  */
 let courseSchema = new mongoose.Schema({
 	name: {

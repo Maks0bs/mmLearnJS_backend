@@ -25,7 +25,7 @@ let router = require('express').Router()
  * path:
  *  /auth/signup:
  *    post:
- *      summary: Creates a new users if the data in the body is valid
+ *      summary: Creates a new user if the data in the body is valid
  *      operationId: signup
  *      tags:
  *        - "/auth/..."
@@ -48,7 +48,7 @@ let router = require('express').Router()
  *                password:
  *                  type: string
  *                  description: >
- *                    See [User schema](#/components/schemas/ObjectId) for correct password pattern
+ *                    See [User schema](#/components/schemas/User) for correct password pattern
  *                teacher:
  *                  type: boolean
  *                  description: >
@@ -61,7 +61,9 @@ let router = require('express').Router()
  *                    FOR TESTING PURPOSES: currently `teacherPassword="testpass"`
  *      responses:
  *        "200":
- *          description: Successfully created a new users. Send the users and the confirmation
+ *          description: >
+ *            Successfully created a new users. Email sent.
+ *            Respond with the user's data and the confirmation
  *          content:
  *            application/json:
  *              schema:
@@ -69,12 +71,12 @@ let router = require('express').Router()
  *                properties:
  *                  message:
  *                    type: string
- *                  users:
+ *                  user:
  *                    $ref: '#/components/schemas/User'
  *        "400":
  *          description: >
  *            Invalid data in the request.
- *            See [User schema](#/components/schemas/ObjectId)
+ *            See [User schema](#/components/schemas/User)
  *            for details about what users data should contain
  *          content:
  *            application/json:
@@ -97,7 +99,94 @@ router.post('/signup',
     userDataValidator(null, 'name', 'password', 'email'),
     validate,
     signup
-);
+);//TODO finish tests, check if email is sent with sinon/or smth else
+
+/**
+ * @swagger
+ * path:
+ *  /auth/invite-signup/:inviteToken:
+ *    post:
+ *      summary: >
+ *        Creates a new user if the data in the body and in the invitation token is correct.
+ *        Sends an message to the user's email address which contains the token to activate their account
+ *      operationId: inviteSignup
+ *      tags:
+ *        - "/auth/..."
+ *      parameters:
+ *        - name: inviteToken
+ *          in: path
+ *          description: >
+ *            the token that contains
+ *            encrypted user data
+ *          required: true
+ *          type: string
+ *      requestBody:
+ *        required: true
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              required:
+ *                - name
+ *                - password
+ *              properties:
+ *                name:
+ *                  type: string
+ *                password:
+ *                  type: string
+ *                  description: >
+ *                    See [User schema](#/components/schemas/User) for correct password pattern
+ *                teacher:
+ *                  type: boolean
+ *                  description: >
+ *                    provide this prop if you want to register an account with the `teacher` role.
+ *                    If true, provide the correct teacher password under the `teacherPassword` prop
+ *                teacherPassword:
+ *                  type: string
+ *                  description: >
+ *                    provide this password to register a teacher account.
+ *                    FOR TESTING PURPOSES: currently `teacherPassword="testpass"`
+ *      responses:
+ *        "200":
+ *          description: >
+ *            Successfully created a new user. If the token contained any additional
+ *            instructions, all of the necessary operations were executed. Email sent.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                  user:
+ *                    $ref: '#/components/schemas/User'
+ *        "400":
+ *          description: >
+ *            Invalid data in the request or in the token.
+ *            See [User schema](#/components/schemas/User)
+ *            for details about what users data should contain
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *        "401":
+ *          description: Wrong token or wrong teacher password
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *        "403":
+ *          description: Given email is taken
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
+router.post('/invite-signup/:inviteToken',
+    userDataValidator(null, 'name', 'password'),
+    validate,
+    inviteSignup
+);//TODO finish tests, check if email is sent with sinon/or smth else
 
 /**
  * @swagger
@@ -161,6 +250,8 @@ router.post('/signup',
  */
 router.post('/signin', signin);
 
+// no need to test it, it doesn't cause errors and always does the same thing,
+// it has no special request properties
 /**
  * @swagger
  * path:
@@ -172,6 +263,7 @@ router.post('/signin', signin);
  *        [HttpOnly](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies) property
  *      tags:
  *        - "/auth/..."
+ *      operationId: logout
  *      responses:
  *        "200":
  *          description: Cookies cleared successfully
@@ -197,6 +289,7 @@ router.get('/logout', logout);
  *        - cookieAuth: []
  *      tags:
  *        - "/auth/..."
+ *      operationId: getAuthenticatedUser
  *      responses:
  *        "200":
  *          description: >
@@ -223,6 +316,7 @@ router.get('/cur-user', getAuthenticatedUser);
  *        - cookieAuth: []
  *      tags:
  *        - "/auth/..."
+ *      operationId: sendActivationLink
  *      responses:
  *        "200":
  *          description: Activation link sent successfully
@@ -269,6 +363,7 @@ router.post('/send-activation',//TODO finish tests, check if email is sent with 
  *            encrypted user data
  *          required: true
  *          type: string
+ *      operationId: activateAccount
  *      responses:
  *        "200":
  *          description: >
@@ -296,11 +391,92 @@ router.post('/send-activation',//TODO finish tests, check if email is sent with 
  *              schema:
  *                $ref: '#/components/schemas/Error'
  */
-router.get('/activate/:activationToken', activateAccount); //TODO add tests
+router.get('/activate/:activationToken', activateAccount);
 
-router.post('/invite-signup', inviteSignup);
+/**
+ * @swagger
+ * path:
+ *  /auth/forgot-password:
+ *    post:
+ *      summary: >
+ *        Sends a message to the user's email address which contains
+ *        instructions on how to reset their password
+ *      tags:
+ *        - "/auth/..."
+ *      operationId: forgotPassword
+ *      responses:
+ *        "200":
+ *          description: >
+ *            Email with instructions sent to user
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *        "400":
+ *          description: No email provided in request or any problems with request body
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *        "404":
+ *          description: User with given email could not be found
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
+router.post('/forgot-password', forgotPassword)//TODO add tests (with checking if email was sent) and docs
 
-router.post('/forgot-password', forgotPassword)
-router.post('/reset-password', resetPassword)
+/**
+ * @swagger
+ * path:
+ *  /auth/reset-password/:resetToken:
+ *    post:
+ *      summary: >
+ *        Sets a new password for the user, whose data is encrypted in the provided token
+ *      tags:
+ *        - "/auth/..."
+ *      operationId: resetPassword
+ *      parameters:
+ *        - name: resetToken
+ *          in: path
+ *          description: >
+ *            the token that contains
+ *            encrypted user data
+ *          required: true
+ *          type: string
+ *      responses:
+ *        "200":
+ *          description: >
+ *            Password updated successfully
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *        "401":
+ *          description: Reset token is invalid
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *        "404":
+ *          description: User with the email, provided in the token could not be found
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
+router.post('/reset-password/:resetToken', resetPassword)//TODO add tests (with checking if email was sent) and docs
+
+
+//TODO one way to test if email is sent: create a sinon.stub which has absolutely the same code
+//TODO as helpers.sendEmail. The email gets sent, check the return value of the first call of the function
+//TODO via sinon.spy methods
 
 module.exports = router;
