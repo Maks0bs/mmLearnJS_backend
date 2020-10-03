@@ -1,5 +1,5 @@
 let {
-	isCourseTeacher,
+	isTeacher,
 	isCourseCreator,
 	teacherInCourse,
 	userInCourse,
@@ -69,7 +69,7 @@ let router = require('express').Router()
 
 router.post('/create', 
 	requireAuthentication,
-	isCourseTeacher,
+	isTeacher,
 	createCourse
 );
 
@@ -77,7 +77,7 @@ router.post('/enroll/:courseId', requireAuthentication, enrollInCourse);
 router.post('/filter', getCoursesFiltered)
 router.put('/update/:courseId', 
 	requireAuthentication, 
-	isCourseTeacher,
+	isTeacher,
 	teacherInCourse,
 	uploadFiles,
 	getNewCourseData,
@@ -101,7 +101,7 @@ router.post('/send-teacher-invite/:courseId',
 )
 router.post('/accept-teacher-invite/:courseId',
 	requireAuthentication,
-	isCourseTeacher,
+	isTeacher,
 	acceptTeacherInvite
 )
 router.get('/:courseId/forum/:forumId',
