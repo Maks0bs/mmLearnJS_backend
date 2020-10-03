@@ -433,7 +433,8 @@ let courseSchema = new mongoose.Schema({
 	},
 	creator: {
 		type: ObjectId,
-		ref: 'User'
+		ref: 'User',
+		required: true
 	},
 	teachers: [
 		{
@@ -463,7 +464,7 @@ let courseSchema = new mongoose.Schema({
 	about: String,
 	type: {
 		type: String,
-		require: true,
+		required: true,
 		enum: ['open', 'public', 'hidden']
 	},
 	hasPassword: {

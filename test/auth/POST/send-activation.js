@@ -4,6 +4,7 @@ let { app, expect, request, User, errCallback, verifyAuthCookie } = require('../
 
 
 describe('POST /auth/send-activation', () => {
+    //TODO check if email was sent
     let agent = request.agent(app);
     let userData = {
         name: 'test',

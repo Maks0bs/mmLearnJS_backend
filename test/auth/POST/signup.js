@@ -5,6 +5,7 @@ let { TEACHER_PASSWORD } = require('../../../constants').users
 
 
 describe('POST /auth/signup', () => {
+    //TODO check if email was sent with sinon
     beforeEach(() => {
         return User.remove({});
     })

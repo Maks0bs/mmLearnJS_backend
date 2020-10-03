@@ -2,6 +2,7 @@ let { body } = require('express-validator')
 let userDataValidatorsSet = {}
 /**
  * @type function
+ * @throws 400
  * @param {string} [fieldName]
  * @return function - the validator for the users's name, which is located in the request body
  * @memberOf controllers
@@ -12,6 +13,7 @@ userDataValidatorsSet['name'] = userNameValidator;
 exports.userNameValidator = userNameValidator;
 /**
  * @type function
+ * @throws 400
  * @param {string} [fieldName]
  * @return function - the validator for the users's email, which is located in the request body
  * @memberOf controllers
@@ -27,6 +29,7 @@ userDataValidatorsSet['email'] = userEmailValidator
 exports.userEmailValidator = userEmailValidator;
 /**
  * @type function
+ * @throws 400
  * @param {string} [fieldName]
  * @return function - the validator for the users's password, which is located in the request body
  * @memberOf controllers
@@ -43,6 +46,7 @@ exports.userPasswordValidator = userPasswordValidator;
 
 /**
  * @type function
+ * @throws 400
  * @param {Object.<string, string>} options - this param maps a {@link models.User} property to
  * its name in the body. For example, you want to set a new password
  * for the users, but this password is located under the `newPassword` property in the body.

@@ -369,7 +369,7 @@
         <p class="tag-source">
             <a href="users_controllers_auth.js.html" class="button">View Source</a>
             <span>
-                <a href="users_controllers_auth.js.html">users/controllers/auth.js</a>, <a href="users_controllers_auth.js.html#line173">line 173</a>
+                <a href="users_controllers_auth.js.html">users/controllers/auth.js</a>, <a href="users_controllers_auth.js.html#line179">line 179</a>
             </span>
         </p>
     
@@ -389,6 +389,23 @@
 
 
 
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+        
+            <div class='param-desc column is-12'><p>401, 404</p></div>
+        
+    
+</div>
+
+                
+        </div>
+    </div>
 
 
 
@@ -637,7 +654,7 @@ to the <code>req</code> object which contains exhaustive data about the authenti
         <p class="tag-source">
             <a href="users_controllers_util.js.html" class="button">View Source</a>
             <span>
-                <a href="users_controllers_util.js.html">users/controllers/util.js</a>, <a href="users_controllers_util.js.html#line19">line 19</a>
+                <a href="users_controllers_util.js.html">users/controllers/util.js</a>, <a href="users_controllers_util.js.html#line20">line 20</a>
             </span>
         </p>
     
@@ -657,6 +674,23 @@ to the <code>req</code> object which contains exhaustive data about the authenti
 
 
 
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+        
+            <div class='param-desc column is-12'><p>401</p></div>
+        
+    
+</div>
+
+                
+        </div>
+    </div>
 
 
 
@@ -902,7 +936,7 @@ authentication cookie for the user to allow them use the site longer</p>
         <p class="tag-source">
             <a href="users_controllers_util.js.html" class="button">View Source</a>
             <span>
-                <a href="users_controllers_util.js.html">users/controllers/util.js</a>, <a href="users_controllers_util.js.html#line58">line 58</a>
+                <a href="users_controllers_util.js.html">users/controllers/util.js</a>, <a href="users_controllers_util.js.html#line59">line 59</a>
             </span>
         </p>
     
@@ -1128,7 +1162,7 @@ authentication cookie for the user to allow them use the site longer</p>
         <p class="tag-source">
             <a href="users_controllers_auth.js.html" class="button">View Source</a>
             <span>
-                <a href="users_controllers_auth.js.html">users/controllers/auth.js</a>, <a href="users_controllers_auth.js.html#line340">line 340</a>
+                <a href="users_controllers_auth.js.html">users/controllers/auth.js</a>, <a href="users_controllers_auth.js.html#line352">line 352</a>
             </span>
         </p>
     
@@ -1148,6 +1182,23 @@ authentication cookie for the user to allow them use the site longer</p>
 
 
 
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+        
+            <div class='param-desc column is-12'><p>400, 404</p></div>
+        
+    
+</div>
+
+                
+        </div>
+    </div>
 
 
 
@@ -1331,7 +1382,7 @@ authentication cookie for the user to allow them use the site longer</p>
         <p class="tag-source">
             <a href="users_controllers_util.js.html" class="button">View Source</a>
             <span>
-                <a href="users_controllers_util.js.html">users/controllers/util.js</a>, <a href="users_controllers_util.js.html#line111">line 111</a>
+                <a href="users_controllers_util.js.html">users/controllers/util.js</a>, <a href="users_controllers_util.js.html#line113">line 113</a>
             </span>
         </p>
     
@@ -1557,7 +1608,7 @@ authentication cookie for the user to allow them use the site longer</p>
         <p class="tag-source">
             <a href="users_controllers_auth.js.html" class="button">View Source</a>
             <span>
-                <a href="users_controllers_auth.js.html">users/controllers/auth.js</a>, <a href="users_controllers_auth.js.html#line223">line 223</a>
+                <a href="users_controllers_auth.js.html">users/controllers/auth.js</a>, <a href="users_controllers_auth.js.html#line230">line 230</a>
             </span>
         </p>
     
@@ -1577,6 +1628,623 @@ authentication cookie for the user to allow them use the site longer</p>
 
 
 
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+        
+            <div class='param-desc column is-12'><p>401, 403</p></div>
+        
+    
+</div>
+
+                
+        </div>
+    </div>
+
+
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id=".isCourseCreator">
+        <a class="href-link" href="#.isCourseCreator">#</a>
+        
+            
+                <span class='tag'>static</span>
+            
+        
+        <span class="code-name">
+            
+                isCourseCreator<span class="signature">(req, res, next)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    
+    <div class="description">
+        <p>lets subsequent middleware be invoked only if the authenticated user is the creator
+of the provided course. Stops the middleware flow otherwise.
+Please prefer using <a href="controllers.html#.userInCourse">this controller</a> instead of this one</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+            <th>Attributes</th>
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">e.Request</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+  
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>auth</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="models.User.html">models.User</a></span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>courseData</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="models.html#.Course">models.Course</a></span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+  
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>res</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">e.Response</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>next</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">function</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <dt class="important tag-deprecated">Deprecated:</dt><dd class="yes-def tag-deprecated"><ul class="dummy"><li>Yes</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="users_controllers_util.js.html" class="button">View Source</a>
+            <span>
+                <a href="users_controllers_util.js.html">users/controllers/util.js</a>, <a href="users_controllers_util.js.html#line249">line 249</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+        
+            <div class='param-desc column is-12'><p>401</p></div>
+        
+    
+</div>
+
+                
+        </div>
+    </div>
+
+
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id=".isTeacher">
+        <a class="href-link" href="#.isTeacher">#</a>
+        
+            
+                <span class='tag'>static</span>
+            
+        
+        <span class="code-name">
+            
+                isTeacher<span class="signature">(req, res, next)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    
+    <div class="description">
+        <p>lets subsequent middleware be invoked only if the user is a teacher
+Stops the middleware flow otherwise.</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+            <th>Attributes</th>
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">e.Request</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+  
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>auth</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="models.User.html">models.User</a></span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+  
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>res</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">e.Response</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>next</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">function</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="users_controllers_util.js.html" class="button">View Source</a>
+            <span>
+                <a href="users_controllers_util.js.html">users/controllers/util.js</a>, <a href="users_controllers_util.js.html#line151">line 151</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+        
+            <div class='param-desc column is-12'><p>401</p></div>
+        
+    
+</div>
+
+                
+        </div>
+    </div>
 
 
 
@@ -1736,7 +2404,7 @@ This is necessary, because all cookies have the
         <p class="tag-source">
             <a href="users_controllers_util.js.html" class="button">View Source</a>
             <span>
-                <a href="users_controllers_util.js.html">users/controllers/util.js</a>, <a href="users_controllers_util.js.html#line131">line 131</a>
+                <a href="users_controllers_util.js.html">users/controllers/util.js</a>, <a href="users_controllers_util.js.html#line133">line 133</a>
             </span>
         </p>
     
@@ -2001,7 +2669,7 @@ Stops the middleware flow otherwise.</p>
         <p class="tag-source">
             <a href="users_controllers_util.js.html" class="button">View Source</a>
             <span>
-                <a href="users_controllers_util.js.html">users/controllers/util.js</a>, <a href="users_controllers_util.js.html#line93">line 93</a>
+                <a href="users_controllers_util.js.html">users/controllers/util.js</a>, <a href="users_controllers_util.js.html#line95">line 95</a>
             </span>
         </p>
     
@@ -2021,6 +2689,23 @@ Stops the middleware flow otherwise.</p>
 
 
 
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+        
+            <div class='param-desc column is-12'><p>401</p></div>
+        
+    
+</div>
+
+                
+        </div>
+    </div>
 
 
 
@@ -2205,7 +2890,7 @@ if their account is not yet activated</p>
         <p class="tag-source">
             <a href="users_controllers_auth.js.html" class="button">View Source</a>
             <span>
-                <a href="users_controllers_auth.js.html">users/controllers/auth.js</a>, <a href="users_controllers_auth.js.html#line132">line 132</a>
+                <a href="users_controllers_auth.js.html">users/controllers/auth.js</a>, <a href="users_controllers_auth.js.html#line136">line 136</a>
             </span>
         </p>
     
@@ -2225,6 +2910,23 @@ if their account is not yet activated</p>
 
 
 
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+        
+            <div class='param-desc column is-12'><p>403</p></div>
+        
+    
+</div>
+
+                
+        </div>
+    </div>
 
 
 
@@ -2409,7 +3111,7 @@ token for authorization</p>
         <p class="tag-source">
             <a href="users_controllers_auth.js.html" class="button">View Source</a>
             <span>
-                <a href="users_controllers_auth.js.html">users/controllers/auth.js</a>, <a href="users_controllers_auth.js.html#line94">line 94</a>
+                <a href="users_controllers_auth.js.html">users/controllers/auth.js</a>, <a href="users_controllers_auth.js.html#line97">line 97</a>
             </span>
         </p>
     
@@ -2429,6 +3131,23 @@ token for authorization</p>
 
 
 
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+        
+            <div class='param-desc column is-12'><p>400, 401</p></div>
+        
+    
+</div>
+
+                
+        </div>
+    </div>
 
 
 
@@ -2616,7 +3335,7 @@ See <a href="models.User.html">models.User</a> for details on this props.</p>
         <p class="tag-source">
             <a href="users_controllers_auth.js.html" class="button">View Source</a>
             <span>
-                <a href="users_controllers_auth.js.html">users/controllers/auth.js</a>, <a href="users_controllers_auth.js.html#line32">line 32</a>
+                <a href="users_controllers_auth.js.html">users/controllers/auth.js</a>, <a href="users_controllers_auth.js.html#line33">line 33</a>
             </span>
         </p>
     
@@ -2636,6 +3355,341 @@ See <a href="models.User.html">models.User</a> for details on this props.</p>
 
 
 
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+        
+            <div class='param-desc column is-12'><p>401, 403</p></div>
+        
+    
+</div>
+
+                
+        </div>
+    </div>
+
+
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id=".teacherInCourse">
+        <a class="href-link" href="#.teacherInCourse">#</a>
+        
+            
+                <span class='tag'>static</span>
+            
+        
+        <span class="code-name">
+            
+                teacherInCourse<span class="signature">(req, res, next)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    
+    <div class="description">
+        <p>lets subsequent middleware be invoked only if the authenticated user is a teacher
+at the provided course. Stops the middleware flow otherwise.
+Please prefer using <a href="controllers.html#.userInCourse">this controller</a> instead of this one</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+            <th>Attributes</th>
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">e.Request</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+  
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>auth</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="models.User.html">models.User</a></span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>courseData</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="models.html#.Course">models.Course</a></span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+  
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>res</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">e.Response</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>next</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">function</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <dt class="important tag-deprecated">Deprecated:</dt><dd class="yes-def tag-deprecated"><ul class="dummy"><li>Yes</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="users_controllers_util.js.html" class="button">View Source</a>
+            <span>
+                <a href="users_controllers_util.js.html">users/controllers/util.js</a>, <a href="users_controllers_util.js.html#line213">line 213</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+        
+            <div class='param-desc column is-12'><p>401</p></div>
+        
+    
+</div>
+
+                
+        </div>
+    </div>
 
 
 
@@ -2815,7 +3869,7 @@ See <a href="models.User.html">models.User</a> for the list of all acceptable fi
         <p class="tag-source">
             <a href="users_controllers_validators.js.html" class="button">View Source</a>
             <span>
-                <a href="users_controllers_validators.js.html">users/controllers/validators.js</a>, <a href="users_controllers_validators.js.html#line58">line 58</a>
+                <a href="users_controllers_validators.js.html">users/controllers/validators.js</a>, <a href="users_controllers_validators.js.html#line62">line 62</a>
             </span>
         </p>
     
@@ -2835,6 +3889,23 @@ See <a href="models.User.html">models.User</a> for the list of all acceptable fi
 
 
 
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+        
+            <div class='param-desc column is-12'><p>400</p></div>
+        
+    
+</div>
+
+                
+        </div>
+    </div>
 
 
 
@@ -3003,7 +4074,7 @@ See <a href="https://express-validator.github.io/docs/index.html">express-valida
         <p class="tag-source">
             <a href="users_controllers_validators.js.html" class="button">View Source</a>
             <span>
-                <a href="users_controllers_validators.js.html">users/controllers/validators.js</a>, <a href="users_controllers_validators.js.html#line19">line 19</a>
+                <a href="users_controllers_validators.js.html">users/controllers/validators.js</a>, <a href="users_controllers_validators.js.html#line21">line 21</a>
             </span>
         </p>
     
@@ -3024,6 +4095,23 @@ See <a href="https://express-validator.github.io/docs/index.html">express-valida
 
 
 
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+        
+            <div class='param-desc column is-12'><p>400</p></div>
+        
+    
+</div>
+
+                
+        </div>
+    </div>
+
 
 
     <div class='columns method-parameter'>
@@ -3042,6 +4130,355 @@ See <a href="https://express-validator.github.io/docs/index.html">express-valida
                 
         </div>
     </div>
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id=".userInCourse">
+        <a class="href-link" href="#.userInCourse">#</a>
+        
+            
+                <span class='tag'>static</span>
+            
+        
+        <span class="code-name">
+            
+                userInCourse<span class="signature">(req, res, next)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    
+    <div class="description">
+        <p>lets subsequent middleware be invoked only if the user is a teacher
+or a student at the provided course. Stops the middleware flow otherwise.</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+            <th>Attributes</th>
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">e.Request</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+  
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>auth</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="models.User.html">models.User</a></span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>courseData</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="models.html#.Course">models.Course</a></span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>userCourseStatus</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">string</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>sets this param in the request object for next middleware;
+can be either <code>&quot;creator&quot;</code>, <code>&quot;teacher&quot;</code>, <code>&quot;enrolled&quot;</code> or <code>&quot;not enrolled&quot;</code></p></td>
+</tr>
+
+  
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>res</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">e.Response</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>next</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">function</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="users_controllers_util.js.html" class="button">View Source</a>
+            <span>
+                <a href="users_controllers_util.js.html">users/controllers/util.js</a>, <a href="users_controllers_util.js.html#line174">line 174</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+        
+            <div class='param-desc column is-12'><p>401</p></div>
+        
+    
+</div>
+
+                
+        </div>
+    </div>
+
+
 
 
 
@@ -3180,7 +4617,7 @@ See <a href="https://express-validator.github.io/docs/index.html">express-valida
         <p class="tag-source">
             <a href="users_controllers_validators.js.html" class="button">View Source</a>
             <span>
-                <a href="users_controllers_validators.js.html">users/controllers/validators.js</a>, <a href="users_controllers_validators.js.html#line9">line 9</a>
+                <a href="users_controllers_validators.js.html">users/controllers/validators.js</a>, <a href="users_controllers_validators.js.html#line10">line 10</a>
             </span>
         </p>
     
@@ -3200,6 +4637,23 @@ See <a href="https://express-validator.github.io/docs/index.html">express-valida
 
 
 
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+        
+            <div class='param-desc column is-12'><p>400</p></div>
+        
+    
+</div>
+
+                
+        </div>
+    </div>
 
 
 
@@ -3357,7 +4811,7 @@ See <a href="https://express-validator.github.io/docs/index.html">express-valida
         <p class="tag-source">
             <a href="users_controllers_validators.js.html" class="button">View Source</a>
             <span>
-                <a href="users_controllers_validators.js.html">users/controllers/validators.js</a>, <a href="users_controllers_validators.js.html#line34">line 34</a>
+                <a href="users_controllers_validators.js.html">users/controllers/validators.js</a>, <a href="users_controllers_validators.js.html#line37">line 37</a>
             </span>
         </p>
     
@@ -3377,6 +4831,23 @@ See <a href="https://express-validator.github.io/docs/index.html">express-valida
 
 
 
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+        
+            <div class='param-desc column is-12'><p>400</p></div>
+        
+    
+</div>
+
+                
+        </div>
+    </div>
 
 
 
@@ -3422,6 +4893,12 @@ See <a href="https://express-validator.github.io/docs/index.html">express-valida
     
 
     
+    
+    <div class="description">
+        <p>this controller should be used at the end of a chain of
+<a href="https://express-validator.github.io/docs/index.html">express validators</a>, which are
+defined in the <code>validators.js</code> file, for example <a href="controllers.html#.userDataValidator">this one</a></p>
+    </div>
     
 
 
@@ -3572,7 +5049,7 @@ See <a href="https://express-validator.github.io/docs/index.html">express-valida
         <p class="tag-source">
             <a href="helpers_index.js.html" class="button">View Source</a>
             <span>
-                <a href="helpers_index.js.html">helpers/index.js</a>, <a href="helpers_index.js.html#line44">line 44</a>
+                <a href="helpers_index.js.html">helpers/index.js</a>, <a href="helpers_index.js.html#line48">line 48</a>
             </span>
         </p>
     
@@ -3592,6 +5069,23 @@ See <a href="https://express-validator.github.io/docs/index.html">express-valida
 
 
 
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+        
+            <div class='param-desc column is-12'><p>400</p></div>
+        
+    
+</div>
+
+                
+        </div>
+    </div>
 
 
 

@@ -662,6 +662,8 @@
     
 
     
+        <dt class="important tag-deprecated">Deprecated:</dt><dd class="yes-def tag-deprecated"><ul class="dummy"><li>Yes</li></ul></dd>
+    
 
     
 
@@ -680,7 +682,7 @@
         <p class="tag-source">
             <a href="helpers_index.js.html" class="button">View Source</a>
             <span>
-                <a href="helpers_index.js.html">helpers/index.js</a>, <a href="helpers_index.js.html#line80">line 80</a>
+                <a href="helpers_index.js.html">helpers/index.js</a>, <a href="helpers_index.js.html#line87">line 87</a>
             </span>
         </p>
     
@@ -746,7 +748,8 @@ otherwise return the message of the first error</p></div>
     <div class="description">
         <p>finished the middleware invocation and sends an error to the client.
 By default the <code>error</code> object has 2 keys: <code>status</code> and <code>message</code>. Customize
-it with the <code>option</code> param.</p>
+it with the <code>option</code> param. Recommended to be put in <code>.catch()</code> expression after
+some <code>.then()</code> promise handlers</p>
     </div>
     
 
@@ -926,7 +929,7 @@ it with the <code>option</code> param.</p>
         <p class="tag-source">
             <a href="helpers_index.js.html" class="button">View Source</a>
             <span>
-                <a href="helpers_index.js.html">helpers/index.js</a>, <a href="helpers_index.js.html#line64">line 64</a>
+                <a href="helpers_index.js.html">helpers/index.js</a>, <a href="helpers_index.js.html#line70">line 70</a>
             </span>
         </p>
     
@@ -946,6 +949,23 @@ it with the <code>option</code> param.</p>
 
 
 
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+        
+            <div class='param-desc column is-12'><p>any error, specified in <code>err.status</code></p></div>
+        
+    
+</div>
+
+                
+        </div>
+    </div>
 
 
 

@@ -131,6 +131,10 @@ exports.sendEmail = sendEmail;
 
 /**
  * @type function
+ * @throws 400
+ * @description this controller should be used at the end of a chain of
+ * {@link https://express-validator.github.io/docs/index.html express validators}, which are
+ * defined in the `validators.js` file, for example {@link controllers.userDataValidator this one}
  * @param {e.Request} req
  * @param {e.Response} res
  * @param {function} next
@@ -151,7 +155,9 @@ exports.validate = validate;
 /**
  * @description finished the middleware invocation and sends an error to the client.
  * By default the `error` object has 2 keys: `status` and `message`. Customize
- * it with the `option` param.
+ * it with the `option` param. Recommended to be put in `.catch()` expression after
+ * some `.then()` promise handlers
+ * @throws any error, specified in `err.status`
  * @param {any} err
  * @param {e.Response} res
  * @param {Object} [options] - specify here how the given error is structured
@@ -168,6 +174,7 @@ const handleError = (err, res, options) => {
 exports.handleError = handleError;
 
 /**
+ * @deprecated
  * @param err the error object of mongoose error data (contains errors array and _message)
  * @return falsy value if err is not a valid mongoose error data object,
  * otherwise return the message of the first error

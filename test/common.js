@@ -7,6 +7,7 @@ let should = chai.should();
 let expect = chai.expect;
 let mongoose = require('mongoose')
 let User = require('../users/model')
+let { Course } = require('../courses/model')
 let Async = require('async');
 let request = require('supertest')
 let sinon = require('sinon');
@@ -16,6 +17,7 @@ exports.should = should;
 exports.expect = expect;
 exports.mongoose = mongoose;
 exports.User = User;
+exports.Course = Course;
 chai.use(chaiHttp);
 exports.chai = chai;
 exports.Async = Async;
