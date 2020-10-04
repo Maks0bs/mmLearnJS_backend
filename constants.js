@@ -66,8 +66,16 @@ module.exports = {
 		}
 	},
 	database: {
-		MONGODB_URI: process.env.NODE_ENV === 'test' ?
-			process.env.MONGODB_TEST_URI : process.env.MONGODB_URI,
+		MONGODB_URI: (() => {
+			switch (process.env.NODE_ENV){
+				case 'production':
+					return process.env.MONGODB_URI
+				case 'test':
+					return process.env.MONGODB_TEST_URI
+				case 'development':
+					return process.env.MONGODB_DEV_URI
+			}
+		})(),
 		FILES_UPLOAD_LIMIT: 50
 	},
 	auth: {
