@@ -111,7 +111,7 @@ exports.addNotifications = (req, res, next) => {
 
 
 exports.deserializeAndCleanData = (req, res, next) => {
-	req.newUserData = JSON.parse(req.body.newUserData);
+	req.body = JSON.parse(req.body.newUserData);
 
 	/**
 	 * Removing previous users avatar if new one gets uploaded
@@ -130,8 +130,7 @@ exports.deserializeAndCleanData = (req, res, next) => {
 
 exports.updateUser = (req, res) => {
 	let newData = {
-		...req.newUserData,
-		newPassword: undefined,
+		...req.body,
 		password:undefined,
 		oldPassword: undefined
 	};
@@ -146,8 +145,8 @@ exports.updateUser = (req, res) => {
 	/*
 	 * Check if given password is equal to current one and set new password only in this case
 	 */
-	if (req.newUserData.password){
-		if (req.user.checkCredentials(req.newUserData.oldPassword)){
+	if (req.body.password){
+		if (req.user.checkCredentials(req.body.oldPassword)){
 			newData.password = req.newUserData.password;
 		} else {
 			return res.status(401).json({

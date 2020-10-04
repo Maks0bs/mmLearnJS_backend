@@ -1,3 +1,4 @@
+let {validate} = require("../../helpers");
 let {
     requireAuthentication,
     getUser,
@@ -29,9 +30,10 @@ router.post('/filter', getUsersFiltered);
 router.put('/:userId',
     requireAuthentication,
     isAuthenticatedUser,
-    userDataValidator,
     uploadFiles,
     deserializeAndCleanData,
+    userDataValidator(null, 'name', 'email', 'password'),//TODO add more validators for each user field
+    validate,
     deleteFiles,
     updateUser
 );
