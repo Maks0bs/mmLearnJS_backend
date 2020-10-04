@@ -1,11 +1,11 @@
 require('dotenv').config();
 
-let clientUrl = process.env.CLIENT_URL
+let clientUrl = process.env.CLIENT_URL;
+let mongoUri
 let defaultCookieOptions
 if (!clientUrl && process.env.NODE_ENV === 'production'){
 	clientUrl = 'https://mmlearnjs-frontend.herokuapp.com'
-}
-else if (!clientUrl){
+} else if (!clientUrl){
 	clientUrl = 'http://localhost:3000'
 }
 
@@ -32,7 +32,16 @@ module.exports = {
 		PORT: process.env.PORT || 8080
 	},
 	database: {
-		MONGODB_URI: process.env.MONGODB_URI,
+		MONGODB_URI: (() => {
+			switch (process.env.NODE_ENV){
+				case 'production':
+					return process.env.MONGODB_URI
+				case 'test':
+					return process.env.MONGODB_TEST_URI
+				case 'development':
+					return process.env.MONGODB_DEV_URI
+			}
+		})(),
 		FILES_UPLOAD_LIMIT: 500
 	},
 	auth: {
