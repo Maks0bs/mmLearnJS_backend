@@ -7,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> definitions.jsdoc</title>
+  <title> users/router/usersData.js</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -84,7 +84,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Source</p>
-                    <h1>definitions.jsdoc</h1>
+                    <h1>users/router/usersData.js</h1>
                 </header>
                 
 
@@ -93,108 +93,94 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
- * @external models
- * @namespace models
- */
-/**
- * @namespace routers
- * @description Please see the
- * {@link https://mmlearnjs-backend.herokuapp.com/docs swagger documentation}
- * for information about all routes and endpoints of the api
- */
-/**
- * @namespace controllers
- */
+            <pre class="prettyprint source linenums"><code>let {validate} = require("../../helpers");
+let {
+    requireAuthentication, getUser, userById, addNotifications, getUsersFiltered,
+    updateUser, deserializeAndCleanData, isAuthenticatedUser, getUpdatesByDate,
+    deleteUser, removeUserMentions
+} = require('../controllers');
+let {
+    uploadFiles, deleteFiles
+} = require('../../files/controller')
+let {userDataValidator} = require('../controllers/validators')
+
 /**
  * @swagger
- * components:
- *   securitySchemes:
- *     cookieAuth:
- *       type: apiKey
- *       in: cookie
- *       name: auth
+ * tags:
+ *   name: /users/...
+ *   description: >
+ *     All routes and API endpoints that are related to users data.
+ *     Here all CRUD operations on users can be performed and some
+ *     special information about users can be queried
  */
-/**
- * @typedef UserNotification
- * @type Object
- * @property {string} title
- * @property {string} [text]
- * @property {string} type
- * @property {BSONDate} created
- */
-/**
- * @typedef BSONDate
- * @type Object|number
- * @description the BSON date type, which is used in MongoDB. Internally it is a 64-bit integer.
- * See MongoDB docs for details
- */
+let router = require('express').Router()
+
 /**
  * @swagger
- * components:
- *   schemas:
- *     Date:
- *       type: object
- *       description: >
- *         Date type. The Date BSON type is used in MongoDB. Internally it is a 64-bit integer.
- *         See MongoDB docs for details
+ * path:
+ *  /users/:userId:
+ *    get:
+ *      summary: >
+ *        Gets all the available data about the given user. If the wanted user
+ *        is not equal to the authenticated one, we don't receive the fields,
+ *        that the wanted user decided to hide
+ *      operationId: getUserById
+ *      tags:
+ *        - "/users/..."
+ *      parameters:
+ *        - name: userId
+ *          in: path
+ *          description: >
+ *            the id of the wanted user
+ *          required: true
+ *          type: string
+ *      responses:
+ *        "200":
+ *          description: >
+ *            All the available data about the wanted user
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/User'
+ *        "404":
+ *          description: User with the given Id could not be found
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  */
-/**
- * @typedef ObjectId
- * @type Object|string
- * @description contains a ref to another object in the database and can be populated with the
- * fields of the given object. See MongoDB docs for details
- */
-/**
- * @swagger
- * components:
- *   schemas:
- *     ObjectId:
- *       type: object
- *       description: >
- *         ObjectID type. The ObjectID BSON type is used in MongoDB to represent refs to other objects in the
- *         Database. See MongoDB docs for details
- */
-/**
- * @typedef Error
- * @type Object
- * @property {string} message
- * @property {number} status
- * @property {any} error
- */
-/**
- * @swagger
- * components:
- *   schemas:
- *     Error:
- *       type: object
- *       description: >
- *         the error object that is returned (sent as response) if an an error has occurred
- *         on the server while running certain middleware
- *       properties:
- *         message:
- *           type: string
- *         status:
- *           type: number
- *         error:
- *           type: object
- *           description: >
- *             This object is optional and is discouraged to be used.
- *             Only use `error` if there is no other way to describe the occurred error.
- */
+router.get('/:userId', getUser);
 
-/**
- * @typedef GridFSFile
- * @memberOf models
- * @name GridFSFile
- * @type Object|File
- */
+router.get('/', getUsersFiltered)
 
+//router.POST('/notifications/', addNotifications);
+router.post('/filter', getUsersFiltered);
 
+router.put('/:userId',
+    requireAuthentication,
+    isAuthenticatedUser,
+    uploadFiles,
+    deserializeAndCleanData,
+    userDataValidator(null, 'name', 'email', 'password'),//TODO add more validators for each user field
+    validate,
+    deleteFiles,
+    updateUser
+);
+router.delete('/:userId',
+    requireAuthentication,
+    isAuthenticatedUser,
+    removeUserMentions,
+    deleteFiles,
+    deleteUser
+)
+router.post('/updates-by-date',
+    requireAuthentication,
+    getUpdatesByDate
+)
 
+router.param('userId', userById);
 
-
-</code></pre>
+module.exports = router;</code></pre>
         </article>
     </section>
 

@@ -63,7 +63,7 @@ let {
 
 let {
 	addNotifications
-} = require('../users/controllers/main')
+} = require('../users/controllers/usersData')
 
 let router = require('express').Router()
 

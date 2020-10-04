@@ -4,6 +4,9 @@
  */
 /**
  * @namespace routers
+ * @description Please see the
+ * {@link https://mmlearnjs-backend.herokuapp.com/docs swagger documentation}
+ * for information about all routes and endpoints of the api
  */
 /**
  * @namespace controllers

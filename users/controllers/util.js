@@ -4,7 +4,9 @@ let constants = require('../../constants');
 let { handleError } = require('../../helpers')
 let { JWT_SECRET } = constants.auth,
     { DEFAULT_COOKIE_OPTIONS, NO_ACTION_LOGOUT_TIME } = constants.client
-
+/**
+ * @class controllers.users.util
+ */
 /**
  * @type function
  * @throws 401
@@ -15,7 +17,7 @@ let { JWT_SECRET } = constants.auth,
  * @param {models.User} [req.auth]
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers
+ * @memberOf controllers.users.util
  */
 const authenticate = async (req, res, next) => {
     if (req.auth){
@@ -54,7 +56,7 @@ exports.authenticate = authenticate
  * @param {models.User} [req.auth]
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers
+ * @memberOf controllers.users.util
  */
 const extendSession = (req, res, next) => {
     if (!req.auth){
@@ -90,7 +92,7 @@ exports.extendSession = extendSession;
  * @param {models.User} [req.auth]
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers
+ * @memberOf controllers.users.util
  */
 const requireAuthentication = (req, res, next) => {
     if (!req.auth){
@@ -101,14 +103,13 @@ const requireAuthentication = (req, res, next) => {
     return next();
 }
 exports.requireAuthentication = requireAuthentication
-
 /**
  * @type function
  * @description lets subsequent middleware be invoked if the user is authenticated
  * @param {e.Request} req
  * @param {models.User} req.auth
  * @param {e.Response} res
- * @memberOf controllers
+ * @memberOf controllers.users.util
  */
 const getAuthenticatedUser = (req, res) => {
     if (!req.auth){
@@ -128,7 +129,7 @@ exports.getAuthenticatedUser = getAuthenticatedUser;
  * [HttpOnly](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies) property
  * @param {e.Request} req
  * @param {e.Response} res
- * @memberOf controllers
+ * @memberOf controllers.users.util
  */
 const logout = (req, res) => {
     // no need for tests here, this endpoint always does the same harmless thing
@@ -146,7 +147,7 @@ exports.logout = logout
  * @param {models.User} [req.auth]
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers
+ * @memberOf controllers.users.util
  */
 const isTeacher = (req, res, next) => {
     if (req.auth.role !== 'teacher'){
@@ -169,7 +170,7 @@ exports.isTeacher = isTeacher;
  * can be either `"creator"`, `"teacher"`, `"enrolled"` or `"not enrolled"`
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers
+ * @memberOf controllers.users.util
  */
 const userInCourse = (req, res, next) => {
     let course = req.courseData;
@@ -208,7 +209,7 @@ exports.userInCourse = userInCourse;
  * @param {models.Course} [req.courseData]
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers
+ * @memberOf controllers.users.util
  */
 const teacherInCourse = (req, res, next) => {
     if (!req.courseData.teachers){
@@ -244,7 +245,7 @@ exports.teacherInCourse = teacherInCourse;
  * @param {models.Course} [req.courseData]
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers
+ * @memberOf controllers.users.util
  */
 const isCourseCreator = (req, res, next) => {
     if (!req.courseData.creator._id.equals(req.auth._id)){

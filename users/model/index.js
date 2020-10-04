@@ -29,7 +29,6 @@ let { ObjectId } = mongoose.Schema;
  * @property {function(UserNotification): undefined} addNotification see {@link models.User.addNotification}
  */
 /**
- * @memberOf models
  * @swagger
  * components:
  *   schemas:

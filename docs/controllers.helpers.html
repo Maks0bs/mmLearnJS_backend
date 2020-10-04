@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,7 +5,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> definitions.jsdoc</title>
+  <title> helpers</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -83,120 +81,383 @@
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Source</p>
-                    <h1>definitions.jsdoc</h1>
+                    <p>Class</p>
+                    <h1>helpers</h1>
                 </header>
                 
 
 
 
+
+<section>
+
+<header>
     
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>/**
- * @external models
- * @namespace models
- */
-/**
- * @namespace routers
- * @description Please see the
- * {@link https://mmlearnjs-backend.herokuapp.com/docs swagger documentation}
- * for information about all routes and endpoints of the api
- */
-/**
- * @namespace controllers
- */
-/**
- * @swagger
- * components:
- *   securitySchemes:
- *     cookieAuth:
- *       type: apiKey
- *       in: cookie
- *       name: auth
- */
-/**
- * @typedef UserNotification
- * @type Object
- * @property {string} title
- * @property {string} [text]
- * @property {string} type
- * @property {BSONDate} created
- */
-/**
- * @typedef BSONDate
- * @type Object|number
- * @description the BSON date type, which is used in MongoDB. Internally it is a 64-bit integer.
- * See MongoDB docs for details
- */
-/**
- * @swagger
- * components:
- *   schemas:
- *     Date:
- *       type: object
- *       description: >
- *         Date type. The Date BSON type is used in MongoDB. Internally it is a 64-bit integer.
- *         See MongoDB docs for details
- */
-/**
- * @typedef ObjectId
- * @type Object|string
- * @description contains a ref to another object in the database and can be populated with the
- * fields of the given object. See MongoDB docs for details
- */
-/**
- * @swagger
- * components:
- *   schemas:
- *     ObjectId:
- *       type: object
- *       description: >
- *         ObjectID type. The ObjectID BSON type is used in MongoDB to represent refs to other objects in the
- *         Database. See MongoDB docs for details
- */
-/**
- * @typedef Error
- * @type Object
- * @property {string} message
- * @property {number} status
- * @property {any} error
- */
-/**
- * @swagger
- * components:
- *   schemas:
- *     Error:
- *       type: object
- *       description: >
- *         the error object that is returned (sent as response) if an an error has occurred
- *         on the server while running certain middleware
- *       properties:
- *         message:
- *           type: string
- *         status:
- *           type: number
- *         error:
- *           type: object
- *           description: >
- *             This object is optional and is discouraged to be used.
- *             Only use `error` if there is no other way to describe the occurred error.
- */
+        <h2><span class="attribs"><span class="type-signature"></span></span>
+            <span class="ancestors"><a href="controllers.html">controllers</a>.</span>helpers<span class="signature">()</span><span class="type-signature"></span></h2>
+        
+    
+</header>
 
-/**
- * @typedef GridFSFile
- * @memberOf models
- * @name GridFSFile
- * @type Object|File
- */
+<article>
+    <div class="container-overview">
+    
+        
+            <div class='vertical-section'>
+                <div class="members">
+                    <div class="member">
+                        <div class=name>
+                            <span class="tag">Constructor</span>
+                        </div>
+                        
+
+
+    
+    <h4 class="name" id="helpers">
+        <a class="href-link" href="#helpers">#</a>
+        
+        <span class="code-name">
+            
+                new helpers<span class="signature">()</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    
 
 
 
 
 
-</code></pre>
-        </article>
-    </section>
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="helpers_index.js.html" class="button">View Source</a>
+            <span>
+                <a href="helpers_index.js.html">helpers/index.js</a>, <a href="helpers_index.js.html#line8">line 8</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+                </div>
+            </div>
+        
+    
+    </div>
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <div class='vertical-section'>
+            <h1>Methods</h1>
+            <div class="members">
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id=".validate">
+        <a class="href-link" href="#.validate">#</a>
+        
+            
+                <span class='tag'>static</span>
+            
+        
+        <span class="code-name">
+            
+                validate<span class="signature">(req, res, next)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    
+    <div class="description">
+        <p>this controller should be used at the end of a chain of
+<a href="https://express-validator.github.io/docs/index.html">express validators</a>, which are
+defined in the <code>validators.js</code> file, for example this one</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">e.Request</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>res</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">e.Response</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>next</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">function</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="helpers_index.js.html" class="button">View Source</a>
+            <span>
+                <a href="helpers_index.js.html">helpers/index.js</a>, <a href="helpers_index.js.html#line57">line 57</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+        
+            <div class='param-desc column is-12'><p>400</p></div>
+        
+    
+</div>
+
+                
+        </div>
+    </div>
+
+
+
+
+
+
+</div>
+            
+            </div>
+        </div>
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 

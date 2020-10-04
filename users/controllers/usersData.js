@@ -2,52 +2,70 @@ let { Course } = require('../../courses/model')
 let User = require('../model');
 let _ = require('lodash');
 let mongoose = require('mongoose');
+const {handleError} = require("../../helpers");
+/**
+ * @class controllers.users.usersData
+ */
 
-exports.userById = (req, res, next, id) => {
-	User.findOne({_id: id})
+/**
+ * @type function
+ * @throws 404
+ * @description works with the `:userId` param in the url. Adds all the user's data
+ * whose Id is the provided parameter. Adds all user's data to the request object
+ * under the `req.user` property
+ * @param {e.Request} req
+ * @param {models.User} [req.auth]
+ * @param {models.User} [req.user]
+ * @param {e.Response} res
+ * @param {function} next
+ * @param {string} id - the id of the user that should be found and saved
+ * @memberOf controllers.users.usersData
+ */
+const userById = (req, res, next, id) => {
+	//TODO add tests for this
+	return User.findOne({_id: id})
 		.populate('enrolledCourses', '_id name')
 		.populate('teacherCourses', '_id name')
 		.then(user => {
 			if (!user) throw {
-				status: 404,
-				error: {
-					message: 'users not found'
-				}
+				status: 404, message: 'users not found'
 			}
-
-			req.user = user;//may need to change req.users to req.userById to avoid conflicts
-			next();
+			req.user = user;
+			return next();
 		})
-		.catch(err => {
-			console.log(err);
-			return res.status(err.status || 400)
-				.json({
-					error: err
-				})
-		})
+		.catch(err => handleError(err, res))
 }
+exports.userById = userById;
 
-exports.getUser = (req, res) => {
+/**
+ * @type function
+ * @throws 404
+ * @description returns the formatted user from the `req.user` object. Normally
+ * works with the {@link controllers.users.usersData.userById userById} controller
+ * @param {e.Request} req
+ * @param {models.User} [req.auth]
+ * @param {models.User} [req.user]
+ * @param {e.Response} res
+ * @memberOf controllers.users.usersData
+ */
+const getUser = (req, res) => {
 	if (!req.user){
-		res.status(404).json({
-			error: {
-				status: 404,
-				message: 'users not found'
-			}
+		return res.status(404).json({
+			error: { status: 404, message: 'users not found' }
 		})
 	}
 	let user = req.user;
-
-
 	user.salt = undefined;
 	user.hashed_password = undefined;
 
-	// TODO if users != auth users then hide hiddenFields, specified in users object
+	// if the wanted user is not the authenticated one, hide fields, which
+	// the user we are looking for decided to hide from the public
 	if (!req.auth || !user._id.equals(req.auth._id)){
 		user.hideFields();
 	}
 	return res.json(user);
 }
+exports.getUser = getUser;
 
 exports.configUsersFilter = (req, res, next) => {
 	req.usersFilter = req.query;

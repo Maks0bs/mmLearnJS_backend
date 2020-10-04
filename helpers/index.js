@@ -3,12 +3,21 @@ let { validationResult } = require('express-validator');
 let { gmailClientCredentials } = require('../constants').mail
 
 /**
+ * @namespace helpers
+ */
+/**
+ * @class controllers.helpers
+ */
+//TODO maybe put some common controllers
+// (like authenticate, extendSession) to the `controllers.helpers` namespace
+/**
  * @param {object} emailData
  * @param {string} emailData.from
  * @param {string} emailData.to
  * @param {string} emailData.text
  * @param {string} [emailData.html]
  * @return {Promise<string>}
+ * @memberOf helpers
  */
 const sendEmail = emailData => {
 
@@ -43,7 +52,7 @@ exports.sendEmail = sendEmail;
  * @param {e.Request} req
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers
+ * @memberOf controllers.helpers
  */
 const validate = (req, res, next) => {
     let { errors } = validationResult(req);
@@ -66,6 +75,7 @@ exports.validate = validate;
  * @param {any} err
  * @param {e.Response} res
  * @param {Object} [options] - specify here how the given error is structured
+ * @memberOf helpers
  */
 const handleError = (err, res, options) => {
     return res.status(err.status || 400)
@@ -83,6 +93,7 @@ exports.handleError = handleError;
  * @param err the error object of mongoose error data (contains errors array and _message)
  * @return falsy value if err is not a valid mongoose error data object,
  * otherwise return the message of the first error
+ * @memberOf helpers
  */
 const formatMongooseError = (err) => {
     if (!err.errors){

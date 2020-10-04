@@ -76,7 +76,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#formatMongooseError">formatMongooseError</a></li><li><a href="global.html#gfs">gfs</a></li><li><a href="global.html#handleError">handleError</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#sendEmail">sendEmail</a></li><li><a href="global.html#updateDeletedEntriesSchema">updateDeletedEntriesSchema</a></li><li><a href="global.html#updateNewEntriesSchema">updateNewEntriesSchema</a></li><li><a href="global.html#updateNewInfoSchema">updateNewInfoSchema</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="helpers.html">helpers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="controllers.helpers.html">helpers</a></li><li><a href="controllers.users.html">users</a></li><li><a href="controllers.users.auth.html">auth</a></li><li><a href="controllers.users.usersData.html">usersData</a></li><li><a href="controllers.users.util.html">util</a></li><li><a href="controllers.users.validators.html">validators</a></li><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#gfs">gfs</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#updateDeletedEntriesSchema">updateDeletedEntriesSchema</a></li><li><a href="global.html#updateNewEntriesSchema">updateNewEntriesSchema</a></li><li><a href="global.html#updateNewInfoSchema">updateNewInfoSchema</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul></div>
                 
             </nav>
         </div>
@@ -96,11 +96,14 @@
             <pre class="prettyprint source linenums"><code>let { body } = require('express-validator')
 let userDataValidatorsSet = {}
 /**
+ * @class controllers.users.validators
+ */
+/**
  * @type function
  * @throws 400
  * @param {string} [fieldName]
- * @return function - the validator for the users's name, which is located in the request body
- * @memberOf controllers
+ * @return function - the validator for the user's name, which is located in the request body
+ * @memberOf controllers.users.validators
  */
 const userNameValidator = (fieldName) =>
     body(fieldName || "name", "Name is required").notEmpty().isString()
@@ -111,7 +114,7 @@ exports.userNameValidator = userNameValidator;
  * @throws 400
  * @param {string} [fieldName]
  * @return function - the validator for the users's email, which is located in the request body
- * @memberOf controllers
+ * @memberOf controllers.users.validators
  */
 const userEmailValidator = (fieldName) => [
     body(fieldName || "email", "Email is required").notEmpty().isString(),
@@ -127,7 +130,7 @@ exports.userEmailValidator = userEmailValidator;
  * @throws 400
  * @param {string} [fieldName]
  * @return function - the validator for the users's password, which is located in the request body
- * @memberOf controllers
+ * @memberOf controllers.users.validators
  */
 const userPasswordValidator = (fieldName) => [
     body(fieldName || 'password', "Password is required").notEmpty().isString(),
@@ -152,7 +155,7 @@ exports.userPasswordValidator = userPasswordValidator;
  * (like `_id` or `updated`) cannot be used here
  * @return {function[]} - returns the array with validator middleware to use in the router
  * See {@link https://express-validator.github.io/docs/index.html express-validator docs}
- * @memberOf controllers
+ * @memberOf controllers.users.validators
  */
 const userDataValidator = (options, ...fields) => {
     let middleware = [], hasOptions = options &amp;&amp; ((typeof options) === 'object')

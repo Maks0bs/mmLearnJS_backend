@@ -8,6 +8,9 @@ let { JWT_SECRET } = constants.auth,
     { TEACHER_PASSWORD, ACTIVATION_TIME_PERIOD } = constants.users,
     { ACTIVATE_ACCOUNT, COURSE_TEACHER_INVITATION } = constants.notifications
 /**
+ * @class controllers.users.auth
+ */
+/**
  * @typedef BasicAuthUserData
  * @type Object
  * @property {string} email
@@ -28,7 +31,7 @@ let { JWT_SECRET } = constants.auth,
  * @param {e.Request} req
  * @param {SignupData|any} req.body
  * @param {e.Response} res
- * @memberOf controllers
+ * @memberOf controllers.users.auth
  */
 const signup = (req, res) => {
     // TODO add tests to check if email was sent
@@ -92,7 +95,7 @@ exports.signup = signup
  * @param {e.Request} req
  * @param {BasicAuthUserData} req.body
  * @param {e.Response} res
- * @memberOf controllers
+ * @memberOf controllers.users.auth
  */
 const signin = (req, res) => {
     let { email, password } = req.body;
@@ -131,7 +134,7 @@ exports.signin = signin;
  * @param {e.Request} req
  * @param {models.User} req.auth
  * @param {e.Response} res
- * @memberOf controllers
+ * @memberOf controllers.users.auth
  */
 const sendActivationLink = (req, res) => {
     // TODO add tests to check if email was sent
@@ -174,7 +177,7 @@ exports.sendActivationLink = sendActivationLink
  * @param {object} req.params
  * @param {string} req.params.activationToken
  * @param {e.Response} res
- * @memberOf controllers
+ * @memberOf controllers.users.auth
  */
 const activateAccount = (req, res) => {
     let token = req.params.activationToken, userData;
@@ -225,7 +228,7 @@ exports.activateAccount = activateAccount;
  * @param {object} req.params
  * @param {string} req.params.inviteToken
  * @param {e.Response} res
- * @memberOf controllers
+ * @memberOf controllers.users.auth
  */
 const inviteSignup = (req, res) => {
     // TODO add tests to check if email was sent
@@ -347,7 +350,7 @@ exports.inviteSignup = inviteSignup;
  * @param {Object} req.body
  * @param {string} req.body.email
  * @param {e.Response} res
- * @memberOf controllers
+ * @memberOf controllers.users.auth
  */
 const forgotPassword = (req, res) => {
     // TODO add test to check if email was sent
@@ -408,7 +411,7 @@ exports.forgotPassword = forgotPassword;
  * @param {Object} req.params
  * @param {string} req.params.resetToken
  * @param {e.Response} res
- * @memberOf controller
+ * @memberOf controllers.users.auth
  */
 const resetPassword = (req, res) => {
     const token = req.params.resetToken;

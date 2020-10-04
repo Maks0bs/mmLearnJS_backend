@@ -7,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> definitions.jsdoc</title>
+  <title> users/controllers/index.js</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -84,7 +84,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Source</p>
-                    <h1>definitions.jsdoc</h1>
+                    <h1>users/controllers/index.js</h1>
                 </header>
                 
 
@@ -93,108 +93,16 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
- * @external models
- * @namespace models
- */
-/**
- * @namespace routers
- * @description Please see the
- * {@link https://mmlearnjs-backend.herokuapp.com/docs swagger documentation}
- * for information about all routes and endpoints of the api
- */
-/**
- * @namespace controllers
- */
-/**
- * @swagger
- * components:
- *   securitySchemes:
- *     cookieAuth:
- *       type: apiKey
- *       in: cookie
- *       name: auth
- */
-/**
- * @typedef UserNotification
- * @type Object
- * @property {string} title
- * @property {string} [text]
- * @property {string} type
- * @property {BSONDate} created
- */
-/**
- * @typedef BSONDate
- * @type Object|number
- * @description the BSON date type, which is used in MongoDB. Internally it is a 64-bit integer.
- * See MongoDB docs for details
- */
-/**
- * @swagger
- * components:
- *   schemas:
- *     Date:
- *       type: object
- *       description: >
- *         Date type. The Date BSON type is used in MongoDB. Internally it is a 64-bit integer.
- *         See MongoDB docs for details
- */
-/**
- * @typedef ObjectId
- * @type Object|string
- * @description contains a ref to another object in the database and can be populated with the
- * fields of the given object. See MongoDB docs for details
- */
-/**
- * @swagger
- * components:
- *   schemas:
- *     ObjectId:
- *       type: object
- *       description: >
- *         ObjectID type. The ObjectID BSON type is used in MongoDB to represent refs to other objects in the
- *         Database. See MongoDB docs for details
- */
-/**
- * @typedef Error
- * @type Object
- * @property {string} message
- * @property {number} status
- * @property {any} error
- */
-/**
- * @swagger
- * components:
- *   schemas:
- *     Error:
- *       type: object
- *       description: >
- *         the error object that is returned (sent as response) if an an error has occurred
- *         on the server while running certain middleware
- *       properties:
- *         message:
- *           type: string
- *         status:
- *           type: number
- *         error:
- *           type: object
- *           description: >
- *             This object is optional and is discouraged to be used.
- *             Only use `error` if there is no other way to describe the occurred error.
- */
+            <pre class="prettyprint source linenums"><code>module.exports = {
+    ...require('./auth'),
+    ...require('./util'),
+    ...require('./usersData'),
+    ...require('./validators')
+}
 
 /**
- * @typedef GridFSFile
- * @memberOf models
- * @name GridFSFile
- * @type Object|File
- */
-
-
-
-
-
-</code></pre>
+ * @class controllers.users
+ */</code></pre>
         </article>
     </section>
 
