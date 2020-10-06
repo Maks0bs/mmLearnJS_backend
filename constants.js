@@ -1,10 +1,9 @@
 require('dotenv').config();
 
 let clientUrl = process.env.CLIENT_URL;
-let mongoUri
 let defaultCookieOptions
 if (!clientUrl && process.env.NODE_ENV === 'production'){
-	clientUrl = 'https://mmlearnjs-frontend.herokuapp.com'
+	clientUrl = 'https://mmlearnjs.maks0bs.com'
 } else if (!clientUrl){
 	clientUrl = 'http://localhost:3000'
 }
