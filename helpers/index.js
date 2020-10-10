@@ -78,11 +78,12 @@ exports.validate = validate;
  * @memberOf helpers
  */
 const handleError = (err, res, options) => {
+    console.log(err);
     return res.status(err.status || 400)
         .json({
             error: {
-                message: err.message,
-                status: err.status
+                message: err.message || err,
+                status: err.status || 400
             }
         })
 }

@@ -30,3 +30,13 @@ exports.errCallback = (status) => (res) => {
     expect(body.error.message).to.be.a('string');
 }
 exports.sinon = sinon;
+/** @param {string} id */
+exports.getForgedId = (id) => {
+    let wrongId;
+    if (id[id.length - 1] === 'a'){
+        wrongId = id.substring(0, id.length - 1) + 'b';
+    } else {
+        wrongId = id.substring(0, id.length - 1) + 'a';
+    }
+    return wrongId
+}

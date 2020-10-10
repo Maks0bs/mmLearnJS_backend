@@ -18,7 +18,7 @@ exports.userNameValidator = userNameValidator;
  * @type function
  * @throws 400
  * @param {string} [fieldName]
- * @return function - the validator for the users's email, which is located in the request body
+ * @return function - the validator for the user's email, which is located in the request body
  * @memberOf controllers.users.validators
  */
 const userEmailValidator = (fieldName) => [
@@ -34,7 +34,7 @@ exports.userEmailValidator = userEmailValidator;
  * @type function
  * @throws 400
  * @param {string} [fieldName]
- * @return function - the validator for the users's password, which is located in the request body
+ * @return function - the validator for the user's password, which is located in the request body
  * @memberOf controllers.users.validators
  */
 const userPasswordValidator = (fieldName) => [

@@ -15,6 +15,9 @@ let constants = require('../constants');
  *         File type. Files are stored in MongoDB via GridFS in this API.
  *         See GridFS and Multer docs for details.
  */
+/**
+ * @class controllers.files
+ */
 
 let gfs;
 mongoose.connection.on('open', () => {
@@ -44,18 +47,20 @@ let storage = new GridFSStorage({
 })
 let upload = multer({ storage });
 
-exports.uploadFiles = upload.any()
-/*.fields([
-	{
-		name: 'files', 
-		maxCount: constants.database.FILES_UPLOAD_LIMIT
-	}
-])*/
+/**
+ * @type function
+ * @description Only works if the request body is a FormData. Uploads all found binary files
+ * inside the request FormData; Replaces the `req.body` with an object
+ * that contains all original FormData fields and `req.body.files` - an array
+ * with metadata about all uploaded files
+ * @throws 400
+ * @memberOf controllers.files
+ */
+const uploadFiles = upload.any();
+exports.uploadFiles = uploadFiles;
 
 exports.sendFiles = (req, res) => {
-	res.json({
-		files: req.files
-	})
+	return res.json({ files: req.files})
 }
 
 exports.getFilesFiltered = (req, res) => {
@@ -170,20 +175,24 @@ exports.deleteFile = (req, res) => {
 	});
 }
 
-exports.deleteFiles = async (req, res, next) => {
-	let cnt = 0;
+/**
+ * @type function
+ * @description deletes the files with the IDs, which are specified in the
+ * `req.filesToDelete` array;
+ * @param {e.Request} req
+ * @param {models.User} [req.auth]
+ * @param {string|ObjectId[]} [req.filesToDelete]
+ * @param {e.Response} res
+ * @param {function} next
+ * @memberOf controllers.users.usersData
+ */
+const deleteFiles = async (req, res, next) => {
 	if (!req.filesToDelete || req.filesToDelete.length === 0){
 		return next();
 	}
-	let promises = [];
-	for (let i of req.filesToDelete){
-		promises.push(new Promise((resolve => {
-			gfs.remove({_id: i, root: 'uploads'}, () => {
-				resolve(i)
-			})
-		})))
-	}
-
-	await Promise.all(promises);
+	await Promise.all(req.filesToDelete.map(id => new Promise(resolve => {
+		gfs.remove({_id: id, root: 'uploads'}, () => resolve(id))
+	})));
 	return next();
 }
+exports.deleteFiles = deleteFiles;

@@ -1,7 +1,7 @@
 let {validate} = require("../../helpers");
 let {
-    requireAuthentication, getUser, userById, addNotifications, getUsersFiltered,
-    updateUser, deserializeAndCleanData, isAuthenticatedUser, getUpdatesByDate,
+    requireAuthentication, getUser, userById, getUsersFiltered,
+    updateUser, deserializeAndCleanUserData, isAuthenticatedUser, getUpdatesByDate,
     deleteUser, removeUserMentions
 } = require('../controllers');
 let {
@@ -30,6 +30,8 @@ let router = require('express').Router()
  *        is not equal to the authenticated one, we don't receive the fields,
  *        that the wanted user decided to hide
  *      operationId: getUserById
+ *      security:
+ *        - cookieAuth: []
  *      tags:
  *        - "/users/..."
  *      parameters:
@@ -47,6 +49,12 @@ let router = require('express').Router()
  *            application/json:
  *              schema:
  *                $ref: '#/components/schemas/User'
+ *        "400":
+ *          description: The provided ID is invalid
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  *        "404":
  *          description: User with the given Id could not be found
  *          content:
@@ -54,34 +62,158 @@ let router = require('express').Router()
  *              schema:
  *                $ref: '#/components/schemas/Error'
  */
-router.get('/:userId', getUser);//TODO add tests for this
+router.get('/:userId', getUser);
 
-router.get('/', getUsersFiltered)
+//TODO!!!!!!!!
+router.get('/', getUsersFiltered)//TODO create basic functionality for this endpoint
+//TODO!!!!!!!!
 
-//router.POST('/notifications/', addNotifications);
-router.post('/filter', getUsersFiltered);
-
+/**
+ * @swagger
+ * path:
+ *  /users/:userId:
+ *    put:
+ *      summary: >
+ *        Updates the user with the given ID (who should be equal to the authenticated user)
+ *        and sets the user data, provided in the request body.
+ *      description: >
+ *        Updates the user with the given ID (who should be equal to the authenticated user)
+ *        and sets the user data, provided in the request body.
+ *        The request body should be [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData).
+ *        All new user data should be a stringified JSON in the `user` field of the request form data.
+ *        If you want to update the user's photo, provide the new photo image file in the
+ *        `files` form field (this image should be the only uploaded file)
+ *        and set the `user.photo` value to the string `"new"`.
+ *        If you wish to explicitly remove the avatar photo for the user,
+ *        set `user.photo` to `null`.
+ *        If you DO NOT want to reset the password, set `user.password` to a
+ *        [falsy value](https://developer.mozilla.org/en-US/docs/Glossary/Falsy).
+ *        Otherwise put the new password in the `user.password` form field; You also have to
+ *        provide the old password under the `user.oldPassword` field.
+ *      operationId: updateUser
+ *      security:
+ *        - cookieAuth: []
+ *      tags:
+ *        - "/users/..."
+ *      parameters:
+ *        - name: userId
+ *          in: path
+ *          description: >
+ *            the id of the user to be updated
+ *          required: true
+ *          type: string
+ *      requestBody:
+ *        content:
+ *          application/form-data:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                user:
+ *                  allOf:
+ *                    - type: object
+ *                      properties:
+ *                        oldPassword:
+ *                          type: string
+ *                    - $ref: '#/components/schemas/User'
+ *                files:
+ *                  type: array
+ *                  items:
+ *                    type: string
+ *                    format: binary
+ *      responses:
+ *        "200":
+ *          description: >
+ *            User has been updates successfully. Return the updates user data
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  user:
+ *                    $ref: '#/components/schemas/User'
+ *                  message:
+ *                    type: string
+ *        "400":
+ *          description: The provided data or userId is invalid
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *        "401":
+ *          description: >
+ *            Not authorized to update the user or some
+ *            special authorization data (like old password) is wrong
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
 router.put('/:userId',
     requireAuthentication,
     isAuthenticatedUser,
     uploadFiles,
-    deserializeAndCleanData,
-    userDataValidator(null, 'name', 'email', 'password'),//TODO add more validators for each user field
+    deserializeAndCleanUserData,
+    userDataValidator(null, 'name', 'email'),
     validate,
     deleteFiles,
     updateUser
-);
+);//TODO write tests for this
+
+/**
+ * @swagger
+ * path:
+ *  /users/:userId:
+ *    delete:
+ *      summary: >
+ *        Deletes the user with the given ID
+ *      operationId: deleteUser
+ *      security:
+ *        - cookieAuth: []
+ *      tags:
+ *        - "/users/..."
+ *      parameters:
+ *        - name: userId
+ *          in: path
+ *          description: >
+ *            the id of the user to be updated
+ *          required: true
+ *          type: string
+ *      responses:
+ *        "200":
+ *          description: User has been deleted successfully
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *        "400":
+ *          description: The provided userId is invalid
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *        "401":
+ *          description: >
+ *            Not authorized to delete the user
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
 router.delete('/:userId',
     requireAuthentication,
     isAuthenticatedUser,
     removeUserMentions,
     deleteFiles,
     deleteUser
-)
-router.post('/updates-by-date',
+)//TODO write tests for this
+
+router.post('/updates-by-date',//TODO refactor this to be a GET request with parameters!!
     requireAuthentication,
     getUpdatesByDate
-)
+)//TODO write tests for this
 
 router.param('userId', userById);
 
