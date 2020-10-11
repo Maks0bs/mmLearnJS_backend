@@ -34,7 +34,6 @@ let { JWT_SECRET } = constants.auth,
  * @memberOf controllers.users.auth
  */
 const signup = (req, res) => {
-    // TODO add tests to check if email was sent
     let { email, teacher, teacherPassword } = req.body, token;
     return User.findOne({ email })
         .then(  user => {
@@ -137,7 +136,6 @@ exports.signin = signin;
  * @memberOf controllers.users.auth
  */
 const sendActivationLink = (req, res) => {
-    // TODO add tests to check if email was sent
     if (req.auth.activated){
         return res.status(403).json({
             error: { status: 403, message: 'Your account is already activated'}
@@ -231,7 +229,6 @@ exports.activateAccount = activateAccount;
  * @memberOf controllers.users.auth
  */
 const inviteSignup = (req, res) => {
-    // TODO add tests to check if email was sent
     let token, inviteData;
     try {
         inviteData = jwt.verify(req.params.inviteToken, JWT_SECRET);
@@ -353,7 +350,6 @@ exports.inviteSignup = inviteSignup;
  * @memberOf controllers.users.auth
  */
 const forgotPassword = (req, res) => {
-    // TODO add test to check if email was sent
     if (!req.body || !req.body.email)
         return res.status(400).json({
             error:{

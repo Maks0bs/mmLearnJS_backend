@@ -5,7 +5,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> helpers</title>
+  <title> files</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -82,7 +82,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Class</p>
-                    <h1>helpers</h1>
+                    <h1>files</h1>
                 </header>
                 
 
@@ -94,7 +94,7 @@
 <header>
     
         <h2><span class="attribs"><span class="type-signature"></span></span>
-            <span class="ancestors"><a href="controllers.html">controllers</a>.</span>helpers<span class="signature">()</span><span class="type-signature"></span></h2>
+            <span class="ancestors"><a href="controllers.html">controllers</a>.</span>files<span class="signature">()</span><span class="type-signature"></span></h2>
         
     
 </header>
@@ -113,12 +113,12 @@
 
 
     
-    <h4 class="name" id="helpers">
-        <a class="href-link" href="#helpers">#</a>
+    <h4 class="name" id="files">
+        <a class="href-link" href="#files">#</a>
         
         <span class="code-name">
             
-                new helpers<span class="signature">()</span><span class="type-signature"></span>
+                new files<span class="signature">()</span><span class="type-signature"></span>
             
         </span>
     </h4>
@@ -172,9 +172,9 @@
 
     
         <p class="tag-source">
-            <a href="helpers_index.js.html" class="button">View Source</a>
+            <a href="files_controller.js.html" class="button">View Source</a>
             <span>
-                <a href="helpers_index.js.html">helpers/index.js</a>, <a href="helpers_index.js.html#line8">line 8</a>
+                <a href="files_controller.js.html">files/controller.js</a>, <a href="files_controller.js.html#line18">line 18</a>
             </span>
         </p>
     
@@ -221,147 +221,43 @@
     
 
     
-
-    
         <div class='vertical-section'>
-            <h1>Methods</h1>
+            <h1>Members</h1>
             <div class="members">
             
                 <div class="member">
 
-
-    
-    <h4 class="name" id=".validate">
-        <a class="href-link" href="#.validate">#</a>
+    <span class="method-parameter is-pulled-right">
+        <label>Type:</label>
         
-            
-                <span class='tag'>static</span>
-            
-        
-        <span class="code-name">
-            
-                validate<span class="signature">(req, res, next)</span><span class="type-signature"></span>
-            
-        </span>
-    </h4>
-    
-
-    
-    
-    <div class="description">
-        <p>this controller should be used at the end of a chain of
-<a href="https://express-validator.github.io/docs/index.html">express validators</a>, which are
-defined in the <code>validators.js</code> file, for example this one</p>
-    </div>
-    
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-<div class="table-container">
-    <table class="params table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>req</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">e.Request</span>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>res</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">e.Response</span>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>next</code></td>
-  
-
-  <td class="type">
-  
-      
 <span class="param-type">function</span>
 
 
-  
-  </td>
+    </span>
 
-  
-
-  
-
-  <td class="description last"></td>
-</tr>
-
-
+<h4 class="name" id=".uploadFiles">
+    <a class="href-link" href="#.uploadFiles">#</a>
+    
         
-        </tbody>
-    </table>
+            <span class='tag'>static</span>
+        
+            <span class='tag'>constant</span>
+        
+    
+    <span class="code-name">
+        uploadFiles
+    </span>
+    
+</h4>
+
+
+
+
+<div class="description">
+    <p>Only works if the request body is a FormData. Uploads all found binary files
+inside the request FormData; Replaces the <code>req.body</code> with an object
+that contains all original FormData fields and <code>req.body.files</code> - an array
+with metadata about all uploaded files</p>
 </div>
 
 
@@ -401,9 +297,9 @@ defined in the <code>validators.js</code> file, for example this one</p>
 
     
         <p class="tag-source">
-            <a href="helpers_index.js.html" class="button">View Source</a>
+            <a href="files_controller.js.html" class="button">View Source</a>
             <span>
-                <a href="helpers_index.js.html">helpers/index.js</a>, <a href="helpers_index.js.html#line57">line 57</a>
+                <a href="files_controller.js.html">files/controller.js</a>, <a href="files_controller.js.html#line59">line 59</a>
             </span>
         </p>
     
@@ -413,43 +309,12 @@ defined in the <code>validators.js</code> file, for example this one</p>
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-    <div class='columns method-parameter'>
-        <div class="column is-2"><label>Throws:</label></div>
-        <div class="column is-10">
-            
-                    
-<div class="columns">
-    
-        
-            <div class='param-desc column is-12'><p>400</p></div>
-        
-    
-</div>
-
-                
-        </div>
-    </div>
-
-
-
-
-
-
 </div>
             
             </div>
         </div>
+    
+
     
 
     

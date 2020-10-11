@@ -5,5 +5,7 @@ describe('POST /auth/...', () => {
     require('./invite-signup');
     require('./signin');
     require('./send-activation')
+    require('./forgot-password')
+    require('./reset-password')
 })
 

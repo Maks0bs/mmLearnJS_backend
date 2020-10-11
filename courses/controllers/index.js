@@ -329,7 +329,7 @@ exports.getCoursesFiltered = async (req, res) => {
 			{ about: reOptions }
 		]
 	}
-	let basicUserFields = ['name', 'photo', 'role', 'activated', '_id', 'hiddenFields'];
+	let basicUserFields = ['name', 'photo', '_id', 'hiddenFields'];
 	Course.find({...filter})
 	//maybe select only necessary info
 		.populate({path: 'students', select: basicUserFields})
@@ -381,18 +381,24 @@ exports.getCoursesFiltered = async (req, res) => {
 						isStudent = true;
 						userStatuses[i] = 'student';
 					}
-					student.hideFields();
+					if (student && student.hideFields){
+						student.hideFields();
+					}
 				}
 				for (let teacher of courses[i].teachers){
 					if (teacher.equals(req.auth._id)){
 						isTeacher = true;
 						userStatuses[i] = 'teacher';
 					}
-					teacher.hideFields();
+					if (teacher && teacher.hideFields){
+						teacher.hideFields();
+					}
 				}
-				courses[i].creator.hideFields();
+				if (courses[i].creator && courses[i].creator.hideFields){
+					courses[i].creator.hideFields();
+				}
 
-				if (courses[i].creator._id.equals(req.auth._id)){
+				if (courses[i].creator && courses[i].creator._id.equals(req.auth._id)){
 					userStatuses[i] = 'creator';
 					continue;
 				}

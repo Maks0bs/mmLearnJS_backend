@@ -69,6 +69,7 @@ describe('GET /users/:userId', () => {
             .expect(200)
             .expect(res => {
                 let { body } = res;
+                console.log(res.body);
                 expect(body).to.be.an('object');
                 expect(body._id).to.be.a('string').eql(user._id.toString());
                 expect(body).to.not.have.own.property('enrolledCourses');

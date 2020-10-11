@@ -89,5 +89,9 @@ module.exports = {
 	notifications: {
 		ACTIVATE_ACCOUNT: 'USER_NOTIFICATION_ACTIVATE_ACCOUNT',
 		COURSE_TEACHER_INVITATION: 'USER_NOTIFICATION_TEACHER_INVITATION'
+	},
+	errors: {
+		CONTACT_EMAIL: process.env.NODE_ENV === 'production' ?
+			'maksthebro173@gmail.com' : 'maksthepro123@gmail.com'
 	}
 }

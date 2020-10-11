@@ -1,15 +1,26 @@
 let { Course } = require('../../courses/model')
 let User = require('../model');
-let { extend, min: minList} = require('lodash');
-let mongoose = require('mongoose');
-const {handleError} = require("../../helpers");
+let { extend } = require('lodash');
+let { v1: uuidv1 } = require('uuid');
+let { ObjectId } = require('mongoose').Types;
+const {handleError, sendEmail} = require("../../helpers");
+let { CONTACT_EMAIL } = require('../../constants').errors
+const CONSTANTS = {
+	NON_UPDATABLE_USER_FIELDS: [
+		'email', 'hashed_password', 'created', 'updated', 'salt', 'role', 'activated',
+		'enrolledCourses', 'teacherCourses', 'subscribedCourses', 'notifications'
+	],
+	NON_AVAILABLE_USER_FIELDS: [
+		'salt', 'hashed_password', 'notifications', 'subscribedCourses'
+	]
+}
+exports.CONSTANTS = CONSTANTS;
 /**
  * @class controllers.users.usersData
  */
-
 /**
  * @type function
- * @throws 404, 400
+ * @throws 400, 404
  * @description works with the `:userId` param in the url. Adds all the user's data
  * whose Id is the provided parameter. Adds all user's data to the request object
  * under the `req.user` property
@@ -54,11 +65,11 @@ const getUser = (req, res) => {
 		})
 	}
 	let user = req.user;
-	// remove irrelevant data
-	user.salt = undefined;
-	user.hashed_password = undefined;
-	user.notifications = undefined;
-	user.subscribedCourses = undefined;
+	// remove irrelevant data for the response
+	for (let f of CONSTANTS.NON_AVAILABLE_USER_FIELDS){
+		user[f] = undefined;
+		delete user[f];
+	}
 
 	// if the wanted user is not the authenticated one, hide fields, which
 	// the user we are looking for decided to hide from the public
@@ -115,14 +126,18 @@ exports.deserializeAndCleanUserData = deserializeAndCleanUserData;
  * @memberOf controllers.users.usersData
  */
 const updateUser = (req, res) => {
-	//TODO write tests for this
 	let newData = {...req.body};
 	delete newData.password;
 	delete newData.oldPassword
 
 	/* If new file is available, then user wants to change their avatar. */
 	if (req.files && req.files[0] && newData.photo === 'new'){
-		newData.photo = mongoose.Types.ObjectId(req.files[0].id.toString());
+		if (req.files[0].contentType.substring(0, 5) !== 'image'){
+			return res.status(400).json({
+				error: {status: 400, message: 'Avatar should be an image'}
+			})
+		}
+		newData.photo = ObjectId(req.files[0].id.toString());
 	}
 	/* Update password only if the correct old password is provided */
 	if (req.body.password){
@@ -139,15 +154,10 @@ const updateUser = (req, res) => {
 	newUser.updated = Date.now();
 
 	// Don't allow changing fields, that are only updated via other API endpoints
-	delete newData.email;
-	delete newData.hashed_password;
-	delete newData.created;
-	delete newData.salt;
-	delete newData.role;
-	delete newData.enrolledCourses;
-	delete newData.teacherCourses;
-	delete newData.subscribedCourses;
-	delete newData.notifications;
+	for (let f of CONSTANTS.NON_UPDATABLE_USER_FIELDS){
+		newData[f] = undefined;
+		delete newData[f];
+	}
 
 	// `name` should always remain a non-hidden field
 	if (!Array.isArray(newData.hiddenFields) || newData.hiddenFields.includes('name')){
@@ -162,7 +172,7 @@ const updateUser = (req, res) => {
 	try {
 		extend(newUser, newData);
 	} catch (err){
-		handleError(err, res);
+		return handleError(err, res);
 	}
 	return newUser.save()
 		.then(updatedUser => res.json(
@@ -187,11 +197,12 @@ exports.updateUser = updateUser;
  */
 const isAuthenticatedUser = (req, res, next) => {
 	if (!req.auth._id.equals(req.user._id)){
-		return res.status(401)
-			.json({error: {
-					status: 401,
-					message: 'You are not authorized to perform such operations to this user'
-				}})
+		return res.status(401).json({
+			error: {
+				status: 401,
+				message: 'You are not authorized to perform such operations to this user'
+			}
+		})
 	}
 	return next();
 }
@@ -225,20 +236,62 @@ const removeUserMentions = (req, res, next) => {
 				if (user._id.equals(c.creator)){
 					// if no new creator was found, then we leave the creator field to
 					// later detect a course with deleted creator to clean it up or do smth else
-					let newCreator = c.teachers.find(t => !t.equals(user._id));
-					if (newCreator) c.creator = newCreator;
+					c.creator = c.teachers.find(t => !t.equals(user._id));
 				}
 				// remove from course subscribers
-				let index = c.subscribers.indexOf(s => s.equals(user._id));
+				let index = c.subscribers.findIndex(s => s.equals(user._id));
 				if (index >= 0) c.subscribers.splice(index, 1);
 				// remove from course students
-				index = c.students.indexOf(s => s.equals(user._id));
+				index = c.students.findIndex(s => s.equals(user._id));
 				if (index >= 0) c.students.splice(index, 1);
 				// remove from course teachers
-				index = c.teachers.indexOf(t => t.equals(user._id));
+				index = c.teachers.findIndex(t => t.equals(user._id));
 				if (index >= 0) c.teachers.splice(index, 1);
 
-				promises.push(c.save());
+				if (c.creator){
+					// everything is ok
+					promises.push(c.save());
+				} else {
+					// no replacement for only teacher who is
+					// the creator of the course at the same time
+					// create a backup admin to be the spare creator for the course
+					let adminPassword = uuidv1(), adminEmail = `${uuidv1()}.admin@m.com`;
+					let newAdmin = new User({
+						name: 'admin', email: adminEmail,
+						password: adminPassword,
+						role: 'admin'
+					})
+					promises.push(
+						new Promise((resolve, reject) => {
+							return newAdmin.save()
+								.then(admin => {
+									c.creator = admin;
+									c.teachers = [admin];
+									return sendEmail({
+										from: "noreply@mmlearnjs.com",
+										to: CONTACT_EMAIL,
+										subject: "Creator of course deleted",
+										text: `
+												The creator of the course ${c.name} with
+												id ${c._id} has been deleted and no teacher
+												to replace the creator was found.
+												The creator of the course was replaced
+												with a newly generated admin account with
+												following credentials:
+												Email: ${adminEmail},
+												Password: ${adminPassword}.
+												Resolve this issue by
+												contacting any potential teachers
+												or deleting the course
+											`
+									})
+								})
+								.then(() => c.save())
+								.then(() => resolve(newAdmin))
+								.catch(err => reject(err))
+						})
+					)
+				}
 			}
 			return Promise.all(promises);
 		})
@@ -290,11 +343,33 @@ const addNotifications = (req, res, next) => {
 }
 exports.addNotifications = addNotifications;
 
-exports.getUpdatesByDate = (req, res) => {//TODO add jsdoc signature, refactor this to a get request with params
-	//TODO add tests for this
-	let { courses: courseIds, dateTo, dateFrom, starting, cnt } = req.body;
+/**
+ * @type function
+ * @throws 400, 404
+ * @description adds the notifications, specified in the `req.notificationsToAdd.data` array to
+ * the user with the id which is equal to `req.notificationsToAdd.user`
+ * @param {e.Request} req
+ * @param {models.User} req.auth
+ * @param {Object} req.query
+ * @param {string} req.query.dateTo
+ * @param {string} req.query.dateFrom
+ * @param {number} req.query.starting
+ * @param {string} req.query.cnt
+ * @param {string[]} req.query.courseIds
+ * @param {e.Response} res
+ * @memberOf controllers.users.usersData
+ */
+const getUpdatesByDate = (req, res) => {
+	let { courses: courseIds, dateTo, dateFrom, starting, cnt } = req.query;
 	return Course.find({_id: {$in: courseIds}})
 		.then((courses) => {
+			cnt = parseInt(cnt);
+			starting = parseInt(starting);
+			if (!courses || !courses.length) {
+				return res.json([]);
+			}
+			//remove courses the current authenticated user is not subscribed to
+			courses = courses.filter(c => !!c.subscribers.find(s => s.equals(req.auth._id)));
 			let from = new Date(dateFrom), to = new Date(dateTo), preUpdates = [];
 			to.setDate(to.getDate() + 1);
 			courses.forEach(c => preUpdates.push(...c.updates
@@ -308,24 +383,26 @@ exports.getUpdatesByDate = (req, res) => {//TODO add jsdoc signature, refactor t
 		})
 		.catch(err => handleError(err, res));
 }
+exports.getUpdatesByDate = getUpdatesByDate;
+
+
+// -----------------------------------------------------------------------
+// this lower part is still not finished and is not fully implemented.
+//
 
 exports.configUsersFilter = (req, res, next) => {
 	req.usersFilter = req.query;
 	return next();
 }
-//TODO if we find users by a certain param and this param is in the hiddenFields array, don't include this users
+//TODO if we find users by a certain param and
+// this param is in the hiddenFields array, don't include this users
 //TODO however still include, if they could be found by another param, which is not hidden
 exports.getUsersFiltered = (req, res) => {
+	return res.json([]);
 	let { usersFilter: filter } = req;
 	return User.find({filter})
 		.then((users) => (
 			res.json(users)
 		))
-		.catch(err => {
-			console.log(err);
-			return res.status(err.status || 400)
-				.json({
-					error: err
-				})
-		})
+		.catch(err => handleError(err, res))
 }

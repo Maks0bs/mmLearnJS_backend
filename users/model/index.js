@@ -270,7 +270,6 @@ userSchema
         return this._password;
     })
 
-userSchema.statics = require('./statics');
 userSchema.methods = require('./methods');
 
 const User = mongoose.model('User', userSchema);

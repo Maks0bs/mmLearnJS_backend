@@ -99,7 +99,7 @@ router.post('/signup',
     userDataValidator(null, 'name', 'password', 'email'),
     validate,
     signup
-);// TODO add tests to check if email was sent
+);
 
 /**
  * @swagger
@@ -186,7 +186,7 @@ router.post('/invite-signup/:inviteToken',
     userDataValidator(null, 'name', 'password'),
     validate,
     inviteSignup
-);// TODO add tests to check if email was sent
+);
 
 /**
  * @swagger
@@ -340,10 +340,10 @@ router.get('/cur-user', getAuthenticatedUser);
  *              schema:
  *                $ref: '#/components/schemas/Error'
  */
-router.post('/send-activation',//TODO finish tests, check if email is sent with sinon/or smth else
+router.post('/send-activation',
     requireAuthentication,
     sendActivationLink
-)// TODO add tests to check if email was sent
+)
 
 /**
  * @swagger
@@ -428,7 +428,7 @@ router.get('/activate/:activationToken', activateAccount);
  *              schema:
  *                $ref: '#/components/schemas/Error'
  */
-router.post('/forgot-password', forgotPassword)// TODO add tests to check if email was sent
+router.post('/forgot-password', forgotPassword)
 
 /**
  * @swagger
@@ -485,9 +485,5 @@ router.post('/reset-password/:resetToken',
     validate,
     resetPassword
 )
-
-//TODO one way to test if email is sent: create a sinon.stub which has absolutely the same code
-//TODO as helpers.sendEmail. The email gets sent, check the return value of the first call of the function
-//TODO via sinon.spy methods
 
 module.exports = router;

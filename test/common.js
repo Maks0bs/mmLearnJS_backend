@@ -25,6 +25,7 @@ exports.request = request;
 exports.errCallback = (status) => (res) => {
     res.should.have.status(status);
     let { body } = res;
+    console.log(body);
     expect(body).to.be.an('object');
     expect(body.error).to.be.an('object');
     expect(body.error.message).to.be.a('string');

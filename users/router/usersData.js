@@ -23,6 +23,101 @@ let router = require('express').Router()
 /**
  * @swagger
  * path:
+ *  /users/updates-by-date:
+ *    get:
+ *      summary: >
+ *        Fetches all course updates(news) for courses with provided IDs and
+ *        for the specified time period
+ *      operationId: getUpdatesByDate
+ *      security:
+ *        - cookieAuth: []
+ *      tags:
+ *        - "/users/..."
+ *      parameters:
+ *        - in: query
+ *          name: courses
+ *          description: >
+ *            the list of course IDs for which the updates should be shown.
+ *            The array of IDs is passed in the
+ *            [default `req.query` notation](https://expressjs.com/de/api.html#req.query)
+ *          required: true
+ *          schema:
+ *            type: array
+ *            items:
+ *              type: string
+ *          example: ?courses=abababababababababababab&courses=cdcdcdcdcdcdcdcdcdcdcdcd
+ *        - in: query
+ *          name: dateFrom
+ *          description: >
+ *            The date from which the updates should be searched for (RFC 3339)
+ *          required: true
+ *          schema:
+ *            type: string
+ *            format: date
+ *        - in: query
+ *          name: dateTo
+ *          description: >
+ *            The date up to which the updates should be searched for (RFC 3339)
+ *          required: true
+ *          schema:
+ *            type: string
+ *            format: date
+ *        - in: query
+ *          name: starting
+ *          description: >
+ *            The first index of the update from the whole list of updates
+ *            for the given time period that should be returned in the response
+ *          required: true
+ *          schema:
+ *            type: integer
+ *        - in: query
+ *          name: cnt
+ *          description: >
+ *            The max amount of updates from the whole list of updates
+ *            for the given time period that should be returned in the response
+ *            (starting from the `query.starting` position)
+ *          required: true
+ *          schema:
+ *            type: integer
+ *      responses:
+ *        "200":
+ *          description: All updates have been sent
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *        "400":
+ *          description: The provided query params are invalid
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *        "401":
+ *          description: >
+ *            User is not authenticated
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *        "404":
+ *          description: >
+ *            No updates / courses found with given params
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
+router.get('/updates-by-date',
+    requireAuthentication,
+    getUpdatesByDate
+)
+
+/**
+ * @swagger
+ * path:
  *  /users/:userId:
  *    get:
  *      summary: >
@@ -81,6 +176,10 @@ router.get('/', getUsersFiltered)//TODO create basic functionality for this endp
  *        and sets the user data, provided in the request body.
  *        The request body should be [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData).
  *        All new user data should be a stringified JSON in the `user` field of the request form data.
+ *        !!!ALWAYS provide all editable fields, even if you don't want to change them.
+ *        For example, if you want to ONLY update the `about` field, please
+ *        send the new `about` content, but also send the old name, photo data (id or newly uploaded photo)
+ *        and the list of hidden fields.
  *        If you want to update the user's photo, provide the new photo image file in the
  *        `files` form field (this image should be the only uploaded file)
  *        and set the `user.photo` value to the string `"new"`.
@@ -147,17 +246,25 @@ router.get('/', getUsersFiltered)//TODO create basic functionality for this endp
  *            application/json:
  *              schema:
  *                $ref: '#/components/schemas/Error'
+ *
+ *        "404":
+ *          description: >
+ *            User with given ID could not be found
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  */
 router.put('/:userId',
     requireAuthentication,
     isAuthenticatedUser,
     uploadFiles,
     deserializeAndCleanUserData,
-    userDataValidator(null, 'name', 'email'),
+    userDataValidator(null, 'name'),
     validate,
     deleteFiles,
     updateUser
-);//TODO write tests for this
+);
 
 /**
  * @swagger
@@ -201,6 +308,13 @@ router.put('/:userId',
  *            application/json:
  *              schema:
  *                $ref: '#/components/schemas/Error'
+ *        "404":
+ *          description: >
+ *            User with given ID could not be found
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  */
 router.delete('/:userId',
     requireAuthentication,
@@ -208,12 +322,7 @@ router.delete('/:userId',
     removeUserMentions,
     deleteFiles,
     deleteUser
-)//TODO write tests for this
-
-router.post('/updates-by-date',//TODO refactor this to be a GET request with parameters!!
-    requireAuthentication,
-    getUpdatesByDate
-)//TODO write tests for this
+)
 
 router.param('userId', userById);
 
