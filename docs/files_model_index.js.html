@@ -7,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> users/model/methods.js</title>
+  <title> files/model/index.js</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -84,7 +84,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Source</p>
-                    <h1>users/model/methods.js</h1>
+                    <h1>files/model/index.js</h1>
                 </header>
                 
 
@@ -93,69 +93,78 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>let crypto = require('crypto');
+            <pre class="prettyprint source linenums"><code>let GridFS = require('gridfs-stream');
+let GridFSStorage = require('multer-gridfs-storage');
+let mongoose = require('mongoose');
+let crypto = require('crypto');
+let constants = require('../../constants');
 
-module.exports = {
-    /**
-     * @function checkCredentials
-     * @description returns true if the given password in plain text is the correct one
-     * for the given users (this password was originally hashed and saved)
-     * @param {string} plain
-     * @return {boolean}
-     *
-     * @memberOf models.User
-     */
-    checkCredentials: function(plain){
-        return this.encryptPassword(plain) === this.hashed_password
-    },
-    /**
-     * @description hides the fields, specified in the array of users's hidden fields.
-     * Note: don't perform call this method if you haven't populated the users
-     * Object with the hidden fields prop or if this array is undefined.
-     * @return undefined
-     *
-     * @memberOf models.User
-     */
-    hideFields: function(){
-        for (let field of this.hiddenFields){
-            this[field] = undefined;
-        }
-    },
-    /**
-     * @description returns a hashed password, see {@link crypto}. The key for hashing the salt,
-     * which is saved in the users document.
-     * @param {string} password
-     * @return {string}
-     * @memberOf models.User
-     */
-    encryptPassword: function(password){
-        // we return "" because errors are caught inside this func.
-        // if we try to set the wrongly encrypted password, it would cause a mongoose error
-        if ((typeof password !== 'string') || !password) return "";
-        try {
-            return crypto.createHmac('sha1', this.salt)
-                .update(password)
-                .digest('hex');
-        } catch (err){
-            console.log(err);
-            return "";
-        }
-    },
-    /**
-     * @param {UserNotification} notification
-     * @return undefined
-     * @memberOf models.User
-     * @inner
-     */
-    addNotification: function(notification){
-        if (!Array.isArray(this.notifications)){
-            this.notifications = [];
-        }
-        this.notifications.push(notification);
-    }
-}
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     File:
+ *       type: object
+ *       description: >
+ *         Files are stored here in MongoDB via GridFS. There are 2 collections:
+ *         one for file metadata and the other one for actual file chunks
+ *         of up to 255kb.
+ *         See [GridFS docs](https://docs.mongodb.com/manual/core/gridfs/) for details
+ */
+/**
+ * @typedef GridFSFile
+ * @description a GridFS file is stored inside
+ * two collection: one for metadata and the other
+ * one for actual binary data chunks of up to 255kb.
+ * See {@link https://docs.mongodb.com/manual/core/gridfs/ GridFS docs}
+ * for more details
+ * @memberOf models
+ * @name GridFSFile
+ * @type Object|File
+ */
+let gfs;
+mongoose.connection.on('open', () => {
+    gfs = GridFS(mongoose.connection.db, mongoose.mongo);
+    gfs.collection('uploads');
+    gfs.find = gfs.files.find;
+})
 
-</code></pre>
+/**
+ * @description if this returns `undefined` then
+ * the connection to the GridFS storage hasn't yet been established.
+ * After successful connection to MongoDB and therefore GridFS storage,
+ * this function will return the object which
+ * is like a MongoDB model, but manipulates files.
+ * See {@link https://www.npmjs.com/package/gridfs-stream gridfs-stream}
+ * for details
+ * @return {?g.Grid }
+ */
+const getGFS = () => gfs;
+exports.getGFS = getGFS;
+
+const fileStorage = new GridFSStorage({
+    url: constants.database.MONGODB_URI,
+    file: (req, file) => (new Promise((resolve, reject) => {
+        crypto.randomBytes(16, (err, buf) => {
+            if (err) {
+                return reject(err);
+            }
+            // filename should be unique, decided to use
+            // crypto here instead of uuid
+            let filename = buf.toString('hex');
+            let fileInfo = {
+                filename: filename,
+                bucketName: 'uploads',
+                metadata: {
+                    uploadedBy: req.auth._id,
+                    originalName: file.originalname
+                }
+            }
+            resolve(fileInfo);
+        })})
+    )
+})
+exports.fileStorage = fileStorage;</code></pre>
         </article>
     </section>
 

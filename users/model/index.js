@@ -113,7 +113,7 @@ let { ObjectId } = mongoose.Schema;
  *         photo:
  *           oneOf:
  *             - type: 'null'
- *             - $ref: '#/components/schemas/Upload.File'
+ *             - $ref: '#/components/schemas/File'
  *             - $ref: '#/components/schemas/ObjectId'
  *         hiddenFields:
  *           type: array

@@ -6,7 +6,7 @@ let {
 } = require('../controllers');
 let {
     uploadFiles, deleteFiles
-} = require('../../files/controller')
+} = require('../../files/controllers')
 let {userDataValidator} = require('../controllers/validators')
 
 /**

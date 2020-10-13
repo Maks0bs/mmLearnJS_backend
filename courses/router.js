@@ -59,7 +59,7 @@ let {
 let {
 	deleteFiles,
 	uploadFiles
-} = require('../files/controller');
+} = require('../files/controllers');
 
 let {
 	addNotifications

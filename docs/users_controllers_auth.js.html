@@ -76,7 +76,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="helpers.html">helpers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="controllers.files.html">files</a></li><li><a href="controllers.helpers.html">helpers</a></li><li><a href="controllers.users.html">users</a></li><li><a href="controllers.users.auth.html">auth</a></li><li><a href="controllers.users.usersData.html">usersData</a></li><li><a href="controllers.users.util.html">util</a></li><li><a href="controllers.users.validators.html">validators</a></li><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#getForgedId">getForgedId</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#updateDeletedEntriesSchema">updateDeletedEntriesSchema</a></li><li><a href="global.html#updateNewEntriesSchema">updateNewEntriesSchema</a></li><li><a href="global.html#updateNewInfoSchema">updateNewInfoSchema</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="helpers.html">helpers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="controllers.files.html">files</a></li><li><a href="controllers.helpers.html">helpers</a></li><li><a href="controllers.users.html">users</a></li><li><a href="controllers.users.auth.html">auth</a></li><li><a href="controllers.users.usersData.html">usersData</a></li><li><a href="controllers.users.util.html">util</a></li><li><a href="controllers.users.validators.html">validators</a></li><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#getForgedId">getForgedId</a></li><li><a href="global.html#getGFS">getGFS</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#updateDeletedEntriesSchema">updateDeletedEntriesSchema</a></li><li><a href="global.html#updateNewEntriesSchema">updateNewEntriesSchema</a></li><li><a href="global.html#updateNewInfoSchema">updateNewInfoSchema</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul></div>
                 
             </nav>
         </div>
@@ -129,7 +129,6 @@ let { JWT_SECRET } = constants.auth,
  * @memberOf controllers.users.auth
  */
 const signup = (req, res) => {
-    // TODO add tests to check if email was sent
     let { email, teacher, teacherPassword } = req.body, token;
     return User.findOne({ email })
         .then(  user => {
@@ -232,7 +231,6 @@ exports.signin = signin;
  * @memberOf controllers.users.auth
  */
 const sendActivationLink = (req, res) => {
-    // TODO add tests to check if email was sent
     if (req.auth.activated){
         return res.status(403).json({
             error: { status: 403, message: 'Your account is already activated'}
@@ -326,7 +324,6 @@ exports.activateAccount = activateAccount;
  * @memberOf controllers.users.auth
  */
 const inviteSignup = (req, res) => {
-    // TODO add tests to check if email was sent
     let token, inviteData;
     try {
         inviteData = jwt.verify(req.params.inviteToken, JWT_SECRET);
@@ -448,7 +445,6 @@ exports.inviteSignup = inviteSignup;
  * @memberOf controllers.users.auth
  */
 const forgotPassword = (req, res) => {
-    // TODO add test to check if email was sent
     if (!req.body || !req.body.email)
         return res.status(400).json({
             error:{

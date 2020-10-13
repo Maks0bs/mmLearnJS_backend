@@ -387,7 +387,8 @@ exports.getUpdatesByDate = getUpdatesByDate;
 
 
 // -----------------------------------------------------------------------
-// this lower part is still not finished and is not fully implemented.
+// this lower part is still not finished or not implemented.
+// The endpoints there don't work
 //
 
 exports.configUsersFilter = (req, res, next) => {

@@ -87,15 +87,3 @@
  *             This object is optional and is discouraged to be used.
  *             Only use `error` if there is no other way to describe the occurred error.
  */
-
-/**
- * @typedef GridFSFile
- * @memberOf models
- * @name GridFSFile
- * @type Object|File
- */
-
-
-
-
-

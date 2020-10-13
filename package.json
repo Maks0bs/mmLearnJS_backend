@@ -27,9 +27,6 @@
   },
   "homepage": "https://github.com/Maks0bs/mmLearnJS_backend#readme",
   "dependencies": {
-    "@types/nodemailer": "^6.4.0",
-    "@types/sinon": "^9.0.7",
-    "@types/supertest": "^2.0.10",
     "async": "^3.2.0",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.5",
@@ -50,6 +47,12 @@
     "uuid": "^7.0.3"
   },
   "devDependencies": {
+    "@types/gridfs-stream": "^0.5.33",
+    "@types/multer": "^1.4.4",
+    "@types/multer-gridfs-storage": "^4.0.1",
+    "@types/nodemailer": "^6.4.0",
+    "@types/sinon": "^9.0.7",
+    "@types/supertest": "^2.0.10",
     "@types/express": "^4.17.8",
     "@types/mongoose": "^5.7.36",
     "better-docs": "^2.3.2",

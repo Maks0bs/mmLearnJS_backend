@@ -45,8 +45,8 @@ module.exports = {
 			]
 		},
 		apis: [
-			"./*.js", "./*.jsdoc", "./routes/*.js", "./users/*/*.js", "./courses/*.js", "./courses/*/*.js",
-			"./files/*.js"
+			"./*.js", "./*.jsdoc", "./routes/*.js", "./users/*/*.js", "./courses/*.js",
+			"./courses/*/*.js", "./files/*/*.js"
 		]
 	},
 	environment: process.env.NODE_ENV,
