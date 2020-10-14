@@ -1,6 +1,7 @@
 let multer = require('multer');
 let mongoose = require('mongoose');
 let { ObjectId } = mongoose.Types;
+const { FILES_UPLOAD_LIMIT, MAX_FILE_SIZE } = require('../../constants').database
 const { fileStorage, getGFS } = require('../model');
 const {handleError} = require("../../helpers");
 const gfsError = {status: 404, message: 'could not connect to file storage'}
@@ -17,7 +18,10 @@ const gfsError = {status: 404, message: 'could not connect to file storage'}
  * @throws 400
  * @memberOf controllers.files
  */
-const uploadFiles = multer({ storage: fileStorage }).any();
+const uploadFiles = multer({
+    storage: fileStorage,
+    limits: { files: FILES_UPLOAD_LIMIT, fileSize: MAX_FILE_SIZE}
+}).any()
 exports.uploadFiles = uploadFiles;
 
 // gfs.remove(...) to delete file
@@ -51,7 +55,7 @@ const fileById = (req, res, next, id) => {
     let fileId;
     try {
         fileId = ObjectId(id);
-    } catch (err) { handleError(err, res) }
+    } catch (err) { return handleError(err, res) }
     const gfs = getGFS();
     if (!gfs) {
         return handleError(gfsError, res);
@@ -59,7 +63,7 @@ const fileById = (req, res, next, id) => {
     return gfs.files.findOne({_id: fileId})
         .then(file => {
             if (!file || file.length === 0) throw {
-                status: 404, error: 'no such file exists'
+                status: 404, message: 'no such file exists'
             }
             req.file = file;
             return next();
@@ -85,7 +89,7 @@ exports.fileById = fileById;
  */
 const allowModifyFile = (req, res, next) => {
     let { uploadedBy } = req.file.metadata;
-    if (!req.auth._id.equals(uploadedBy)){
+    if (uploadedBy && !req.auth._id.equals(uploadedBy)){
         return res.status(401).json({
             error: 'you are not authorized to modify this file'
         })

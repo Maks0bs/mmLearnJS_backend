@@ -15,7 +15,8 @@ mongoose.connect(
   	{
   		useNewUrlParser: true,
    		useUnifiedTopology: true,
-        useFindAndModify: false
+        useFindAndModify: false,
+        ssl: true
    	}
 )
     .then(() => console.log(`MONGODB connected`));

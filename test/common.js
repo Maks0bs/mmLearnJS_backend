@@ -11,6 +11,7 @@ let { Course } = require('../courses/model')
 let Async = require('async');
 let request = require('supertest')
 let sinon = require('sinon');
+let { getGFS } = require('../files/model');
 
 exports.app = app;
 exports.should = should;
@@ -41,3 +42,4 @@ exports.getForgedId = (id) => {
     }
     return wrongId
 }
+exports.getGFS = getGFS;

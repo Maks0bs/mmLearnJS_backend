@@ -52,8 +52,9 @@ let router = require('express').Router()
  *                teacher:
  *                  type: boolean
  *                  description: >
- *                    provide this prop if you want to register an account with the `teacher` role.
- *                    If true, provide the correct teacher password under the `teacherPassword` prop
+ *                    provide this prop if you want to register an account
+ *                    with the `teacher` role. If true, provide the
+ *                    correct teacher password under the `teacherPassword` prop
  *                teacherPassword:
  *                  type: string
  *                  description: >
@@ -108,7 +109,8 @@ router.post('/signup',
  *    post:
  *      summary: >
  *        Creates a new user if the data in the body and in the invitation token is correct.
- *        Sends an message to the user's email address which contains the token to activate their account
+ *        Sends an message to the user's email address which
+ *        contains the token to activate their account
  *      operationId: inviteSignup
  *      tags:
  *        - "/auth/..."
@@ -139,8 +141,9 @@ router.post('/signup',
  *                teacher:
  *                  type: boolean
  *                  description: >
- *                    provide this prop if you want to register an account with the `teacher` role.
- *                    If true, provide the correct teacher password under the `teacherPassword` prop
+ *                    provide this prop if you want to register
+ *                    an account with the `teacher` role. If true, provide the correct teacher
+ *                    password under the `teacherPassword` prop
  *                teacherPassword:
  *                  type: string
  *                  description: >

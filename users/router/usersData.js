@@ -85,10 +85,9 @@ let router = require('express').Router()
  *          content:
  *            application/json:
  *              schema:
- *                type: object
- *                properties:
- *                  message:
- *                    type: string
+ *                type: array
+ *                items:
+ *                  $ref: '#/components/schemas/CourseUpdate'
  *        "400":
  *          description: The provided query params are invalid
  *          content:

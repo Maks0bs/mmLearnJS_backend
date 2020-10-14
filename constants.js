@@ -76,7 +76,8 @@ module.exports = {
 					return process.env.MONGODB_DEV_URI
 			}
 		})(),
-		FILES_UPLOAD_LIMIT: 50
+		FILES_UPLOAD_LIMIT: 50,
+		MAX_FILE_SIZE: 1024 * 1024 * 100 // 100 MiB (in bytes)
 	},
 	auth: {
 		JWT_SECRET: process.env.JWT_SECRET
