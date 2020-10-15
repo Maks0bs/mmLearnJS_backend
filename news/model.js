@@ -1,5 +1,7 @@
 let mongoose = require('mongoose');
 let { ObjectId } = mongoose.Schema;
+
+//TODO implement news system with comments/likes/etc
 let newsEntriesSchema = new mongoose.Schema({
 	title: {
 		type: String,

@@ -343,6 +343,7 @@ entrySchema.path('content').discriminator('EntryForum', entryForumSchema)
 let Entry = mongoose.model('Entry', entrySchema);
 exports.Entry = Entry;
 
+// ------------------ CourseUpdate
 let courseUpdateSchema = new mongoose.Schema({
 	created: {
 		type: Date,
@@ -354,11 +355,10 @@ let courseUpdateSchema = new mongoose.Schema({
 let CourseUpdate = mongoose.model('CourseUpdate', courseUpdateSchema);
 exports.CourseUpdate = CourseUpdate;
 
-/**
- * Here we don't use refs to EntrySchema, because they can GET deleted an this might cause trouble
- * @param newEntries.name name of the added entry,
- * @param newEntries.type type of the added entry
- */
+ //* Here we don't use refs to EntrySchema, because they can GET deleted an this might cause trouble
+ //* @param newEntries.name name of the added entry,
+ //* @param newEntries.type type of the added entry
+
 let updateNewEntriesSchema = new mongoose.Schema({
 	newEntries: [
 		{
@@ -373,11 +373,11 @@ let updateNewEntriesSchema = new mongoose.Schema({
 let UpdateNewEntries = CourseUpdate.discriminator('UpdateNewEntries', updateNewEntriesSchema);
 exports.UpdateNewEntries = UpdateNewEntries;
 
-/**
- * Here we don't use refs to EntrySchema, because entries are not stored separately from the course
- * @param newEntries.name name of the deleted entry,
- * @param newEntries.type type of the deleted entry
- */
+//
+//  * Here we don't use refs to EntrySchema, because entries are not stored separately from the course
+//  * @param newEntries.name name of the deleted entry,
+//  * @param newEntries.type type of the deleted entry
+//
 let updateDeletedEntriesSchema = new mongoose.Schema({
 	deletedEntries: [
 		{
@@ -392,10 +392,10 @@ let updateDeletedEntriesSchema = new mongoose.Schema({
 let UpdateDeletedEntries = CourseUpdate.discriminator('UpdateDeletedEntries', updateDeletedEntriesSchema);
 exports.UpdateDeletedEntries = UpdateDeletedEntries;
 
-/**
- * @param newName new name of the updated course
- * @param newAbout new info about the updated course
- */
+// /**
+//  * @param newName new name of the updated course
+//  * @param newAbout new info about the updated course
+//
 let updateNewInfoSchema = new mongoose.Schema({
 	oldName: String,
 	newName: String,
@@ -403,6 +403,7 @@ let updateNewInfoSchema = new mongoose.Schema({
 })
 let UpdateNewInfo = CourseUpdate.discriminator('UpdateNewInfo', updateNewInfoSchema);
 exports.UpdateNewInfo = UpdateNewInfo;
+// ------------------ CourseUpdate end
 
 /**
  * @typedef Course
@@ -529,4 +530,3 @@ courseSchema.methods = {
 }
 let Course = mongoose.model('Course', courseSchema);
 exports.Course = Course;
-

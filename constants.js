@@ -3,12 +3,18 @@ require('dotenv').config();
 // you should only use variables from this file
 // accessing process.env is discouraged
 let clientUrl = process.env.CLIENT_URL;
+let clientDevUrl = process.env.CLIENT_DEV_URL;
 let apiUrl = process.env.API_URL;
 let defaultCookieOptions
 if (!clientUrl && process.env.NODE_ENV === 'production'){
 	clientUrl = 'https://mmlearnjs.maks0bs.com'
 } else if (!clientUrl){
 	clientUrl = 'http://localhost:3000'
+}
+if (!clientDevUrl && process.env.NODE_ENV === 'production'){
+	clientDevUrl = 'https://mmlearnjs-dev.maks0bs.com'
+} else if (!clientDevUrl){
+	clientDevUrl = 'http://localhost:3000'
 }
 if (!apiUrl && process.env.NODE_ENV === 'production'){
 	apiUrl = 'https://mmlearnjs-backend.herokuapp.com'
@@ -85,7 +91,8 @@ module.exports = {
 	client: {
 		NO_ACTION_LOGOUT_TIME: 10 * 60 * 1000,
 		DEFAULT_COOKIE_OPTIONS: defaultCookieOptions,
-		CLIENT_URL: clientUrl
+		CLIENT_URL: clientUrl,
+		CLIENT_DEV_URL: clientDevUrl
 	},
 	notifications: {
 		ACTIVATE_ACCOUNT: 'USER_NOTIFICATION_ACTIVATE_ACCOUNT',
