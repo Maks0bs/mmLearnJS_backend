@@ -1,79 +1,67 @@
-// module imports
 let constants = require('./constants')
 let express = require('express');
 let cors = require('cors');
 let mongoose = require('mongoose')
 let bodyParser = require('body-parser');
-let cookieParser = require('cookie-parser')
-let fs = require('fs');
-let GridFS = require('gridfs-stream');
-let GridFSStorage = require('multer-gridfs-storage');
-let multer = require('multer');
+let cookieParser = require('cookie-parser');
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
 
-
-// app imports
-let mainRouter = require('./routes')
-
-
-// config, database and setup
 let app = express();
+
+// connect to Mongo database
 mongoose.connect(
   	constants.database.MONGODB_URI,
   	{
   		useNewUrlParser: true,
    		useUnifiedTopology: true,
-        useFindAndModify: false
+        useFindAndModify: false,
+        ssl: true
    	}
 )
-.then(() => console.log(`MONGODB connected`))
+    .then(() => console.log(`MONGODB connected`));
 mongoose.connection.on('error', err => {
-  	console.log(`DB connection error: ${err.message}`)
+  	console.log(`DB connection error: ${err.message || err}`)
 });
 
-// basic middleware and dev features
+// dev middleware
 if (constants.environment !== 'production') {
 	let morgan = require('morgan');
 	app.use(morgan('dev'));
 }
-//app.disable('etag');
+
+// general CORS for all requests
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin || origin === constants.client.CLIENT_URL) return callback(null, true);
-
         return callback(
-            new Error('the cors policy for this site does not allow access from the specified origin'),
+            new Error(
+                'the cors policy for this site does not ' +
+                'allow access from the specified origin'
+            ),
             false
         )
     },
     withCredentials: true,
     credentials: true
 }));
+
+// middleware for processing requests
 app.use(bodyParser.json());
-app.use(cookieParser())
+app.use(cookieParser());
 
-// app middleware
-
+// include all api middleware
+let mainRouter = require('./routes')
 app.use('/', mainRouter);
 
-app.get('/', (req, res) => {
-    fs.readFile('docs/apiDocs.json', (err, data) => {
-        if (err){
-            res.status(400).json({
-            error: err
-            });
-        }
-        let docs = JSON.parse(data);
-        res.json({
-            info: docs
-        });
-    })
-})
-
-
-// get requests from specified port
+// documentation middleware
+let swaggerSpecs = swaggerJsdoc(constants.swaggerOptions);
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 let port = constants.network.PORT || 8080
+// receive requests from specified port
 app.listen(
-	port,
-	() => console.log(`App listening on port ${port}`)
+	port, () => console.log(`App listening on port ${port}`)
 )
+
+module.exports = app;

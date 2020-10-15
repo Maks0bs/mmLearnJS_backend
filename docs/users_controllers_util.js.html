@@ -1,0 +1,388 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> users/controllers/util.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">mmLearnJS API</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+                <div class="search-wrapper">
+                    <input id="search" type="text" placeholder="Search docs..." class="input">
+                </div>
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="helpers.html">helpers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="controllers.files.html">files</a></li><li><a href="controllers.helpers.html">helpers</a></li><li><a href="controllers.users.html">users</a></li><li><a href="controllers.users.auth.html">auth</a></li><li><a href="controllers.users.usersData.html">usersData</a></li><li><a href="controllers.users.util.html">util</a></li><li><a href="controllers.users.validators.html">validators</a></li><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#getForgedId">getForgedId</a></li><li><a href="global.html#getGFS">getGFS</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#updateDeletedEntriesSchema">updateDeletedEntriesSchema</a></li><li><a href="global.html#updateNewEntriesSchema">updateNewEntriesSchema</a></li><li><a href="global.html#updateNewInfoSchema">updateNewInfoSchema</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>users/controllers/util.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>let jwt = require('jsonwebtoken');
+let User = require('../model');
+let constants = require('../../constants');
+let { handleError } = require('../../helpers')
+let { JWT_SECRET } = constants.auth,
+    { DEFAULT_COOKIE_OPTIONS, NO_ACTION_LOGOUT_TIME } = constants.client
+/**
+ * @class controllers.users.util
+ */
+/**
+ * @type function
+ * @throws 401
+ * @description this middleware doesn't affect the flow of others if used once.
+ * If the cookie with the authentication token is provided, adds the `auth` property
+ * to the `req` object which contains exhaustive data about the authenticated user
+ * @param {e.Request} req
+ * @param {models.User} [req.auth]
+ * @param {e.Response} res
+ * @param {function} next
+ * @memberOf controllers.users.util
+ */
+const authenticate = async (req, res, next) => {
+    if (req.auth){
+        return res.status(401).json({
+            error: {
+                status: 401,
+                message:
+                    'authenticated user is defined before extracting ' +
+                    'data about them from the cookies'
+            }
+        })
+    }
+    let token = req.cookies['auth']
+    if (!token){
+        return next();
+    }
+    let userData = undefined;
+    try {
+        userData = jwt.verify(token, JWT_SECRET);
+        delete userData.iat;
+        req.auth = await User.findOne({_id: userData._id})
+        return next();
+    }
+    catch(err) {
+        console.log(err);
+        return next();
+    }
+}
+exports.authenticate = authenticate
+
+/**
+ * @type function
+ * @description if the user was authenticated via {@link authenticate}, set the new
+ * authentication cookie for the user to allow them use the site longer
+ * @param {e.Request} req
+ * @param {models.User} [req.auth]
+ * @param {e.Response} res
+ * @param {function} next
+ * @memberOf controllers.users.util
+ */
+const extendSession = (req, res, next) => {
+    if (!req.auth){
+        return next()
+    }
+    try {
+        let { _id, role, email} = req.auth;
+        let updatedToken = jwt.sign(
+            { _id, role, email }, JWT_SECRET
+        );
+        res.cookie(
+            'auth',
+            updatedToken,
+            {
+                ...DEFAULT_COOKIE_OPTIONS,
+                maxAge: NO_ACTION_LOGOUT_TIME
+            }
+        )
+        return next()
+    }
+    catch (err) {
+        console.log(err);
+        return next()
+    }
+}
+exports.extendSession = extendSession;
+/**
+ * @type function
+ * @throws 401
+ * @description lets subsequent middleware be invoked if the user is authenticated.
+ * Stops the middleware flow otherwise.
+ * @param {e.Request} req
+ * @param {models.User} [req.auth]
+ * @param {e.Response} res
+ * @param {function} next
+ * @memberOf controllers.users.util
+ */
+const requireAuthentication = (req, res, next) => {
+    if (!req.auth){
+        return res.status(401).json({
+            error: { status: 401, message: 'Unauthorized' }
+        })
+    }
+    return next();
+}
+exports.requireAuthentication = requireAuthentication
+/**
+ * @type function
+ * @description lets subsequent middleware be invoked if the user is authenticated
+ * @param {e.Request} req
+ * @param {models.User} req.auth
+ * @param {e.Response} res
+ * @memberOf controllers.users.util
+ */
+const getAuthenticatedUser = (req, res) => {
+    if (!req.auth){
+        return res.json("Not authenticated");
+    }
+    return User.findOne({ _id: req.auth._id })
+        .select('-salt -hashed_password')
+        .populate('subscribedCourses.course', '_id name')
+        .then(user => res.json(user))
+        .catch(err => handleError(err, res));
+}
+exports.getAuthenticatedUser = getAuthenticatedUser;
+/**
+ * @type function
+ * @description Clears the cookie that is responsible for authenticating the user.
+ * This is necessary, because all cookies have the
+ * [HttpOnly](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies) property
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @memberOf controllers.users.util
+ */
+const logout = (req, res) => {
+    // no need for tests here, this endpoint always does the same harmless thing
+    res.clearCookie('auth', {...DEFAULT_COOKIE_OPTIONS});
+    return res.json({ message: 'logout successful'})
+}
+exports.logout = logout
+
+/**
+ * @type function
+ * @throws 401
+ * @description lets subsequent middleware be invoked only if the user is a teacher
+ * Stops the middleware flow otherwise.
+ * @param {e.Request} req
+ * @param {models.User} [req.auth]
+ * @param {e.Response} res
+ * @param {function} next
+ * @memberOf controllers.users.util
+ */
+const isTeacher = (req, res, next) => {
+    if (req.auth.role !== 'teacher'){
+        return res.status(401)
+            .json({ status: 401, message: 'You are not a teacher'})
+    }
+    return next();
+}
+exports.isTeacher = isTeacher;
+
+/**
+ * @type function
+ * @throws 401
+ * @description lets subsequent middleware be invoked only if the user is a teacher
+ * or a student at the provided course. Stops the middleware flow otherwise.
+ * @param {e.Request} req
+ * @param {models.User} [req.auth]
+ * @param {models.Course} [req.courseData]
+ * @param {string} [req.userCourseStatus] - sets this param in the request object for next middleware;
+ * can be either `"creator"`, `"teacher"`, `"enrolled"` or `"not enrolled"`
+ * @param {e.Response} res
+ * @param {function} next
+ * @memberOf controllers.users.util
+ */
+const userInCourse = (req, res, next) => {
+    let course = req.courseData;
+    if (course.creator._id.equals(req.auth._id)){
+        req.userCourseStatus = 'creator';
+        return next();
+    }
+    for (let t of course.teachers){
+        if (t._id.equals(req.auth._id)){
+            req.userCourseStatus = 'teacher';
+            return next();
+        }
+    }
+    for (let i of course.students){
+        if (i._id.equals(req.auth._id)){
+            req.userCourseStatus = 'student';
+            return next();
+        }
+    }
+    req.userCourseStatus = 'not enrolled';
+    return res.status(401).json({
+        error: {status: 401, message: `you don't have access to this course`}
+    })
+}
+exports.userInCourse = userInCourse;
+
+/**
+ * @type function
+ * @deprecated
+ * @throws 401
+ * @description lets subsequent middleware be invoked only if the authenticated user is a teacher
+ * at the provided course. Stops the middleware flow otherwise.
+ * Please prefer using {@link controllers.userInCourse this controller} instead of this one
+ * @param {e.Request} req
+ * @param {models.User} [req.auth]
+ * @param {models.Course} [req.courseData]
+ * @param {e.Response} res
+ * @param {function} next
+ * @memberOf controllers.users.util
+ */
+const teacherInCourse = (req, res, next) => {
+    if (!req.courseData.teachers){
+        return res.status(401).json({
+            status: 401, message: 'No teachers in this course'
+        })
+    }
+    let check = false;
+    for (let t of req.courseData.teachers){
+        if (t.equals(req.auth._id)){
+            check = true;
+            break;
+        }
+    }
+    if (!check){
+        return res.status(401).json({
+            status: 401, message: 'You are not authorized to perform this action'
+        })
+    }
+    return next();
+}
+exports.teacherInCourse = teacherInCourse;
+
+/**
+ * @type function
+ * @deprecated
+ * @throws 401
+ * @description lets subsequent middleware be invoked only if the authenticated user is the creator
+ * of the provided course. Stops the middleware flow otherwise.
+ * Please prefer using {@link controllers.userInCourse this controller} instead of this one
+ * @param {e.Request} req
+ * @param {models.User} [req.auth]
+ * @param {models.Course} [req.courseData]
+ * @param {e.Response} res
+ * @param {function} next
+ * @memberOf controllers.users.util
+ */
+const isCourseCreator = (req, res, next) => {
+    if (!req.courseData.creator._id.equals(req.auth._id)){
+        res.status(401).json({
+            error: {
+                status: 401,
+                message: 'you are not the creator of the course'
+            }
+        })
+    }
+    return next();
+}
+exports.isCourseCreator = isCourseCreator;
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+<script src="scripts/search.js"> </script>
+
+</body>
+</html>

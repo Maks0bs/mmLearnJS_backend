@@ -1,0 +1,401 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> users/model/index.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">mmLearnJS API</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+                <div class="search-wrapper">
+                    <input id="search" type="text" placeholder="Search docs..." class="input">
+                </div>
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="helpers.html">helpers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="controllers.files.html">files</a></li><li><a href="controllers.helpers.html">helpers</a></li><li><a href="controllers.users.html">users</a></li><li><a href="controllers.users.auth.html">auth</a></li><li><a href="controllers.users.usersData.html">usersData</a></li><li><a href="controllers.users.util.html">util</a></li><li><a href="controllers.users.validators.html">validators</a></li><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#getForgedId">getForgedId</a></li><li><a href="global.html#getGFS">getGFS</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#updateDeletedEntriesSchema">updateDeletedEntriesSchema</a></li><li><a href="global.html#updateNewEntriesSchema">updateNewEntriesSchema</a></li><li><a href="global.html#updateNewInfoSchema">updateNewInfoSchema</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>users/model/index.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>let mongoose = require('mongoose');
+let { v1: uuidv1 } = require('uuid');
+let { ObjectId } = mongoose.Schema;
+
+/**
+ * @class User
+ * @memberOf models
+ * @name User
+ * @type Class
+ * @property {ObjectId} _id
+ * @property {string} name
+ * @property {string} email
+ * @property {boolean} activated
+ * @property {string} hashed_password
+ * @property {string} salt
+ * @property {?string} [about]
+ * @property {string} role
+ * @property {BSONDate} created
+ * @property {BSONDate} updated
+ * @property {ObjectId[]|models.Course[]} enrolledCourses
+ * @property {ObjectId[]|models.Course[]} [teacherCourses]
+ * @property {{course: ObjectId|models.Course, lastVisited: BSONDate}[]} subscribedCourses
+ * @property {?ObjectId|?models.GridFSFile} photo
+ * @property {string[]} hiddenFields
+ * @property {UserNotification[]} notifications
+ * @property {function(): undefined} hideFields see {@link models.User.hideFields}
+ * @property {function(string): boolean} checkCredentials see {@link models.User.checkCredentials}
+ * @property {function(string): string} encryptPassword see {@link models.User.encryptPassword}
+ * @property {function(UserNotification): undefined} addNotification see {@link models.User.addNotification}
+ */
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - _id
+ *         - name
+ *         - email
+ *         - hashed_password
+ *         - _password
+ *         - salt
+ *         - role
+ *       properties:
+ *         _id:
+ *           $ref: '#/components/schemas/ObjectId'
+ *         name:
+ *           type: string
+ *           example: nickname
+ *         email:
+ *           type: string
+ *           format: email
+ *           example: example@email.com
+ *         hashed_password:
+ *           type: string
+ *         _password:
+ *           type: string
+ *           pattern: '\d'
+ *           minLength: 6
+ *           description: >
+ *             this property is not saved in the database.
+ *             the password gets hashed on the server and
+ *             all operations are only done with the hashed password.
+ *             The original (plain text) password should be
+ *             at least 6 characters long and should contain a number
+ *           example: passw1
+ *         activated:
+ *           type: boolean
+ *         salt:
+ *           readOnly: true
+ *           type: string
+ *           description: >
+ *             the key for hashing the password. It is saved
+ *             in the database and it is absolutely safe to do so
+ *         created:
+ *           $ref: '#/components/schemas/Date'
+ *           default: Date.now
+ *           description: the date when this users was created
+ *         updated:
+ *           $ref: '#/components/schemas/Date'
+ *           description: the date when this users was updated / edited for the last time
+ *         about:
+ *           type: string
+ *           default: '""'
+ *         role:
+ *           type: string
+ *           enum: [student, teacher, admin]
+ *           default: student
+ *         enrolledCourses:
+ *           type: array
+ *           items:
+ *             oneOf:
+ *               - $ref: '#/components/schemas/Course'
+ *               - $ref: '#/components/schemas/ObjectId'
+ *         teacherCourses:
+ *           type: array
+ *           items:
+ *             oneOf:
+ *               - $ref: '#/components/schemas/Course'
+ *               - $ref: '#/components/schemas/ObjectId'
+ *         subscribedCourses:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               course:
+ *                 oneOf:
+ *                   - $ref: '#/components/schemas/Course'
+ *                   - $ref: '#/components/schemas/ObjectId'
+ *               lastVisited:
+ *                 $ref: '#/components/schemas/Date'
+ *         photo:
+ *           oneOf:
+ *             - type: 'null'
+ *             - $ref: '#/components/schemas/File'
+ *             - $ref: '#/components/schemas/ObjectId'
+ *         hiddenFields:
+ *           type: array
+ *           items:
+ *             type: string
+ *         notifications:
+ *           type: array
+ *           items:
+ *             type: object
+ *             required:
+ *               - title
+ *             properties:
+ *               type:
+ *                 type: string
+ *               title:
+ *                 type: string
+ *               text:
+ *                 type: string
+ *               created:
+ *                 $ref: '#/components/schemas/Date'
+ *                 default: Date.now
+ */
+let userSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        trim: true,
+        required: true
+    },
+    email: {
+        type: String,
+        trim: true,
+        validate: {
+            validator: function(email){
+                return /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/
+                    .test(email);
+            },
+            message: props => (
+                `${props.value} is not a valid email.` +
+                `Follow the common pattern, specified in RFC 5322`
+            )
+        },
+        required: [true, 'Email is required']
+    },
+    hashed_password: {
+        type: String,
+        required: [true, 'Password is required'],
+    },
+    salt: {
+        type: String,
+        required: [true, 'Special salt for password is required']
+    },
+    created: {
+        type: Date,
+        default: Date.now
+    },
+    updated: Date,
+    about: {
+        type: String,
+        trim: true,
+        default: ''
+    },
+    role: {
+        type: String,
+        enum: ['student', 'teacher', 'admin'],
+        default: "student",
+        required: [true, 'User role is required']
+    },
+    activated: {
+        type: Boolean,
+        default: false
+    },
+    enrolledCourses: [
+        {
+            type: ObjectId,
+            ref: 'Course'
+        }
+    ],
+    subscribedCourses: [
+        {
+            course: {
+                type: ObjectId,
+                ref: 'Course',
+                required: [
+                    true,
+                    'subscribed courses should have ' +
+                    'a reference to the actual course'
+                ]
+            },
+            lastVisited: {
+                type: Date,
+                required: [
+                    true,
+                    `subscribed courses should have data about` +
+                    `the user's last visit to the course`
+                ]
+            }
+        }
+    ],
+    teacherCourses: [
+        {
+            type: ObjectId,
+            ref: 'Course'
+        }
+    ],
+    photo: {
+        type: ObjectId,
+        ref: 'Uploads.File',
+        default: null
+    },
+    hiddenFields: [
+        String
+    ],
+    notifications: [
+        {
+            //TODO add discriminators for different types of notifications
+            type: {
+                type: String,
+            },
+            title: {
+                type: String,
+                required: [true, 'title is required to create a notification']
+            },
+            text: String,
+            created: {
+                type: Date,
+                default: Date.now
+            }
+        }
+    ]
+});
+
+// when setting the password, the validation occurs right away (before saving document to database)
+// Because of that, always wrap the operation, where you try to set the password in a try...catch block
+// to catch error, which are thrown in the setter for password if it is not acceptable.
+userSchema
+    .virtual('password')
+    .set(function(password){
+        if ((typeof password) !== 'string'){
+            throw new Error('Password should be a string');
+        }
+        let isLongEnough = password.length >= 6;
+        let containsDigit = /\d/.test(password);
+        if (!(isLongEnough &amp;&amp; containsDigit)){
+            throw new Error(
+                'Password should be at least 6 characters long and should contain a digit'
+            )
+        }
+        this._password = password;
+        // we should generate a new salt each time a password gets reset
+        this.salt = uuidv1();
+        this.hashed_password = this.encryptPassword(password);
+    })
+    .get(function() {
+        return this._password;
+    })
+
+userSchema.methods = require('./methods');
+
+const User = mongoose.model('User', userSchema);
+module.exports = User;</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+<script src="scripts/search.js"> </script>
+
+</body>
+</html>

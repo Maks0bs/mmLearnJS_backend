@@ -51,7 +51,7 @@ exports.getExercise = (req, res) => {
     }
 
     if (!(hasActiveAttempt && exercise.available)){
-        //Don't send tasks data if user is not currently doing the exercise or if the exercise is not available
+        //Don't send tasks data if users is not currently doing the exercise or if the exercise is not available
         exercise.tasks = undefined;
     } else {
 
@@ -97,7 +97,7 @@ exports.getExercise = (req, res) => {
 
 //TODO getGrades (for students)
 
-//TODO getGrades (for teachers). Order: each user->exercise data, (not vice versa, not like stored in db)
+//TODO getGrades (for teachers). Order: each users->exercise data, (not vice versa, not like stored in db)
 
 exports.attemptById = async (req, res, next, id) => {
     let { exercise } = req;

@@ -1,5 +1,7 @@
 let mongoose = require('mongoose');
 let { ObjectId } = mongoose.Schema;
+
+//TODO implement news system with comments/likes/etc
 let newsEntriesSchema = new mongoose.Schema({
 	title: {
 		type: String,
@@ -9,13 +11,6 @@ let newsEntriesSchema = new mongoose.Schema({
 		type: String,
 		required: true
 	},
-	//TODO maybe switch to buffer for smaller files
-	/*files: [
-		{
-			data: Buffer,
-			contentType: String
-		}
-	],*/
 	postedBy: {
 		type: ObjectId,
 		ref: "User"

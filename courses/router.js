@@ -1,10 +1,10 @@
 let {
 	isTeacher,
-	requireAuthentication,
-	isCreator,
+	isCourseCreator,
 	teacherInCourse,
-	userInCourse
-} = require('../auth/controllers')
+	userInCourse,
+	requireAuthentication
+} = require('../users/controllers')
 
 let {
 	createCourse,
@@ -59,11 +59,11 @@ let {
 let {
 	deleteFiles,
 	uploadFiles
-} = require('../files/controller');
+} = require('../files/controllers');
 
 let {
 	addNotifications
-} = require('../users/controller')
+} = require('../users/controllers/usersData')
 
 let router = require('express').Router()
 
@@ -72,6 +72,7 @@ router.post('/create',
 	isTeacher,
 	createCourse
 );
+
 router.post('/enroll/:courseId', requireAuthentication, enrollInCourse);
 router.post('/filter', getCoursesFiltered)
 router.put('/update/:courseId', 
@@ -86,14 +87,14 @@ router.put('/update/:courseId',
 );
 router.delete('/:courseId', 
 	requireAuthentication, 
-	isCreator,
+	isCourseCreator,
 	removeCourseMentions,
 	deleteFiles,
 	deleteCourse
 );
 router.post('/send-teacher-invite/:courseId',
 	requireAuthentication,
-	isCreator,
+	isCourseCreator,
 	sendTeacherInvite,
 	addNotifications,
 	addToInvitedList//send notification to teacher and add them to invitedTeacher array in db
@@ -113,12 +114,12 @@ router.post('/:courseId/forum/:entryId/new-topic',
 	userInCourse,
 	createForumTopic,
 )
-router.post('/:courseId/forum/:entryId/topic/:topicId/post/:postId/answer',
+router.post('/:courseId/forum/:entryId/topic/:topicId/POST/:postId/answer',
 	requireAuthentication,
 	userInCourse,
 	answerTopicPost
 )
-router.delete('/:courseId/forum/:entryId/topic/:topicId/post/:postId',
+router.delete('/:courseId/forum/:entryId/topic/:topicId/POST/:postId',
 	requireAuthentication,
 	userInCourse,
 	deleteTopicPost
@@ -146,7 +147,7 @@ router.get('/:courseId/exercise/:exerciseId',
 	userInCourse,
 	getExercise
 )
-router.get('/:courseId/exercise/:exerciseId/user-attempts',
+router.get('/:courseId/exercise/:exerciseId/users-attempts',
 	requireAuthentication,
 	userInCourse,
 	getExerciseAttempts

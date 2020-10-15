@@ -196,7 +196,7 @@ exports.updateCourse = async (req, res) => {
 
 
 
-	//TODO if previously unavailable / hidden exercises or entries get published, also add updates for this
+	//TODO if previously unavailable / hidden exercises or entries GET published, also add updates for this
 
 
 	if (req.deletedEntries && req.deletedEntries.length > 0){
@@ -278,7 +278,7 @@ exports.enrollInCourse = (req, res) => {
 
 exports.getCoursesFiltered = async (req, res) => {
 
-	//!!! add validation for sane request (e. g. can't post enrolled + teacher)
+	//!!! add validation for sane request (e. g. can't POST enrolled + teacher)
 	let filter = {}, usersToPopulate = [], usersToPopulateSet = {}, courses;
 	if (req.body.courseId){
 		filter._id = req.body.courseId;
@@ -329,7 +329,7 @@ exports.getCoursesFiltered = async (req, res) => {
 			{ about: reOptions }
 		]
 	}
-	let basicUserFields = ['name', 'photo', 'role', 'activated', '_id', 'hiddenFields'];
+	let basicUserFields = ['name', 'photo', '_id', 'hiddenFields'];
 	Course.find({...filter})
 	//maybe select only necessary info
 		.populate({path: 'students', select: basicUserFields})
@@ -381,18 +381,24 @@ exports.getCoursesFiltered = async (req, res) => {
 						isStudent = true;
 						userStatuses[i] = 'student';
 					}
-					student.hideFields();
+					if (student && student.hideFields){
+						student.hideFields();
+					}
 				}
 				for (let teacher of courses[i].teachers){
 					if (teacher.equals(req.auth._id)){
 						isTeacher = true;
 						userStatuses[i] = 'teacher';
 					}
-					teacher.hideFields();
+					if (teacher && teacher.hideFields){
+						teacher.hideFields();
+					}
 				}
-				courses[i].creator.hideFields();
+				if (courses[i].creator && courses[i].creator.hideFields){
+					courses[i].creator.hideFields();
+				}
 
-				if (courses[i].creator._id.equals(req.auth._id)){
+				if (courses[i].creator && courses[i].creator._id.equals(req.auth._id)){
 					userStatuses[i] = 'creator';
 					continue;
 				}

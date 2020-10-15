@@ -1,11 +1,10 @@
 let NewsEntry = require('./model')
 
 exports.getNews = (req, res) => {
-	//Fake delay for tests
+	//Fake delay for testing async actions
 	setTimeout(() => {
 		res.json([
-			{message: `password for signing in as teacher : "testpass" `},
-			{message: `TODO use github api to fetch readme for this project`}
+			{message: 'First release! YAY!'},
 		])
 	}, 500)
 
