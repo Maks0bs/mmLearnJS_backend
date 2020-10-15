@@ -421,6 +421,8 @@ exports.UpdateNewInfo = UpdateNewInfo;
  *       type: object
  *       required:
  *         - _id
+ *         - name
+ *         - creator
  *       properties:
  *         _id:
  *           $ref: '#/components/schemas/ObjectId'
