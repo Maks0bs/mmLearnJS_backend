@@ -147,7 +147,7 @@ router.get('/:courseId/exercise/:exerciseId',
 	userInCourse,
 	getExercise
 )
-router.get('/:courseId/exercise/:exerciseId/users-attempts',
+router.get('/:courseId/exercise/:exerciseId/user-attempts',
 	requireAuthentication,
 	userInCourse,
 	getExerciseAttempts
