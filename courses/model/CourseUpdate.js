@@ -1,3 +1,5 @@
+let mongoose = require('mongoose');
+
 let courseUpdateSchema = new mongoose.Schema({
     created: {
         type: Date,
@@ -8,41 +10,38 @@ let courseUpdateSchema = new mongoose.Schema({
 })
 let CourseUpdate = mongoose.model('CourseUpdate', courseUpdateSchema);
 exports.CourseUpdate = CourseUpdate;
+exports.courseUpdateSchema = courseUpdateSchema;
 
-/**
- * Here we don't use refs to EntrySchema, because they can GET deleted an this might cause trouble
- * @param newEntries.name name of the added entry,
- * @param newEntries.type type of the added entry
- */
 let updateNewEntriesSchema = new mongoose.Schema({
     newEntries: [
         {
             name: String,
-            type: {
-                type: String
-            }
+            type: { type: String }
         }
-
     ]
 })
 let UpdateNewEntries = CourseUpdate.discriminator('UpdateNewEntries', updateNewEntriesSchema);
 exports.UpdateNewEntries = UpdateNewEntries;
+exports.updateNewEntriesSchema = updateNewEntriesSchema;
 
-/**
- * Here we don't use refs to EntrySchema, because entries are not stored separately from the course
- * @param newEntries.name name of the deleted entry,
- * @param newEntries.type type of the deleted entry
- */
 let updateDeletedEntriesSchema = new mongoose.Schema({
     deletedEntries: [
         {
             name: String,
-            type: {
-                type: String
-            }
+            type: { type: String }
         }
-
     ]
 })
-let UpdateDeletedEntries = CourseUpdate.discriminator('UpdateDeletedEntries', updateDeletedEntriesSchema);
+let UpdateDeletedEntries =
+    CourseUpdate.discriminator('UpdateDeletedEntries', updateDeletedEntriesSchema);
 exports.UpdateDeletedEntries = UpdateDeletedEntries;
+exports.updateDeletedEntriesSchema = updateDeletedEntriesSchema;
+
+let updateNewInfoSchema = new mongoose.Schema({
+    oldName: String,
+    newName: String,
+    newAbout: String
+})
+let UpdateNewInfo = CourseUpdate.discriminator('UpdateNewInfo', updateNewInfoSchema);
+exports.UpdateNewInfo = UpdateNewInfo;
+exports.updateNewInfoSchema = updateNewInfoSchema;
