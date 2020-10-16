@@ -1,83 +1,57 @@
-let attemptAnswerSchema = new mongoose.Schema({
-    taskRef: {
-        type: ObjectId,
-        required: true
-    },
-    score: {
-        type: Number,
-        default: null
-    }
-}, {
-    discriminatorKey: 'kind'
-})
+let mongoose = require('mongoose');
+let { ObjectId } = mongoose.Schema;
+const {
+    oneChoiceTaskSchema, multipleChoiceTaskSchema,
+    textTaskSchema
+} = require('./ExerciseTask')
 
-let AttemptAnswer = mongoose.model('AttemptAnswer', attemptAnswerSchema);
-exports.AttemptAnswer = AttemptAnswer;
-
-let oneChoiceTaskAttemptSchema = new mongoose.Schema({
-    value: String
-})
-
-let OneChoiceTaskAttempt = AttemptAnswer.discriminator(
-    'OneChoiceTaskAttempt', oneChoiceTaskAttemptSchema);
-exports.OneChoiceTaskAttempt = OneChoiceTaskAttempt;
-
-// text tasks only have one answer option, the same as one choice tasks
-let TextTaskAttempt = AttemptAnswer.discriminator(
-    'TextTaskAttempt', oneChoiceTaskAttemptSchema);
-exports.TextTaskAttempt = TextTaskAttempt;
-
-let multipleChoiceTaskAttemptSchema = new mongoose.Schema({
-    values: [ String ]
-})
-
-let MultipleChoiceTaskAttempt = AttemptAnswer.discriminator(
-    'MultipleChoiceTaskAttempt', multipleChoiceTaskAttemptSchema);
-exports.MultipleChoiceTaskAttempt = MultipleChoiceTaskAttempt;
-
-
-let exerciseAttemptSchema = new mongoose.Schema({
-    startTime: {
-        type: Date,
-        default: Date.now
-        //TODO maybe make required
-    },
-    endTime: {
-        type: Date,
-        default: null
-        //TODO maybe make required
-    },
-    answers: [
-        attemptAnswerSchema
-    ],
-    score: {
-        type: Number,
-        default: null
-    }
-}, {
-    discriminatorKey: 'kind'
-})
-
-let ExerciseAttempt = mongoose.model('ExerciseAttempt', exerciseAttemptSchema);
-exports.ExerciseAttempt = ExerciseAttempt;
-
-exerciseAttemptSchema.path('answers').discriminator('OneChoiceTaskAttempt', oneChoiceTaskAttemptSchema)
-exerciseAttemptSchema.path('answers').discriminator('MultipleChoiceTaskAttempt', multipleChoiceTaskAttemptSchema)
-exerciseAttemptSchema.path('answers').discriminator('TextTaskAttempt', oneChoiceTaskAttemptSchema)
-
-let exerciseTaskSchema = new mongoose.Schema({
-    description: String,
-    score: {
-        type: Number,
-        required: true
-    }
-}, {
-    discriminatorKey: 'kind'
-})
-
-let ExerciseTask = mongoose.model('ExerciseTask', exerciseTaskSchema);
-exports.ExerciseTask = ExerciseTask;
-
+/**
+ * @class Exercise
+ * @memberOf models.Course
+ * @name Exercise
+ * @property {ObjectId} _id
+ */
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Exercise:
+ *       type: object
+ *         required:
+ *           - name
+ *           - weight
+ *           - tasks
+ *         properties:
+ *           name:
+ *             type: string
+ *           available:
+ *             type: boolean
+ *           weight:
+ *             type: number
+ *           tasks:
+ *             type: array
+ *             items:
+ *               oneOf:
+ *                 - $ref: '#/components/schemas/ExerciseTask'
+ *                 - $ref: '#/components/schemas/ObjectId'
+ *           participants:
+ *             type: array
+ *             items:
+ *               type: object
+ *               required:
+ *                 - user
+ *                 - attempts
+ *               properties:
+ *                 user:
+ *                   oneOf:
+ *                     - $ref: '#/components/schemas/User'
+ *                     - $ref: '#/components/schemas/ObjectId'
+ *                 attempts:
+ *                   oneOf:
+ *                     - $ref: '#/components/schemas/ExerciseAttempt'
+ *                     - $ref: '#/components/schemas/ObjectId'
+ *
+ *///TODO don't forget to check if docs are compiled correctly
 let courseExerciseSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -87,21 +61,28 @@ let courseExerciseSchema = new mongoose.Schema({
         {
             user: {
                 type: ObjectId,
-                ref: 'User'
+                ref: 'User',
+                required: 'The ref to the participant is required'
             },
             attempts: [
-                exerciseAttemptSchema
+                {
+                    type: ObjectId,
+                    ref: 'ExerciseAttempt'
+                }
             ]
         }
     ],
     tasks: [
-        exerciseTaskSchema
+        {
+            type: ObjectId,
+            ref: 'ExerciseTask'
+        }
     ],
     available: {
         type: Boolean,
         required: true
     },
-    weight: {//TODO if no weight gets received in the update request, set to 1. Add this to schema methods
+    weight: {
         type: Number,
         required: true,
         default: 1
@@ -110,9 +91,11 @@ let courseExerciseSchema = new mongoose.Schema({
     discriminatorKey: 'kind'
 })
 
-let Exercise = mongoose.model('CourseExercise', courseExerciseSchema);
+let Exercise = mongoose.model('Exercise', courseExerciseSchema);
 exports.Exercise = Exercise;
+exports.courseExerciseSchema = courseExerciseSchema;
 
-courseExerciseSchema.path('tasks').discriminator('OneChoiceTask', oneChoiceTaskSchema)
-courseExerciseSchema.path('tasks').discriminator('MultipleChoiceTask', multipleChoiceTaskSchema)
-courseExerciseSchema.path('tasks').discriminator('TextTask', textTaskSchema)
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// courseExerciseSchema.path('tasks').discriminator('OneChoiceTask', oneChoiceTaskSchema)
+// courseExerciseSchema.path('tasks').discriminator('MultipleChoiceTask', multipleChoiceTaskSchema)
+// courseExerciseSchema.path('tasks').discriminator('TextTask', textTaskSchema)

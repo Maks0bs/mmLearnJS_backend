@@ -7,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> helpers/index.js</title>
+  <title> courses/model/CourseUpdate.js</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -84,7 +84,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Source</p>
-                    <h1>helpers/index.js</h1>
+                    <h1>courses/model/CourseUpdate.js</h1>
                 </header>
                 
 
@@ -93,126 +93,133 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const nodeMailer = require('nodemailer');
-let { validationResult } = require('express-validator');
-let { gmailClientCredentials } = require('../constants').mail
+            <pre class="prettyprint source linenums"><code>let mongoose = require('mongoose');
 
 /**
- * @namespace helpers
+ * @class CourseUpdate
+ * @memberOf models.Course
+ * @name CourseUpdate
+ * @property {ObjectId} _id
+ * @property {BSONDate} created
  */
 /**
- * @class controllers.helpers
+ * @class CourseUpdateNewEntries
+ * @augments models.Course.CourseUpdate
+ * @memberOf models.Course
+ * @name CourseUpdateNewEntries
+ * @property {{name: string, type: string}[]} newEntries
  */
-//TODO maybe put some common controllers
-// (like authenticate, extendSession) to the `controllers.helpers` namespace
 /**
- * @param {object} emailData
- * @param {string} emailData.from
- * @param {string} emailData.to
- * @param {string} emailData.text
- * @param {string} [emailData.html]
- * @return {Promise&lt;string>}
- * @memberOf helpers
+ * @class CourseUpdateDeletedEntries
+ * @augments models.Course.CourseUpdate
+ * @memberOf models.Course
+ * @name CourseUpdateDeletedEntries
+ * @property {{name: string, type: string}[]} deletedEntries
  */
-const sendEmail = emailData => {
-
-    const transporter = nodeMailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false,
-        requireTLS: true,
-        auth: gmailClientCredentials
-    });
-    return new Promise((resolve, reject) => {
-        transporter
-            .sendMail(emailData, (err, info) => {
-                if (err){
-                    console.log(`Problem sending email: ${JSON.stringify(err)}`)
-                    reject(err);
-                } else {
-                    console.log(`Message sent: ${info.response}`);
-                    resolve(`Email sent: ${info.response}`);
-                }
-            })
-    })
-};
-exports.sendEmail = sendEmail;
-
 /**
- * @type function
- * @throws 400
- * @description this controller should be used at the end of a chain of
- * {@link https://express-validator.github.io/docs/index.html express validators}, which are
- * defined in the `validators.js` file, for example {@link controllers.userDataValidator this one}
- * @param {e.Request} req
- * @param {e.Response} res
- * @param {function} next
- * @memberOf controllers.helpers
+ * @class CourseUpdateNewInfo
+ * @augments models.Course.CourseUpdate
+ * @memberOf models.Course
+ * @name CourseUpdateNewEntries
+ * @property {string} oldName
+ * @property {string} newName
+ * @property {?string} newAbout
  */
-const validate = (req, res, next) => {
-    let { errors } = validationResult(req);
-    if (errors.length > 0){
-        let firstError = errors.map((error) => error.msg)[0];
-        return res.status(400).json({
-            error: { status: 400, message: firstError}
-        })
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     ExerciseTask:
+ *       allOf:
+ *         - type: object
+ *           required:
+ *             - _id
+ *             - created
+ *           properties:
+ *             _id:
+ *               $ref: '#/components/schemas/ObjectId'
+ *             created:
+ *               $ref: '#/components/schemas/Date'
+ *         - oneOf:
+ *           - type: object
+ *             properties:
+ *               newEntries:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                     type:
+ *                       type: string
+ *           - type: object
+ *             properties:
+ *               deletedEntries:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                     type:
+ *                       type: string
+ *           - type: object
+ *             properties:
+ *               newName:
+ *                 type: string
+ *               oldName:
+ *                 type: string
+ *               newAbout:
+ *                 type: string
+ *///TODO don't forget to check if docs are compiled correctly
+let courseUpdateSchema = new mongoose.Schema({
+    created: {
+        type: Date,
+        default: Date.now
     }
-    return next();
-}
-exports.validate = validate;
+}, {
+    discriminatorKey: 'kind'
+})
+let CourseUpdate = mongoose.model('CourseUpdate', courseUpdateSchema);
+exports.CourseUpdate = CourseUpdate;
+exports.courseUpdateSchema = courseUpdateSchema;
 
-/**
- * @description finished the middleware invocation and sends an error to the client.
- * By default the `error` object has 2 keys: `status` and `message`. Customize
- * it with the `option` param. Recommended to be put in `.catch()` expression after
- * some `.then()` promise handlers
- * @throws any error, specified in `err.status`
- * @param {any} err
- * @param {e.Response} res
- * @param {Object} [options] - specify here how the given error is structured
- * @memberOf helpers
- */
-const handleError = (err, res, options) => {
-    console.log(err);
-    return res.status(err.status || 400)
-        .json({
-            error: {
-                message: err.message || err,
-                status: err.status || 400
-            }
-        })
-}
-exports.handleError = handleError;
+let updateNewEntriesSchema = new mongoose.Schema({
+    newEntries: [
+        {
+            name: String,
+            type: { type: String }
+        }
+    ]
+})
+let UpdateNewEntries = CourseUpdate.discriminator(
+    'UpdateNewEntries', updateNewEntriesSchema
+);
+exports.UpdateNewEntries = UpdateNewEntries;
+exports.updateNewEntriesSchema = updateNewEntriesSchema;
 
-/**
- * @deprecated
- * @param err the error object of mongoose error data (contains errors array and _message)
- * @return falsy value if err is not a valid mongoose error data object,
- * otherwise return the message of the first error
- * @memberOf helpers
- */
-const formatMongooseError = (err) => {
-    if (!err.errors){
-        return 'Error';
-    }
-    let errorsValues = Object.keys(err.errors);
-    let firstError = err.errors[errorsValues[0]];
-    if (!firstError.properties){
-        return 'Error';
-    }
-    let message = firstError.properties.message
-    if ( ((typeof message) === 'object') || (message instanceof Object)){
-        return JSON.stringify(message);
-    } else if ( ((typeof message) === 'string') || (message instanceof String)){
-        return {
-            message,
-            path: firstError
-        };
-    } else {
-        return false;
-    }
-}
-exports.formatMongooseError = formatMongooseError;</code></pre>
+let updateDeletedEntriesSchema = new mongoose.Schema({
+    deletedEntries: [
+        {
+            name: String,
+            type: { type: String }
+        }
+    ]
+})
+let UpdateDeletedEntries = CourseUpdate.discriminator(
+    'UpdateDeletedEntries', updateDeletedEntriesSchema
+);
+exports.UpdateDeletedEntries = UpdateDeletedEntries;
+exports.updateDeletedEntriesSchema = updateDeletedEntriesSchema;
+
+let updateNewInfoSchema = new mongoose.Schema({
+    oldName: String,
+    newName: String,
+    newAbout: String
+})
+let UpdateNewInfo = CourseUpdate.discriminator('UpdateNewInfo', updateNewInfoSchema);
+exports.UpdateNewInfo = UpdateNewInfo;
+exports.updateNewInfoSchema = updateNewInfoSchema;</code></pre>
         </article>
     </section>
 

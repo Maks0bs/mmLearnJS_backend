@@ -2,6 +2,10 @@ let mongoose = require('mongoose');
 let { v1: uuidv1 } = require('uuid');
 let { ObjectId } = mongoose.Schema;
 
+const HIDEABLE_FIELDS = [
+    'email', 'created', 'updated', 'about', 'role', 'enrolledCourses',
+    'teacherCourses', 'photo'
+]
 /**
  * @class User
  * @memberOf models
@@ -224,7 +228,15 @@ let userSchema = new mongoose.Schema({
         default: null
     },
     hiddenFields: [
-        String
+        {
+            type: String,
+            validate: {
+                validator: function(field){
+                    return HIDEABLE_FIELDS.includes(field);
+                },
+                message: props => `Cannot hide the field "${props.value}"`
+            }
+        }
     ],
     notifications: [
         {

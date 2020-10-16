@@ -7,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> helpers/index.js</title>
+  <title> courses/model/ExerciseAttempt.js</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -84,7 +84,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Source</p>
-                    <h1>helpers/index.js</h1>
+                    <h1>courses/model/ExerciseAttempt.js</h1>
                 </header>
                 
 
@@ -93,126 +93,173 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const nodeMailer = require('nodemailer');
-let { validationResult } = require('express-validator');
-let { gmailClientCredentials } = require('../constants').mail
-
+            <pre class="prettyprint source linenums"><code>let mongoose = require('mongoose');
+let { ObjectId } = mongoose.Schema;
 /**
- * @namespace helpers
+ * @class ExerciseAttemptAnswer
+ * @memberOf models.Course.Exercise
+ * @name ExerciseAttemptAnswer
+ * @property {ObjectId|models.Course.Exercise.ExerciseAttempt} taskRef
+ * @property {?number} score
+ * @property {?string} [value]
+ * @property {?string[]} [values]
  */
 /**
- * @class controllers.helpers
+ * @class ExerciseAttempt
+ * @memberOf models.Course.Exercise
+ * @name ExerciseAttempt
+ * @property {ObjectId} _id
+ * @property {ObjectId|models.User} respondent
+ * @property {ObjectId|models.Course.Exercise} exerciseRef
+ * @property {BSONDate} startTime
+ * @property {?BSONDate} endTime
+ * @property {ExerciseAttemptAnswer[]} answers
+ * @property {?number} score
  */
-//TODO maybe put some common controllers
-// (like authenticate, extendSession) to the `controllers.helpers` namespace
 /**
- * @param {object} emailData
- * @param {string} emailData.from
- * @param {string} emailData.to
- * @param {string} emailData.text
- * @param {string} [emailData.html]
- * @return {Promise&lt;string>}
- * @memberOf helpers
- */
-const sendEmail = emailData => {
-
-    const transporter = nodeMailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false,
-        requireTLS: true,
-        auth: gmailClientCredentials
-    });
-    return new Promise((resolve, reject) => {
-        transporter
-            .sendMail(emailData, (err, info) => {
-                if (err){
-                    console.log(`Problem sending email: ${JSON.stringify(err)}`)
-                    reject(err);
-                } else {
-                    console.log(`Message sent: ${info.response}`);
-                    resolve(`Email sent: ${info.response}`);
-                }
-            })
-    })
-};
-exports.sendEmail = sendEmail;
-
-/**
- * @type function
- * @throws 400
- * @description this controller should be used at the end of a chain of
- * {@link https://express-validator.github.io/docs/index.html express validators}, which are
- * defined in the `validators.js` file, for example {@link controllers.userDataValidator this one}
- * @param {e.Request} req
- * @param {e.Response} res
- * @param {function} next
- * @memberOf controllers.helpers
- */
-const validate = (req, res, next) => {
-    let { errors } = validationResult(req);
-    if (errors.length > 0){
-        let firstError = errors.map((error) => error.msg)[0];
-        return res.status(400).json({
-            error: { status: 400, message: firstError}
-        })
+ * @swagger
+ * components:
+ *   schemas:
+ *     ExerciseAttempt:
+ *       type: object
+ *       required:
+ *         - _id
+ *         - respondent
+ *         - exerciseRef
+ *         - startTime
+ *       properties:
+ *         _id:
+ *           $ref: '#/components/schemas/ObjectId'
+ *         respondent:
+ *           oneOf:
+ *             - $ref: '#/components/schemas/User'
+ *             - $ref: '#/components/schemas/ObjectId'
+ *         exerciseRef:
+ *           oneOf:
+ *             - $ref: '#/components/schemas/User'
+ *             - $ref: '#/components/schemas/ObjectId'
+ *         startTime:
+ *           $ref: '#/components/schemas/Date'
+ *         endTime:
+ *           $ref: '#/components/schemas/Date'
+ *         score:
+ *           type: number
+ *         answers:
+ *           type: array
+ *           items:
+ *             anyOf:
+ *               - type: object
+ *                 required:
+ *                   - taskRef
+ *                 properties:
+ *                  taskRef:
+ *                    oneOf:
+ *                      - $ref: '#/components/schemas/ExerciseTask'
+ *                      - $ref: '#/components/schemas/ObjectId'
+ *                  score:
+ *                    type: number
+ *               - type: object
+ *                 properties:
+ *                   value:
+ *                     type: string
+ *               - type: object
+ *                 properties:
+ *                   values:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *///TODO don't forget to check if docs are compiled correctly
+let attemptAnswerSchema = new mongoose.Schema({
+    taskRef: {
+        type: ObjectId,
+        ref: 'ExerciseTask'
+    },
+    score: {
+        type: Number,
+        default: null
     }
-    return next();
-}
-exports.validate = validate;
+}, {
+    discriminatorKey: 'kind',
+    _id: false
+})
 
-/**
- * @description finished the middleware invocation and sends an error to the client.
- * By default the `error` object has 2 keys: `status` and `message`. Customize
- * it with the `option` param. Recommended to be put in `.catch()` expression after
- * some `.then()` promise handlers
- * @throws any error, specified in `err.status`
- * @param {any} err
- * @param {e.Response} res
- * @param {Object} [options] - specify here how the given error is structured
- * @memberOf helpers
- */
-const handleError = (err, res, options) => {
-    console.log(err);
-    return res.status(err.status || 400)
-        .json({
-            error: {
-                message: err.message || err,
-                status: err.status || 400
-            }
-        })
-}
-exports.handleError = handleError;
+let AttemptAnswer = mongoose.model('AttemptAnswer', attemptAnswerSchema);
+exports.AttemptAnswer = AttemptAnswer;
+exports.attemptAnswerSchema = attemptAnswerSchema;
 
-/**
- * @deprecated
- * @param err the error object of mongoose error data (contains errors array and _message)
- * @return falsy value if err is not a valid mongoose error data object,
- * otherwise return the message of the first error
- * @memberOf helpers
- */
-const formatMongooseError = (err) => {
-    if (!err.errors){
-        return 'Error';
+let oneChoiceTaskAttemptSchema = new mongoose.Schema({
+    value: String
+})
+
+let OneChoiceTaskAttempt = AttemptAnswer.discriminator(
+    'OneChoiceTaskAttempt', oneChoiceTaskAttemptSchema
+);
+exports.OneChoiceTaskAttempt = OneChoiceTaskAttempt;
+exports.oneChoiceTaskAttemptSchema = oneChoiceTaskAttemptSchema;
+// text tasks only have one answer option, the same as one choice tasks
+let TextTaskAttempt = AttemptAnswer.discriminator(
+    'TextTaskAttempt', oneChoiceTaskAttemptSchema
+);
+exports.TextTaskAttempt = TextTaskAttempt;
+exports.textTaskAttemptSchema = oneChoiceTaskAttemptSchema;
+
+let multipleChoiceTaskAttemptSchema = new mongoose.Schema({
+    values: [
+        String
+    ]
+})
+
+let MultipleChoiceTaskAttempt = AttemptAnswer.discriminator(
+    'MultipleChoiceTaskAttempt', multipleChoiceTaskAttemptSchema
+);
+exports.MultipleChoiceTaskAttempt = MultipleChoiceTaskAttempt
+exports.multipleChoiceTaskAttemptSchema = multipleChoiceTaskAttemptSchema;
+
+let exerciseAttemptSchema = new mongoose.Schema({
+    respondent: {
+        type: ObjectId,
+        ref: 'User',
+        required: 'The ref to the student, who attempts the exercise is required'
+    },
+    exerciseRef: {
+        type: ObjectId,
+        ref: 'User',
+        required: 'The link to the exercise, which the attempt refers to, is required'
+    },
+    startTime: {
+        type: Date,
+        default: Date.now,
+        required: 'The starting time of the attempt is required'
+    },
+    endTime: {
+        type: Date,
+        default: null,
+        required: 'The ending time of the attempt is required'
+    },
+    answers: [
+        attemptAnswerSchema
+    ],
+    score: {
+        type: Number,
+        default: null
     }
-    let errorsValues = Object.keys(err.errors);
-    let firstError = err.errors[errorsValues[0]];
-    if (!firstError.properties){
-        return 'Error';
-    }
-    let message = firstError.properties.message
-    if ( ((typeof message) === 'object') || (message instanceof Object)){
-        return JSON.stringify(message);
-    } else if ( ((typeof message) === 'string') || (message instanceof String)){
-        return {
-            message,
-            path: firstError
-        };
-    } else {
-        return false;
-    }
-}
-exports.formatMongooseError = formatMongooseError;</code></pre>
+}, {
+    discriminatorKey: 'kind'
+})
+
+let ExerciseAttempt = mongoose.model('ExerciseAttempt', exerciseAttemptSchema);
+exports.ExerciseAttempt = ExerciseAttempt;
+exports.exerciseAttemptSchema = exerciseAttemptSchema;
+
+exerciseAttemptSchema.path('answers').discriminator(
+    'OneChoiceTaskAttempt', oneChoiceTaskAttemptSchema
+)
+exerciseAttemptSchema.path('answers').discriminator(
+    'MultipleChoiceTaskAttempt', multipleChoiceTaskAttemptSchema
+)
+exerciseAttemptSchema.path('answers').discriminator(
+    'TextTaskAttempt', oneChoiceTaskAttemptSchema
+)</code></pre>
         </article>
     </section>
 

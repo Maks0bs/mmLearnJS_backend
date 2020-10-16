@@ -1,6 +1,22 @@
 let mongoose = require('mongoose');
 let { ObjectId } = mongoose.Schema;
 
+//TODO REFACTOR
+//TODO REFACTOR
+//TODO REFACTOR
+//TODO REFACTOR
+//TODO REFACTOR
+//TODO REFACTOR
+//TODO REFACTOR
+//TODO REFACTOR
+//TODO REFACTOR
+//TODO REFACTOR
+//TODO REFACTOR
+//TODO REFACTOR
+//TODO REFACTOR
+//TODO REFACTOR
+//TODO REFACTOR
+
 let entryContentSchema = new mongoose.Schema({
     info: {}
 }, {
