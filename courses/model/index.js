@@ -1,7 +1,7 @@
 let mongoose = require('mongoose');
 let { ObjectId } = mongoose.Schema;
 let { v1: uuidv1} = require('uuid');
-let crypto = require('crypto');
+let { courseUpdateSchema } = require('./CourseUpdate');
 
 // ------------------ Task
 //TODO this should be the easiest part. Just improve already existing validators
@@ -76,6 +76,8 @@ let crypto = require('crypto');
  * @property {models.Course.CourseUpdate[]} updates
  * @property {models.Course.Exercise[]} exercises
  * @property {models.Course.CourseSection[]} sections
+ * @property {function(string): boolean} checkPassword see {@link models.Course.checkCredentials}
+ * @property {function(string): string} encryptPassword see {@link models.Course.encryptPassword}
  */
 /**
  * @swagger
@@ -247,23 +249,6 @@ courseSchema
 	.get(function() {
 		return this._password;
 	})
-
-courseSchema.methods = {
-	checkPassword: function(plainText){
-		return this.encryptPassword(plainText) === this.hashed_password
-	},
-
-	encryptPassword: function(password){
-		if (!password) return '';
-		try {
-			return crypto.createHmac('sha1', this.salt)
-			.update(password)
-			.digest('hex');
-		} catch(err){
-			console.log(err);
-			return '';
-		}
-	}
-}
+courseSchema.methods = require('./methods').courseMethods;
 let Course = mongoose.model('Course', courseSchema);
-exports.Course = Course;
+module.exports = Course;

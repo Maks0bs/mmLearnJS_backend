@@ -17,46 +17,60 @@ const {
  *   schemas:
  *     Exercise:
  *       type: object
- *         required:
- *           - name
- *           - weight
- *           - tasks
- *         properties:
- *           name:
- *             type: string
- *           available:
- *             type: boolean
- *           weight:
- *             type: number
- *           tasks:
- *             type: array
- *             items:
- *               oneOf:
- *                 - $ref: '#/components/schemas/ExerciseTask'
- *                 - $ref: '#/components/schemas/ObjectId'
- *           participants:
- *             type: array
- *             items:
- *               type: object
- *               required:
- *                 - user
- *                 - attempts
- *               properties:
- *                 user:
- *                   oneOf:
- *                     - $ref: '#/components/schemas/User'
- *                     - $ref: '#/components/schemas/ObjectId'
- *                 attempts:
- *                   oneOf:
- *                     - $ref: '#/components/schemas/ExerciseAttempt'
- *                     - $ref: '#/components/schemas/ObjectId'
- *
+ *       required:
+ *         - name
+ *         - weight
+ *         - tasks
+ *       properties:
+ *         name:
+ *           type: string
+ *         available:
+ *           type: boolean
+ *         weight:
+ *           type: number
+ *         tasks:
+ *           type: array
+ *           items:
+ *             oneOf:
+ *               - $ref: '#/components/schemas/ExerciseTask'
+ *               - $ref: '#/components/schemas/ObjectId'
+ *         courseRefs:
+ *           type: array
+ *           description: >
+ *             the list of courses, the teachers of which
+ *             are allowed to edit the exercise
+ *           items:
+ *             oneOf:
+ *               - $ref: '#/components/schemas/Course'
+ *               - $ref: '#/components/schemas/ObjectId'
+ *         participants:
+ *           type: array
+ *           items:
+ *             type: object
+ *             required:
+ *               - user
+ *               - attempts
+ *             properties:
+ *               user:
+ *                 oneOf:
+ *                   - $ref: '#/components/schemas/User'
+ *                   - $ref: '#/components/schemas/ObjectId'
+ *               attempts:
+ *                 oneOf:
+ *                   - $ref: '#/components/schemas/ExerciseAttempt'
+ *                   - $ref: '#/components/schemas/ObjectId'
  *///TODO don't forget to check if docs are compiled correctly
 let courseExerciseSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true
     },
+    courseRefs: [
+        {
+            type: ObjectId,
+            ref: 'Course'
+        }
+    ],
     participants: [
         {
             user: {
