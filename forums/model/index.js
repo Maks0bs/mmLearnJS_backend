@@ -23,9 +23,9 @@ let { ObjectId } = mongoose.Schema;
  * @property {ForumTopicPost[]} posts
  */
 /**
- * @class Forum
+ * @class Index
  * @memberOf models.Course
- * @name Forum
+ * @name Index
  * @property {ObjectId} _id
  * @property {string} name
  * @property {?string} description
@@ -59,7 +59,7 @@ let { ObjectId } = mongoose.Schema;
  * @swagger
  * components:
  *   schemas:
- *     Forum:
+ *     Index:
  *       allOf:
  *         - type: object
  *           required:
@@ -134,7 +134,7 @@ exports.forumTopicPostSchema = forumTopicPostSchema;
 let forumSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: 'Forum name is required'
+        required: 'Index name is required'
     },
     description: String,
     teachersOnly: Boolean,
@@ -162,6 +162,6 @@ let forumSchema = new mongoose.Schema({
         }
     ]
 })
-let Forum = mongoose.model('Forum', forumSchema);
-exports.Forum = Forum;
+let Index = mongoose.model('Forum', forumSchema);
+exports.Forum = Index;
 exports.forumSchema = forumSchema;
