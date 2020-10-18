@@ -5,7 +5,7 @@ let User = require('../../users/model');
 const {formatMongooseError} = require("../../helpers");
 
 exports.subscribe = (req, res) => {
-    let course = req.courseData;
+    let {course} = req;
     if (course.subscribers.includes(req.auth._id)){
         return res.status(400).json({
             error: {
@@ -44,7 +44,7 @@ exports.subscribe = (req, res) => {
 }
 
 exports.unsubscribe = (req, res) => {
-    let course = req.courseData;
+    let {course} = req;
     let newSubscribers = [];
     let test = false;
     for (let i = 0; i < course.subscribers.length; i++){
@@ -96,7 +96,7 @@ exports.unsubscribe = (req, res) => {
 
 exports.viewCourse = (req, res) => {
     let user = req.auth;
-    let courseId = req.courseData._id;
+    let courseId = req.course._id;
 
     for (let i = 0; i < user.subscribedCourses.length; i++){
         let cur = user.subscribedCourses[i].course;

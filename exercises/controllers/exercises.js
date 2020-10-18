@@ -1,4 +1,4 @@
-let { ExerciseAttempt } = require('../model');
+let { ExerciseAttempt } = require('../../courses/model');
 let { assign } = require('lodash');
 let User = require('../../users/model')
 

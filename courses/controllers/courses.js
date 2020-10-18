@@ -1,66 +1,74 @@
-let {
-    Course
-} = require('../model')
+let Course = require('../model')
 let User = require('../../users/model');
-let _ = require('lodash');
-const {formatMongooseError} = require("../../helpers");
+let { extend, isEqual, cloneDeep} = require('lodash');
+const {formatMongooseError, handleError} = require("../../helpers");
 
-exports.courseById = (req, res, next, id) => {
-    Course.findOne({_id: id})
+/**
+ * @class controllers.courses.courseData
+ */
+/**
+ * @type function
+ * @throws 400, 404
+ * @description works with the `:courseId` param in the url. Adds all the data
+ * about the course with the ID the provided parameter. Adds all course data to
+ * the request object under the `req.course` property
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Course.Entry} req.course
+ * @param {function} next
+ * @param {string} id - the id of the course that should be found
+ * @memberOf controllers.courses.courseData
+ */
+const courseById = (req, res, next, id) => {
+    return Course.findOne({_id: id})
         .then(course => {
             if (!course) throw {
-                status: 404,
-                error: 'course not found'
+                status: 404, error: 'course not found'
             }
             return course;
         })
         .then(course => {
-
-            req.courseData = course;
-            next();
+            req.course = course;
+            return next();
         })
-        .catch(err => {
-            console.log(err);
-            return res.status(err.status || 400)
-                .json({
-                    error: formatMongooseError(err)
-                })
-        })
+        .catch(err => {handleError(err, res)})
 }
+exports.courseById = courseById;
 
-exports.createCourse = (req, res) => {
+/**
+ * @type function
+ * @throws 400
+ * @description creates a new course with the given type and name. If the `hasPassword` attribute
+ * is true, the course password should be provided as well. See {@link models.Course course model}
+ * for details
+ * @param {e.Request} req
+ * @param {models.User} req.auth
+ * @param {e.Response} res
+ * @param {models.Course.Entry} req.course
+ * @memberOf controllers.courses.courseData
+ */
+const createCourse = (req, res) => {
     let courseData = req.body;
     courseData.creator = req.auth;
     courseData.teachers = [req.auth];
     let course = new Course(courseData);
-    User.findByIdAndUpdate(
+    return User.findByIdAndUpdate(
         req.auth._id,
-        {
-            $push: {
-                teacherCourses: course
-            }
-        },
+        { $push: { teacherCourses: course } },
         {new: true}
     )
-        .populate('courses', '_id name')
-        .then(result =>{
-            return course.save();
-        })
-        .then(result => {
-            return res.json({
+        .then(() => (
+            course.save()
+        ))
+        .then(savedCourse => (
+            res.json({
                 message: 'Your course has been created successfully',
-                _id: course._id
-            });
-        })
-        .catch(err => {
-            console.log(err);
-            return res.status(err.status || 400)
-                .json({
-                    error: err
-                })
-        })
-
+                course: savedCourse
+            })
+        ))
+        .catch(err => handleError(err, res))
 };
+exports.createCourse = createCourse;
 
 exports.getNewCourseData = (req, res, next) => {
     req.newCourseData = JSON.parse(req.body.newCourseData);
@@ -78,7 +86,7 @@ exports.cleanupCourseData = (req, res, next) => {
     if (!req.newCourseData.sections){
         return next();
     }
-    for (let section of req.courseData.sections){
+    for (let section of req.course.sections){
         for (let i of section.entries){
             if (i.type === 'file'){
                 curFiles[i.content.id] = 'none';
@@ -183,13 +191,13 @@ exports.updateCourse = async (req, res) => {
 
 
 
-    let course = req.courseData;
+    let {course} = req;
 
     let prevInfo = {
-        name: req.courseData.name,
-        about: req.courseData.about
+        name: req.course.name,
+        about: req.course.about
     }
-    course = _.extend(course, newCourseData);
+    course = extend(course, newCourseData);
 
     //TODO add new updates when a new exercise gets released. Display it only if it has available == true
 
@@ -211,7 +219,7 @@ exports.updateCourse = async (req, res) => {
             newEntries: req.newEntries
         })
     }
-    if (!_.isEqual(
+    if (!isEqual(
         {name: course.name, about: course.about},
         prevInfo
     )
@@ -240,7 +248,7 @@ exports.updateCourse = async (req, res) => {
 }
 
 exports.enrollInCourse = (req, res) => {
-    let course = req.courseData;
+    let {course} = req;
     if (course.hasPassword && !course.checkPassword(req.body.password)) {
         return res.status(401).json({
             error: {
@@ -363,7 +371,7 @@ exports.getCoursesFiltered = async (req, res) => {
                 }
 
                 if (courses[i].invitedTeachers){
-                    let invitedTeachers = _.cloneDeep(courses[i].invitedTeachers);
+                    let invitedTeachers = cloneDeep(courses[i].invitedTeachers);
                     courses[i].invitedTeachers = undefined;
                     for (let invited of invitedTeachers){
                         if (invited.equals(req.auth._id)){
@@ -459,7 +467,7 @@ exports.getCoursesFiltered = async (req, res) => {
 
 
                 for (let i = 0; i < courses[c].sections.length; i++){
-                    let section = _.cloneDeep(courses[c].sections[i]);
+                    let section = cloneDeep(courses[c].sections[i]);
                     section.entries = [];
                     for (let j = 0; j < courses[c].sections[i].entries.length; j++){
                         let entry = courses[c].sections[i].entries[j];
@@ -624,7 +632,7 @@ exports.getCoursesFiltered = async (req, res) => {
 }
 
 exports.deleteCourse = (req, res) => {
-    Course.deleteOne({ _id: req.courseData._id})
+    Course.deleteOne({ _id: req.course._id})
         .then(() => {
             res.json({
                 message: 'course deleted successfully'
@@ -647,7 +655,7 @@ exports.deleteCourse = (req, res) => {
 }
 
 exports.removeCourseMentions = (req, res, next) => {
-    let filesToDelete = [], course = req.courseData;
+    let filesToDelete = [], course = req.course;
 
     for (let s of course.sections){
         for (let e of s.entries){
@@ -716,12 +724,12 @@ exports.removeCourseMentions = (req, res, next) => {
 
 exports.entryById = (req, res, next, entryId) => {
     let len = 0;
-    if (req.courseData.sections){
-        len = req.courseData.sections.length
+    if (req.course.sections){
+        len = req.course.sections.length
     }
     for (let section = 0; section < len; section++){
-        for (let i = 0; i < req.courseData.sections[section].entries.length; i++){
-            let entry = req.courseData.sections[section].entries[i];
+        for (let i = 0; i < req.course.sections[section].entries.length; i++){
+            let entry = req.course.sections[section].entries[i];
             if(entry._id == entryId){
                 req.entry = {
                     data: entry,

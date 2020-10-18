@@ -1,6 +1,6 @@
 module.exports = {
-    ...require('./forums'),
+    ...require('./exercises'),
 }
 /**
- * @class controllers.forums
+ * @class controllers.exercises
  */

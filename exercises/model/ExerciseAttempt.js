@@ -2,20 +2,20 @@ let mongoose = require('mongoose');
 let { ObjectId } = mongoose.Schema;
 /**
  * @class ExerciseAttemptAnswer
- * @memberOf models.Course.Exercise
+ * @memberOf models.Exercise
  * @name ExerciseAttemptAnswer
- * @property {ObjectId|models.Course.Exercise.ExerciseAttempt} taskRef
+ * @property {ObjectId|models.Exercise.ExerciseAttempt} taskRef
  * @property {?number} score
  * @property {?string} [value]
  * @property {?string[]} [values]
  */
 /**
  * @class ExerciseAttempt
- * @memberOf models.Course.Exercise
+ * @memberOf models.Exercise
  * @name ExerciseAttempt
  * @property {ObjectId} _id
  * @property {ObjectId|models.User} respondent
- * @property {ObjectId|models.Course.Exercise} exerciseRef
+ * @property {ObjectId|models.Exercise} exerciseRef
  * @property {BSONDate} startTime
  * @property {?BSONDate} endTime
  * @property {ExerciseAttemptAnswer[]} answers

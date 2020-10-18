@@ -2,7 +2,7 @@ let mongoose = require('mongoose');
 
 /**
  * @class ExerciseTask
- * @memberOf models.Course.Exercise
+ * @memberOf models.Exercise
  * @name ExerciseTask
  * @property {ObjectId} _id
  * @property {string} [description]
@@ -10,16 +10,16 @@ let mongoose = require('mongoose');
  */
 /**
  * @class OneChoiceTask
- * @augments models.Course.Exercise.ExerciseTask
- * @memberOf models.Course.Exercise
+ * @augments models.Exercise.ExerciseTask
+ * @memberOf models.Exercise
  * @name OneChoiceTask
  * @property {{[text]: string, key: string}[]} options
  * @property {string} correctAnswer
  */
 /**
  * @class MultipleChoiceTask
- * @augments models.Course.Exercise.ExerciseTask
- * @memberOf models.Course.Exercise
+ * @augments models.Exercise.ExerciseTask
+ * @memberOf models.Exercise
  * @name MultipleChoiceTask
  * @property {{[text]: string, key: string}[]} options
  * @property {string[]} correctAnswers
@@ -27,8 +27,8 @@ let mongoose = require('mongoose');
  */
 /**
  * @class TextTask
- * @augments models.Course.Exercise.ExerciseTask
- * @memberOf models.Course.Exercise
+ * @augments models.Exercise.ExerciseTask
+ * @memberOf models.Exercise
  * @name TextTask
  * @property {{[text]: string, key: string}[]} correctAnswers
  * @property {boolean} interpretMath

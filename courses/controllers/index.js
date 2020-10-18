@@ -1,7 +1,7 @@
 module.exports = {
 	...require('./courses'),
-	...require('./exercises'),
-	...require('./forums'),
+	...require('../../exercises/controllers/exercises'),
+	...require('../../forums/controllers/forums'),
 	...require('./subscription'),
 	...require('./teachers')
 }

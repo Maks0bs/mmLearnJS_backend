@@ -4,12 +4,24 @@ const {
     oneChoiceTaskSchema, multipleChoiceTaskSchema,
     textTaskSchema
 } = require('./ExerciseTask')
-
+/**
+ * @class ExerciseParticipant
+ * @memberOf models.Exercise
+ * @name ExerciseParticipant
+ * @property {ObjectId|models.User} user
+ * @property {ObjectId[]|models.Exercise.ExerciseAttempt[]} attempts
+ */
 /**
  * @class Exercise
- * @memberOf models.Course
+ * @memberOf models
  * @name Exercise
  * @property {ObjectId} _id
+ * @property {string} name
+ * @property {ObjectId[]|models.Course[]} courseRefs
+ * @property {ObjectId[]|models.Exercise.ExerciseTask[]} tasks
+ * @property {boolean} available
+ * @property {number} weight
+ * @property {models.Exercise.ExerciseParticipant[]} participants
  */
 /**
  * @swagger
@@ -106,8 +118,7 @@ let courseExerciseSchema = new mongoose.Schema({
 })
 
 let Exercise = mongoose.model('Exercise', courseExerciseSchema);
-exports.Exercise = Exercise;
-exports.courseExerciseSchema = courseExerciseSchema;
+module.exports = Exercise;
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // courseExerciseSchema.path('tasks').discriminator('OneChoiceTask', oneChoiceTaskSchema)

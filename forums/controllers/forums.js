@@ -1,6 +1,6 @@
 let { 
 	ForumTopicPost
-} = require('../model')
+} = require('../../courses/model')
 let mongoose = require('mongoose');
 let User = require('../../users/model');
 const {formatMongooseError} = require("../../helpers");

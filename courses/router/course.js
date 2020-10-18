@@ -3,7 +3,7 @@ let {
     requireAuthentication, addNotifications
 } = require('../../users/controllers')
 let {
-    createCourse, enrollInCourse, updateCourse, cleanupCourseData, getNewCourseData,
+    enrollInCourse, updateCourse, cleanupCourseData, getNewCourseData,
     deleteCourse, removeCourseMentions, subscribe, unsubscribe, viewCourse,
     sendTeacherInvite, addToInvitedList, acceptTeacherInvite, configureExerciseSummary,
     getExerciseSummary
@@ -12,13 +12,14 @@ let {
     deleteFiles, uploadFiles
 } = require('../../files/controllers');
 
+/**
+ * @swagger
+ * tags:
+ *   name: /course/...
+ *   description: >
+ *     All endpoints connected to updating/changing/managing data in a single course
+ */
 let router = require('express').Router()
-
-router.post('/create',
-    requireAuthentication,
-    isTeacher,
-    createCourse
-);
 
 //TODO change of frontend
 router.post('/enroll', requireAuthentication, enrollInCourse);
@@ -40,6 +41,9 @@ router.delete('/',
     deleteFiles,
     deleteCourse
 );
+
+//TODO add a getter for a single course (GET /course/:courseId/)
+
 //TODO change of frontend
 router.post('/send-teacher-invite',
     requireAuthentication,
@@ -78,7 +82,7 @@ router.post('/view',
 
 //TODO change of frontend
 //TODO maybe move this to ./exercises or the correspondent directory!!!!!!!!!!
-router.get('/:courseId/exercise-summary/:summaryParam',
+router.get('/exercise-summary/:summaryParam',
     requireAuthentication,
     userInCourse,
     configureExerciseSummary,

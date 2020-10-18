@@ -34,7 +34,7 @@ let mongoose = require('mongoose');
  * @swagger
  * components:
  *   schemas:
- *     ExerciseTask:
+ *     CourseUpdate:
  *       allOf:
  *         - type: object
  *           required:

@@ -199,7 +199,6 @@ exports.userInCourse = userInCourse;
 
 /**
  * @type function
- * @deprecated
  * @throws 401
  * @description lets subsequent middleware be invoked only if the authenticated user is a teacher
  * at the provided course. Stops the middleware flow otherwise.
@@ -235,7 +234,6 @@ exports.teacherInCourse = teacherInCourse;
 
 /**
  * @type function
- * @deprecated
  * @throws 401
  * @description lets subsequent middleware be invoked only if the authenticated user is the creator
  * of the provided course. Stops the middleware flow otherwise.
@@ -250,13 +248,9 @@ exports.teacherInCourse = teacherInCourse;
 const isCourseCreator = (req, res, next) => {
     if (!req.courseData.creator._id.equals(req.auth._id)){
         res.status(401).json({
-            error: {
-                status: 401,
-                message: 'you are not the creator of the course'
-            }
+            error: { status: 401, message: 'you are not the creator of the course'}
         })
     }
     return next();
 }
 exports.isCourseCreator = isCourseCreator;
-

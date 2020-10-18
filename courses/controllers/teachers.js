@@ -17,8 +17,8 @@ exports.sendTeacherInvite = (req, res, next) => {
                 {
                     email: req.body.email,
                     teacher: true,
-                    courseId: req.courseData._id,
-                    courseName: req.courseData.name,
+                    courseId: req.course._id,
+                    courseName: req.course.name,
 					invited: true
                 },
                 JWT_SECRET,
@@ -30,11 +30,11 @@ exports.sendTeacherInvite = (req, res, next) => {
 	            from: "noreply@mmlearnjs.com",
 	            to: req.body.email,
 	            subject: "Teacher invitation to course on mmLearnJS",
-	            text: `You have been invited to be a teacher at the course "${req.courseData.name}" on mmLearnJS. Please sign up with this link to become a teacher at that course:
+	            text: `You have been invited to be a teacher at the course "${req.course.name}" on mmLearnJS. Please sign up with this link to become a teacher at that course:
 	            	${CLIENT_URL}/invite-signup/${token}?teacher=true&email=${req.body.email}`,
 	            html: `
 	            	<div>
-		                <p>You have been invited to be a teacher at the course "${req.courseData.name}" on mmLearnJS.</p> 
+		                <p>You have been invited to be a teacher at the course "${req.course.name}" on mmLearnJS.</p> 
 		                <p>Please sign up with this link to become a teacher at that course: </p>
 		                <p>${CLIENT_URL}/invite-signup/${token}?teacher=true&email=${req.body.email}</p>
 		            </div>
@@ -46,11 +46,11 @@ exports.sendTeacherInvite = (req, res, next) => {
 			status: 404,
 			message: 'User with this email is a STUDENT, can\'t make teachers out of students'
 		}
-		if (req.courseData.teachers.includes(user._id)) throw {
+		if (req.course.teachers.includes(user._id)) throw {
 			status: 400,
 			message: 'User with this email is already a teacher at this course'
 		}
-		if (req.courseData.invitedTeachers.includes(user._id)) throw {
+		if (req.course.invitedTeachers.includes(user._id)) throw {
 			status: 400,
 			message: 'User with this email is already invited'
 		}
@@ -61,10 +61,10 @@ exports.sendTeacherInvite = (req, res, next) => {
 				{
 					type: COURSE_TEACHER_INVITATION,
 					title: 'You are invited to be a teacher',
-					text: `The creator of the course "${req.courseData.name}" has invited you ` +
+					text: `The creator of the course "${req.course.name}" has invited you ` +
 						`to be a teacher in their course. You can accept of decline this invitation`,
 					data: {
-						courseId: req.courseData._id
+						courseId: req.course._id
 					}
 				}
 			]
@@ -74,10 +74,10 @@ exports.sendTeacherInvite = (req, res, next) => {
             from: "noreply@mmlearnjs.com",
             to: user.email,
             subject: "Teacher invitation to course",
-            text: `You have been invited to be a teacher at the course "${req.courseData.name}". ${CLIENT_URL}/classroom/course/${req.courseData._id}`,
+            text: `You have been invited to be a teacher at the course "${req.course.name}". ${CLIENT_URL}/classroom/course/${req.course._id}`,
             html: `
-                <p>You have been invited to be a teacher at the course "${req.courseData.name}".</p> 
-                <p>${CLIENT_URL}/classroom/course/${req.courseData._id}</p>
+                <p>You have been invited to be a teacher at the course "${req.course.name}".</p> 
+                <p>${CLIENT_URL}/classroom/course/${req.course._id}</p>
             `
         });
 	})
@@ -103,7 +103,7 @@ exports.sendTeacherInvite = (req, res, next) => {
 }
 
 exports.addToInvitedList = (req, res) => {
-	let course = req.courseData;
+	let {course} = req;
 	course.invitedTeachers.push(req.invitedTeacher);
 	course.save()
 	.then(course => {
@@ -121,7 +121,7 @@ exports.addToInvitedList = (req, res) => {
 }
 
 exports.acceptTeacherInvite = (req, res) => {
-	let course = req.courseData;
+	let {course} = req;
 	let hasInvited = false, isTeacher = false
 	for (let i = 0; i < course.invitedTeachers.length; i++){
 		let cur = course.invitedTeachers[i];
@@ -162,7 +162,7 @@ exports.acceptTeacherInvite = (req, res) => {
 				$pull: {
 					notifications: {
 						type: COURSE_TEACHER_INVITATION,
-						'data.courseId': req.courseData._id
+						'data.courseId': req.course._id
 					}
 				},
 				$push: {

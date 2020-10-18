@@ -1,19 +1,9 @@
 let mongoose = require('mongoose');
 let { ObjectId } = mongoose.Schema;
-/**
- * @class ForumTopicPost
- * @memberOf models.Course.Forum.ForumTopic
- * @name ForumTopicPost
- * @property {ObjectId} _id
- * @property {string} content
- * @property {ObjectId|models.User} creator
- * @property {BSONDate} created
- * @property {BSONDate} [updated]
- * @property {ForumTopicPost[]|ObjectId} answers
- */
+
 /**
  * @class ForumTopic
- * @memberOf models.Course.Forum
+ * @memberOf models.Forum
  * @name ForumTopic
  * @property {ObjectId} _id
  * @property {string} name
@@ -23,9 +13,9 @@ let { ObjectId } = mongoose.Schema;
  * @property {ForumTopicPost[]} posts
  */
 /**
- * @class Index
- * @memberOf models.Course
- * @name Index
+ * @class Forum
+ * @memberOf models
+ * @name Forum
  * @property {ObjectId} _id
  * @property {string} name
  * @property {?string} description
@@ -33,33 +23,12 @@ let { ObjectId } = mongoose.Schema;
  * @property {ObjectId[]|models.Course[]} courseRefs
  * @property {ForumTopic[]} topics
  */
+
 /**
  * @swagger
  * components:
  *   schemas:
- *     ForumTopicPost:
- *       type: object
- *       properties:
- *         content:
- *           type: string
- *         creator:
- *           oneOf:
- *             - $ref: '#/components/schemas/User'
- *             - $ref: '#/components/schemas/ObjectId'
- *         created:
- *           $ref: '#/components/schemas/Date'
- *         updated:
- *           $ref: '#/components/schemas/Date'
- *         answers:
- *           type: array
- *           items:
- *           $ref: '#/components/schemas/ForumTopicPost'
- */
-/**
- * @swagger
- * components:
- *   schemas:
- *     Index:
+ *     Forum:
  *       allOf:
  *         - type: object
  *           required:
@@ -106,35 +75,11 @@ let { ObjectId } = mongoose.Schema;
  *                     items:
  *                       $ref: '#/components/schemas/ForumTopicPost'
  *///TODO don't forget to check if docs are compiled correctly
-let forumTopicPostSchema = new mongoose.Schema({
-    creator: {
-        type: ObjectId,
-        ref: 'User',
-        required: 'Each forum post should have a creator'
-    },
-    created: {
-        type: Date,
-        default: Date.now
-    },
-    updated: Date,
-    content: String,
-    answers: [
-        {
-            type: ObjectId
-            // should only reference ForumTopicPost
-            // but posts don't get saved to the DB,
-            // that's why there is no `ref` attribute
-        }
-    ]
-})
-let ForumTopicPost = mongoose.model('ForumTopicPost', forumTopicPostSchema);
-exports.ForumTopicPost = ForumTopicPost;
-exports.forumTopicPostSchema = forumTopicPostSchema;
 
 let forumSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: 'Index name is required'
+        required: 'Forum name is required'
     },
     description: String,
     teachersOnly: Boolean,
@@ -157,11 +102,10 @@ let forumSchema = new mongoose.Schema({
             },
             updated: Date,
             posts: [
-                forumTopicPostSchema
+                require('./ForumTopicPost').forumTopicPostSchema
             ]
         }
     ]
 })
-let Index = mongoose.model('Forum', forumSchema);
-exports.Forum = Index;
-exports.forumSchema = forumSchema;
+let Forum = mongoose.model('Forum', forumSchema);
+module.exports = Forum;

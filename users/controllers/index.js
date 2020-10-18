@@ -1,10 +1,11 @@
 module.exports = {
-    ...require('./auth'),
+    ...require('./accountManagement'),
+    ...require('./authentication'),
     ...require('./util'),
     ...require('./usersData'),
-    ...require('./validators')
+    ...require('./validators'),
+    ...require('./usersContent')
 }
-
 /**
  * @class controllers.users
  */

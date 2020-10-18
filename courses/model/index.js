@@ -102,6 +102,7 @@ let { courseUpdateSchema } = require('./CourseUpdate');
  *           type: string
  *         type:
  *           type: string
+ *           enum: [open, public, hidden]
  *         hasPassword:
  *           type: boolean
  *         creator:
