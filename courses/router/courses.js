@@ -89,16 +89,8 @@ router.post('/create',//TODO change url on frontend
     createCourse
 );//TODO write tests for this
 
-
-//TODO MOVE TO users route
-//TODO MOVE TO users route!!!!!!!!!!!!!!!!!!!!!
-router.post('/updates-notifications',
-    requireAuthentication,
-    getUpdatesNotifications
-)
-
 //TODO change of frontend
 //TODO change to get with url params
-router.post('/courses', getCoursesFiltered)
+router.post('/', getCoursesFiltered)
 
 module.exports = router;

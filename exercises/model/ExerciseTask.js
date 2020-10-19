@@ -1,4 +1,5 @@
 let mongoose = require('mongoose');
+let { ObjectId } = mongoose.Schema;
 
 /**
  * @class ExerciseTask
@@ -7,6 +8,7 @@ let mongoose = require('mongoose');
  * @property {ObjectId} _id
  * @property {string} [description]
  * @property {?number} score
+ * @property {ObjectId[]|models.Exercise[]} exerciseRefs
  */
 /**
  * @class OneChoiceTask
@@ -51,6 +53,12 @@ let mongoose = require('mongoose');
  *             score:
  *               type: number
  *               nullable: true
+ *             exerciseRefs:
+ *               type: array
+ *               items:
+ *                 oneOf:
+ *                   - $ref: '#/components/schemas/Exercise'
+ *                   - $ref: '#/components/schemas/ObjectId'
  *         - oneOf:
  *           - type: object
  *             required:
@@ -116,7 +124,13 @@ let exerciseTaskSchema = new mongoose.Schema({
     score: {
         type: Number,
         required: true
-    }
+    },
+    exerciseRefs: [
+        {
+            type: ObjectId,
+            ref: 'Exercise'
+        }
+    ]
     // there is no ref to the exercise,
     // because it enables more flexibility:
     // one task can be used in several exercises

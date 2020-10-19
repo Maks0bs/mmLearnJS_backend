@@ -7,9 +7,12 @@ let { CONTACT_EMAIL } = require('../../constants').errors
 
 /**
  * @type function
- * @throws 400, 404
- * @description adds the notifications, specified in the `req.notificationsToAdd.data` array to
- * the user with the id which is equal to `req.notificationsToAdd.user`
+ * @throws 400
+ * @description sends the updates/news that happened in the specified
+ * courses in the specified time period. Specify the date in RFC 3339 format.
+ * You can also specify the max amount of news entries that will be fetched.
+ * In order to view the updates the user has to be subscribed to
+ * the specified courses
  * @param {e.Request} req
  * @param {models.User} req.auth
  * @param {Object} req.query
@@ -17,7 +20,7 @@ let { CONTACT_EMAIL } = require('../../constants').errors
  * @param {string} req.query.dateFrom
  * @param {number} req.query.starting
  * @param {string} req.query.cnt
- * @param {string[]} req.query.courseIds
+ * @param {string[]} req.query.courses
  * @param {e.Response} res
  * @memberOf controllers.users.usersData
  */
@@ -50,6 +53,35 @@ exports.getUpdatesByDate = getUpdatesByDate;
 /**
  * @type function
  * @throws 400
+ * @description returns the amount of unseen notifications for each course (as a map)
+ * @param {e.Request} req
+ * @param {models.User} req.auth
+ * @param {string[]} req.query.courses
+ * @param {e.Response} res
+ * @memberOf controllers.users.usersData
+ */
+const getUpdatesNotifications = (req, res) => {
+    let lastVisitedSet = {}, { subscribedCourses } = req.auth;
+    subscribedCourses.forEach(c => lastVisitedSet[c.course] = c.lastVisited);
+    return Course.find({ _id: { $in: req.query.courses} })
+        .then(courses => {
+            let result = {};
+            for (let c of courses){
+                let lastVisited = lastVisitedSet[c._id];
+                if (!lastVisited) continue;
+                let reducer = (acc, u) => ( acc + ((u.created > lastVisited) ? 1 : 0) );
+                result[c._id] = c.updates.reduce(reducer, 0);
+            }
+            return res.json(result);
+        })
+        .catch(err => handleError(err, res))
+}
+exports.getUpdatesNotifications = getUpdatesNotifications;
+
+/**
+ * @type function
+ * @throws 400
+ * @deprecated
  * @description adds the notifications, specified in the `req.notificationsToAdd.data` array to
  * the user with the id which is equal to `req.notificationsToAdd.user`
  * @param {e.Request} req

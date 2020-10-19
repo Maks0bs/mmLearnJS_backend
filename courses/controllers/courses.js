@@ -14,7 +14,7 @@ const {formatMongooseError, handleError} = require("../../helpers");
  * the request object under the `req.course` property
  * @param {e.Request} req
  * @param {e.Response} res
- * @param {models.Course.Entry} req.course
+ * @param {models.Course} req.course
  * @param {function} next
  * @param {string} id - the id of the course that should be found
  * @memberOf controllers.courses.courseData
@@ -258,30 +258,18 @@ exports.enrollInCourse = (req, res) => {
         })
     }
     course.students.push(req.auth);
-    course.save()
-        .then(() => {
-            return User.findByIdAndUpdate(
+    return course.save()
+        .then(() => //add the course to user's list of enrolled courses
+            User.findByIdAndUpdate(
                 req.auth._id,
-                {
-                    $push: {
-                        enrolledCourses: { _id: course._id }
-                    }
-                },
+                {$push: {enrolledCourses: { _id: course._id }}},
                 {new: true}
             )
-        })
-        .then(result => {
-            return res.json({
-                message: 'You have successfully enrolled in the course'
-            })
-        })
-        .catch(err => {
-            console.log(err);
-            return res.status(err.status || 400)
-                .json({
-                    error: err
-                })
-        })
+        )
+        .then(() => (
+            res.json({ message: 'Enrollment successful' })
+        ))
+        .catch(err => {handleError(err, res)})
 }
 
 exports.getCoursesFiltered = async (req, res) => {
@@ -631,96 +619,77 @@ exports.getCoursesFiltered = async (req, res) => {
         })
 }
 
-exports.deleteCourse = (req, res) => {
-    Course.deleteOne({ _id: req.course._id})
+/**
+ * @type function
+ * @description deletes the course from the database. Please use this
+ * {@link controllers.courses.courseData.removeCourseMentions cleanup controller}
+ * to remove all references to this course beforehand.
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Course} req.course
+ * @param {models.User} req.auth
+ * @memberOf controllers.courses.courseData
+ */
+const deleteCourse = (req, res) => {
+    return Course.deleteOne({ _id: req.course._id})
         .then(() => {
-            res.json({
-                message: 'course deleted successfully'
-            })
+            return res.json({ message: 'course deleted successfully'})
         })
-        .catch(err => {
-            console.log(err);
-            res.status(err.status || 400)
-                .json({
-                    error: err
-                })
-        })
-    res.status(401).json({
-        error:{
-            message: 'kek',
-
-        }
-    })
-
+        .catch(err => handleError(err, res))
 }
+exports.deleteCourse = deleteCourse;
 
-exports.removeCourseMentions = (req, res, next) => {
-    let filesToDelete = [], course = req.course;
+/**
+ * @type function
+ * @description removes all references to the course from
+ * all its members (students/teachers). Also removes
+ * the exercises/forums/etc. inside the course if
+ * this course is the only place where these
+ * exercises/forums are used
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Course} req.course
+ * @param {models.User} req.auth
+ * @param {function} next
+ * @memberOf controllers.courses.courseData
+ */
+const removeCourseMentions = (req, res, next) => {
+    //TODO remove exercises/forums/entries documents if they
+    // only have one single courseRef which is the course to be deleted
+    let filesToDelete = [], {course} = req;
 
-    for (let s of course.sections){
-        for (let e of s.entries){
-            if (e.type === 'file'){
-                filesToDelete.push(e.content.id);
-            }
-        }
-    }
-
-    User.find({ _id: { $in:
-                [...course.subscribers, ...course.teachers, ...course.students]
-        }})
-        .then((users) => {
-            for (let u of users){
-                let index = -1;
-                for (let c = 0; c < u.subscribedCourses.length; c++){
-                    if (u.subscribedCourses[c].course.equals(course._id)){
-                        index = c;
-                        break;
-                    }
-                }
-                if (index >= 0){
-                    u.subscribedCourses.splice(index, 1);
-                }
-
-                index = -1;
-                for (let c = 0; c < u.enrolledCourses.length; c++){
-                    if (u.enrolledCourses[c].equals(course._id)){
-                        index = c;
-                        break;
-                    }
-                }
-                if (index >= 0){
-                    u.enrolledCourses.splice(index, 1);
-                }
-
-                if (u.teacherCourses){
-                    index = -1;
-                    for (let c = 0; c < u.teacherCourses.length; c++){
-                        if (u.teacherCourses[c].equals(course._id)){
-                            index = c;
-                            break;
-                        }
-                    }
-                    if (index >= 0){
-                        u.teacherCourses.splice(index, 1);
-                    }
-                }
-
-
-
-                u.save();
-            }
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(err.status || 400)
-                .json({
-                    error: err
-                })
-        })
-
+    course.sections.forEach(s => s.entries.forEach(
+        e => (e.kind === 'EntryFile') && filesToDelete.push(e.file)
+    ))
     req.filesToDelete = filesToDelete;
-    return next();
+    let usersWithRefs = [...course.subscribers, ...course.teachers, ...course.students];
+    return User.find({ _id: { $in: usersWithRefs}})
+        .then(users => {
+            let promises = [];
+            for (let u of users){
+                let index = u.subscribedCourses.findIndex(
+                    c => c.course.equals(course._id)
+                )
+                if (index >= 0) u.subscribedCourses.splice(index, 1);
+
+                index = u.enrolledCourses.findIndex(c => c.equals(course._id));
+                if (index >= 0) u.enrolledCourses.splice(index, 1);
+
+                if (Array.isArray(u.teacherCourses)){
+                    index = u.teacherCourses.findIndex(c => c.equals(course._id));
+                    if (index >= 0) u.teacherCourses.splice(index, 1);
+                }
+
+                promises.push(u.save());
+            }
+            return Promise.all(promises);
+        })
+        //TODO iterate through all exercises and call exercise.cleanup()
+        // this method should remove all tasks
+        .then(() => next())
+        .catch(err => handleError(err, res))
 }
+exports.removeCourseMentions = removeCourseMentions;
 
 exports.entryById = (req, res, next, entryId) => {
     let len = 0;
@@ -748,45 +717,3 @@ exports.entryById = (req, res, next, entryId) => {
         }
     })
 }
-
-exports.getUpdatesNotifications = (req, res) => {
-    let userSubbedSet = {};
-
-    for (let c of req.auth.subscribedCourses) {
-        userSubbedSet[c.course] = c.lastVisited;
-    }
-
-    Course.find({
-        _id: {
-            $in: req.body.courses
-        }
-    })
-        .then((courses) => {
-            let result = {};
-            for (let c of courses){
-                let lastVisited = userSubbedSet[c._id], curResult = 0;
-                if (!lastVisited){
-                    continue;
-                }
-                for (let u of c.updates){
-                    if (u.created > lastVisited){
-                        curResult++;
-                    }
-                }
-                if (curResult > 0){
-                    result[c._id] = curResult;
-                }
-            }
-
-
-            return res.json(result);
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(err.status || 400)
-                .json({
-                    error: formatMongooseError(err) || err
-                })
-        })
-}
-

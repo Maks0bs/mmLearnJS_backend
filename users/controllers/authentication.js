@@ -159,9 +159,7 @@ const inviteSignup = (req, res) => {
             }
             return Course.findByIdAndUpdate(
                 courseId,
-                {
-                    $push: { invitedTeachers: user }
-                },
+                {$push: { invitedTeachers: user }},
                 { new: true }
             )
         })

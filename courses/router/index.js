@@ -4,7 +4,7 @@ const {courseById} = require("../controllers");
 
 let router = require('express').Router();
 
-router.use('/course/:courseId', coursesRouter);
+router.use('/courses/:courseId', coursesRouter);
 router.use('/courses', miscRouter);
 
 router.param('courseId', courseById);

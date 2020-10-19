@@ -1,32 +1,38 @@
-let {
-    Course
-} = require('../model')
 let User = require('../../users/model');
-const {formatMongooseError} = require("../../helpers");
+const { handleError } = require("../../helpers");
+/**
+ * @class controllers.courses.subscription
+ */
 
-exports.subscribe = (req, res) => {
+/**
+ * @type function
+ * @throws 403
+ * @description subscribes the authenticated user to the given course.
+ * In order to subscribe, the user has to be a member (teacher/student)
+ * of the course.
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Course} req.course
+ * @param {models.User} req.auth
+ * @memberOf controllers.courses.subscription
+ */
+const subscribe = (req, res) => {
     let {course} = req;
     if (course.subscribers.includes(req.auth._id)){
-        return res.status(400).json({
+        return res.status(403).json({
             error: {
-                status: 400,
+                status: 403,
                 message: 'You are already subscribed to the course'
             }
         })
     }
     course.subscribers.push(req.auth);
-    course.save()
-        .then(c => {
+    return course.save()
+        .then(savedCourse => {
+            let courseData = { lastVisited: Date.now(), course: savedCourse }
             return User.findByIdAndUpdate(
                 req.auth._id,
-                {
-                    $push: {
-                        subscribedCourses: {
-                            lastVisited: Date.now(),
-                            course: c
-                        }
-                    }
-                }
+                { $push: { subscribedCourses: courseData } }
             )
         })
         .then(() => {
@@ -34,49 +40,44 @@ exports.subscribe = (req, res) => {
                 message: 'You have subscribed to updates in this course'
             })
         })
-        .catch(err => {
-            console.log(err);
-            return res.status(err.status || 400)
-                .json({
-                    error: err
-                })
-        })
+        .catch(err => {handleError(err, res)})
 }
+exports.subscribe = subscribe;
 
-exports.unsubscribe = (req, res) => {
+/**
+ * @type function
+ * @throws 403
+ * @description removes the subscription of the
+ * authenticated user to the given course.
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Course} req.course
+ * @param {models.User} req.auth
+ * @memberOf controllers.courses.subscription
+ */
+const unsubscribe = (req, res) => {
     let {course} = req;
-    let newSubscribers = [];
-    let test = false;
-    for (let i = 0; i < course.subscribers.length; i++){
-        if (course.subscribers[i].equals(req.auth._id)){
-            test = true;
-        } else {
-            newSubscribers.push(course.subscribers[i]);
-        }
-    }
+    // there might be several occurrences of one subscribed user (that's a bug)
+    // that's why we don't remove a single instance, but all found instances
+    let newSubscribers = course.subscribers.filter(c => !c.equals(req.auth._id));
 
-    if (!test){
-        return res.status(400).json({
+    if (newSubscribers.length === course.subscribers.length){
+        return res.status(403).json({
             error: {
-                status: 400,
-                message: 'You are not subscribed to the course, therefore you can\'t unsubscribe'
+                status: 403,
+                message:
+                    'You are not subscribed to the course, ' +
+                    'therefore you can\'t unsubscribe'
             }
         })
     }
-
     course.subscribers = newSubscribers;
 
-    course.save()
-        .then(c => {
+    return course.save()
+        .then(savedCourse => {
             return User.findByIdAndUpdate(
                 req.auth._id,
-                {
-                    $pull: {
-                        subscribedCourses: {
-                            course: c._id
-                        }
-                    }
-                },
+                { $pull: {subscribedCourses: { course: savedCourse._id}}},
                 {new: true}
             )
         })
@@ -85,37 +86,34 @@ exports.unsubscribe = (req, res) => {
                 message: 'You have unsubscribed from updates in this course'
             })
         })
-        .catch(err => {
-            console.log(err);
-            return res.status(err.status || 400)
-                .json({
-                    error: formatMongooseError(err)
-                })
-        })
+        .catch(err => {handleError(err, res)})
 }
+exports.unsubscribe = unsubscribe;
 
-exports.viewCourse = (req, res) => {
-    let user = req.auth;
-    let courseId = req.course._id;
-
+/**
+ * @type function
+ * @throws 400
+ * @description updates the time which specifies when
+ * the user had viewed the content of the given course for the last time
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Course} req.course
+ * @param {models.User} req.auth
+ * @memberOf controllers.courses.subscription
+ */
+const viewCourse = (req, res) => {
+    let user = req.auth, courseId = req.course._id;
+    // there might be several occurrences (if any) of a course in the
+    // user's subscribed courses list
     for (let i = 0; i < user.subscribedCourses.length; i++){
-        let cur = user.subscribedCourses[i].course;
-        if (courseId.equals(cur)){
+        if (courseId.equals(user.subscribedCourses[i].course)){
             user.subscribedCourses[i].lastVisited = new Date();
         }
     }
-
-    user.save()
+    return user.save()
         .then(() => {
-            return res.json({
-                message: 'course has been viewed'
-            })
+            return res.json({ message: 'course has been viewed'})
         })
-        .catch(err => {
-            console.log(err);
-            res.status(err.status || 400)
-                .json({
-                    error: err
-                })
-        })
+        .catch(err => handleError(err, res))
 }
+exports.viewCourse = viewCourse;

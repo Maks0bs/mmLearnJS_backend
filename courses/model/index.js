@@ -157,8 +157,9 @@ let { courseUpdateSchema } = require('./CourseUpdate');
  *               entries:
  *                 type: array
  *                 items:
- *                   - $ref: '#/components/schemas/Entry'
- *                   - $ref: '#/components/schemas/ObjectId'
+ *                   oneOf:
+ *                     - $ref: '#/components/schemas/Entry'
+ *                     - $ref: '#/components/schemas/ObjectId'
  *///TODO don't forget to check if docs are compiled correctly
 let courseSchema = new mongoose.Schema({
 	name: {

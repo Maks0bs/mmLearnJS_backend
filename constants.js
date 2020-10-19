@@ -58,7 +58,8 @@ module.exports = {
 	users: {
 		USER_HIDDEN: 'USER_HIDDEN',
 		TEACHER_PASSWORD: 'testpass',
-		ACTIVATION_TIME_PERIOD: 24 * 60 * 60
+		ACTIVATION_TIME_PERIOD: 24 * 60 * 60,
+		COURSE_INVITATION_DURATION: 30 * 24 * 60 * 60
 	},
 	network: {
 		PORT: process.env.NODE_ENV === 'test' ?

@@ -8,6 +8,7 @@ let { ObjectId } = mongoose.Schema;
  * @property {ObjectId} _id
  * @property {string} name
  * @property {string} access
+ * @property {string} kind
  */
 /**
  * @class EntryText
@@ -61,7 +62,7 @@ let { ObjectId } = mongoose.Schema;
  *             required:
  *               - forum
  *             properties:
- *               text:
+ *               forum:
  *                 oneOf:
  *                   - $ref: '#/components/schemas/Forum'
  *                   - $ref: '#/components/schemas/ObjectId'
@@ -85,6 +86,12 @@ let entrySchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    courseRef: {
+        // An entry can only be used in one course, not like exercises
+        type: ObjectId,
+        ref: 'Course',
+        required: true
+    }
 }, {
     discriminatorKey: 'kind'
 })
