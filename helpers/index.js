@@ -8,8 +8,6 @@ let { gmailClientCredentials } = require('../constants').mail
 /**
  * @class controllers.helpers
  */
-//TODO maybe put some common controllers
-// (like authenticate, extendSession) to the `controllers.helpers` namespace
 /**
  * @param {object} emailData
  * @param {string} emailData.from

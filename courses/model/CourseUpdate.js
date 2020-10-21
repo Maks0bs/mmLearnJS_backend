@@ -5,6 +5,7 @@ let mongoose = require('mongoose');
  * @memberOf models.Course
  * @name CourseUpdate
  * @property {ObjectId} _id
+ * @property {string} kind
  * @property {BSONDate} created
  */
 /**
@@ -76,7 +77,7 @@ let mongoose = require('mongoose');
  *                 type: string
  *               newAbout:
  *                 type: string
- *///TODO don't forget to check if docs are compiled correctly
+ */
 let courseUpdateSchema = new mongoose.Schema({
     created: {
         type: Date,

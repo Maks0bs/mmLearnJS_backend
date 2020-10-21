@@ -3,50 +3,6 @@ let { ObjectId } = mongoose.Schema;
 let { v1: uuidv1} = require('uuid');
 let { courseUpdateSchema } = require('./CourseUpdate');
 
-// ------------------ Task
-//TODO this should be the easiest part. Just improve already existing validators
-// tasks should be saved directly to the DB
-/*
- See ./Task'
- added swagger docs
- added jsdoc
- refactored schema
- */
-
-// ------------------ Exercise
-//TODO exercises should be referenced as models in the course document,
-// exercises themselves should contain refs to separate Tasks as ObjectIds!!!
-// ????maybe also encapsulate exercise attempts????? (do it if the exercise schema gets too big)
-/*
- See ./Exercise
- */
-
-// ------------------ Entry
-//TODO !get rid of entry.content!
-// entries should be saved separately in the DB (and referenced as ObjectIds)
-// also save forums independently as another document in MongoDB (forums
-// should be referenced as ObjectIds from entries)
-// entries need huge refactoring!!!!!
-
-/*
- See ./Entry
- */
-
-// ------------------ CourseUpdate
-//TODO leave everything as is there, courseSchema should reference the courseUpdate!SCHEMA!,
-// !not its model!
-/*
-  See ./CourseUpdate
-*/
-
-
-
-
-//TODO figure out what documents should be stored separately in the db (e. g. exercise tasks,
-// but not exercises, as they are a part of the course directly)
-
-//TODO first do a full refactor: replace existing built-in schemas with
-// separate ones in other files. Only then fix all controllers to reflect these changes
 /**
  * @class CourseSection
  * @memberOf models.Course
@@ -160,17 +116,17 @@ let { courseUpdateSchema } = require('./CourseUpdate');
  *                   oneOf:
  *                     - $ref: '#/components/schemas/Entry'
  *                     - $ref: '#/components/schemas/ObjectId'
- *///TODO don't forget to check if docs are compiled correctly
+ */
 let courseSchema = new mongoose.Schema({
 	name: {
 		type: String,
 		trim: true,
-		required: true
+		required: 'Course name is required'
 	},
 	creator: {
 		type: ObjectId,
 		ref: 'User',
-		required: true
+		required: 'Each course should have a creator'
 	},
 	teachers: [
 		{
@@ -200,7 +156,7 @@ let courseSchema = new mongoose.Schema({
 	about: String,
 	type: {
 		type: String,
-		required: true,
+		required: 'Course type is required',
 		enum: ['open', 'public', 'hidden']
 	},
 	hasPassword: {
@@ -215,7 +171,7 @@ let courseSchema = new mongoose.Schema({
 		{
 			name: {
 				type: String,
-				required: true
+				required: 'Each section should have a name'
 			},
 			description: String,
 			entries: [

@@ -3,7 +3,7 @@ let {
 } = require('../../users/controllers')
 
 let {
-    getCoursesFiltered, getUpdatesNotifications, createCourse
+    getCoursesFiltered, createCourse
 } = require('../controllers')
 
 /**
@@ -83,7 +83,7 @@ let router = require('express').Router()
  *              schema:
  *                $ref: '#/components/schemas/Error'
  */
-router.post('/create',//TODO change url on frontend
+router.post('/create',
     requireAuthentication,
     isTeacher,
     createCourse

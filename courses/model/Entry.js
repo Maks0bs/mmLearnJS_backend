@@ -76,7 +76,7 @@ let { ObjectId } = mongoose.Schema;
  *                   - $ref: '#/components/schemas/ObjectId'
  *               fileName:
  *                 type: string
- *///TODO don't forget to check if docs are compiled correctly
+ */
 let entrySchema = new mongoose.Schema({
     name: {
         type: String,
@@ -112,7 +112,7 @@ let entryForumSchema = new mongoose.Schema({
         ref: 'Forum'
     }
 })
-let EntryForum = Entry.discriminator('EntryText', entryForumSchema);
+let EntryForum = Entry.discriminator('EntryForum', entryForumSchema);
 exports.EntryForum = EntryForum;
 exports.entryForumSchema = entryForumSchema;
 
@@ -130,6 +130,6 @@ let EntryFile = Entry.discriminator('EntryFile', entryFileSchema);
 exports.EntryFile = EntryFile;
 exports.entryFileSchema = entryFileSchema;
 
-entrySchema.path('content').discriminator('EntryFile', entryFileSchema)
-entrySchema.path('content').discriminator('EntryText', entryTextSchema)
-entrySchema.path('content').discriminator('EntryForum', entryForumSchema)
+// entrySchema.path('content').discriminator('EntryFile', entryFileSchema)
+// entrySchema.path('content').discriminator('EntryText', entryTextSchema)
+// entrySchema.path('content').discriminator('EntryForum', entryForumSchema)

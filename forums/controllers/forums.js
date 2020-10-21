@@ -323,3 +323,14 @@ exports.deleteTopicPost = (req, res) => {
 			})
 	}) 
 }
+
+
+const deleteForums = (req, res, next) => {
+	//TODO delete forums
+}
+exports.deleteForums = deleteForums;
+
+const updateForums = (req, res, next) => {
+	//TODO update forums with given data
+}
+exports.updateForums = updateForums;

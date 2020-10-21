@@ -1,3 +1,5 @@
+let crypto = require('crypto');
+
 exports.courseMethods = {
     /**
      * @function checkPassword
@@ -31,5 +33,21 @@ exports.courseMethods = {
             console.log(err);
             return '';
         }
+    }
+}
+
+exports.entryMethods = {
+    /**
+     *
+     * @param {Object} options
+     * @param {boolean} [options.deleteFiles] - set to true if
+     * the files that are referenced in the entries should
+     * also be removed from the DB
+     * @param {string} options.userId - required option! The user
+     * who performs the operation about deleting entries. Required
+     * to check if this user has enough authorization
+     */
+    delete: function (options) {
+
     }
 }

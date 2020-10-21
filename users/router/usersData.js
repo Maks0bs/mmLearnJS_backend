@@ -166,7 +166,7 @@ router.get('/updates-by-date',
  *              schema:
  *                $ref: '#/components/schemas/Error'
  */
-router.get('/updates-notifications',//TODO change this on frontend (post -> get, new url, use query params)
+router.get('/updates-notifications',
     requireAuthentication,
     getUpdatesNotifications
 )//TODO add tests for this
@@ -215,9 +215,8 @@ router.get('/updates-notifications',//TODO change this on frontend (post -> get,
  */
 router.get('/:userId', getUser);
 
-//TODO!!!!!!!!
-router.get('/', getUsersFiltered)//TODO create basic functionality for this endpoint
-//TODO!!!!!!!!
+//TODO create basic functionality for this endpoint
+router.get('/', getUsersFiltered)
 
 /**
  * @swagger

@@ -165,7 +165,7 @@ exports.isTeacher = isTeacher;
  * or a student at the provided course. Stops the middleware flow otherwise.
  * @param {e.Request} req
  * @param {models.User} [req.auth]
- * @param {models.Course} [req.courseData]
+ * @param {models.Course} [req.course]
  * @param {string} [req.userCourseStatus] - sets this param in the request object for next middleware;
  * can be either `"creator"`, `"teacher"`, `"enrolled"` or `"not enrolled"`
  * @param {e.Response} res
@@ -173,7 +173,7 @@ exports.isTeacher = isTeacher;
  * @memberOf controllers.users.util
  */
 const userInCourse = (req, res, next) => {
-    let course = req.courseData;
+    let course = req.course;
     if (course.creator._id.equals(req.auth._id)){
         req.userCourseStatus = 'creator';
         return next();
@@ -205,19 +205,19 @@ exports.userInCourse = userInCourse;
  * Please prefer using {@link controllers.userInCourse this controller} instead of this one
  * @param {e.Request} req
  * @param {models.User} [req.auth]
- * @param {models.Course} [req.courseData]
+ * @param {models.Course} [req.course]
  * @param {e.Response} res
  * @param {function} next
  * @memberOf controllers.users.util
  */
 const teacherInCourse = (req, res, next) => {
-    if (!req.courseData.teachers){
+    if (!req.course.teachers){
         return res.status(401).json({
             status: 401, message: 'No teachers in this course'
         })
     }
     let check = false;
-    for (let t of req.courseData.teachers){
+    for (let t of req.course.teachers){
         if (t.equals(req.auth._id)){
             check = true;
             break;
@@ -240,13 +240,13 @@ exports.teacherInCourse = teacherInCourse;
  * Please prefer using {@link controllers.userInCourse this controller} instead of this one
  * @param {e.Request} req
  * @param {models.User} [req.auth]
- * @param {models.Course} [req.courseData]
+ * @param {models.Course} [req.course]
  * @param {e.Response} res
  * @param {function} next
  * @memberOf controllers.users.util
  */
 const isCourseCreator = (req, res, next) => {
-    if (!req.courseData.creator._id.equals(req.auth._id)){
+    if (!req.course.creator._id.equals(req.auth._id)){
         res.status(401).json({
             error: { status: 401, message: 'you are not the creator of the course'}
         })

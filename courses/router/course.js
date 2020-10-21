@@ -1,3 +1,10 @@
+const {deleteForums} = require("../../forums/controllers");
+const {
+    deleteEntries, removeEntriesMentions
+} = require("../controllers/entries");
+const {
+    deleteExercises, removeExerciseMentions
+} = require("../../exercises/controllers");
 let {
     isTeacher, isCourseCreator, teacherInCourse, userInCourse,
     requireAuthentication, userDataValidator
@@ -6,8 +13,8 @@ let { validate } = require('../../helpers')
 let {
     enrollInCourse, updateCourse, cleanupCourseData, getNewCourseData,
     deleteCourse, removeCourseMentions, subscribe, unsubscribe, viewCourse,
-    sendTeacherInvite, addToInvitedList, acceptTeacherInvite, configureExerciseSummary,
-    getExerciseSummary
+    sendTeacherInvite, addToInvitedList, acceptTeacherInvite, getExerciseSummary,
+    addUpdatesToCourse
 } = require('../controllers')
 let {
     deleteFiles, uploadFiles
@@ -72,7 +79,7 @@ let router = require('express').Router()
  *              schema:
  *                $ref: '#/components/schemas/Error'
  */
-router.post('/enroll', //TODO change of frontend
+router.post('/enroll',
     requireAuthentication,
     enrollInCourse
 );//TODO add tests for this
@@ -132,7 +139,7 @@ router.post('/enroll', //TODO change of frontend
  *              schema:
  *                $ref: '#/components/schemas/Error'
  */
-router.post('/send-teacher-invite',//TODO change of frontend
+router.post('/send-teacher-invitation',
     requireAuthentication,
     isCourseCreator,
     userDataValidator(null, 'email'),
@@ -184,7 +191,7 @@ router.post('/send-teacher-invite',//TODO change of frontend
  *              schema:
  *                $ref: '#/components/schemas/Error'
  */
-router.post('/accept-teacher-invite', //TODO change of frontend
+router.post('/accept-teacher-invitation',
     requireAuthentication,
     isTeacher,
     acceptTeacherInvite
@@ -228,7 +235,7 @@ router.post('/accept-teacher-invite', //TODO change of frontend
  *              schema:
  *                $ref: '#/components/schemas/Error'
  */
-router.post('/subscribe',//TODO change of frontend
+router.post('/subscribe',
     requireAuthentication,
     userInCourse,
     subscribe
@@ -271,7 +278,7 @@ router.post('/subscribe',//TODO change of frontend
  *              schema:
  *                $ref: '#/components/schemas/Error'
  */
-router.post('/unsubscribe', //TODO change of frontend
+router.post('/unsubscribe',
     requireAuthentication,
     userInCourse,
     unsubscribe
@@ -308,20 +315,24 @@ router.post('/unsubscribe', //TODO change of frontend
  *              schema:
  *                $ref: '#/components/schemas/Error'
  */
-router.post('/view', //TODO change of frontend
+router.get('/view',
     requireAuthentication,
     viewCourse
 )//TODO add tests for this
 
+//TODO !!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!
+// add functionality to remove refs to existing exercises/entries/forums!!!!!
 router.delete('/',
     requireAuthentication,
     isCourseCreator,
     removeCourseMentions,
     deleteFiles,
     deleteCourse
-);
+);//TODO add tests for this
 
-//TODO change of frontend
+//TODO huge refactoring should be done
 router.put('/',
     requireAuthentication,
     isTeacher,
@@ -329,8 +340,14 @@ router.put('/',
     uploadFiles,
     getNewCourseData,
     cleanupCourseData,
-    deleteFiles,
-    updateCourse
+    // removeExerciseMentions,
+    // addUpdatesToCourse,
+    // deleteExercises,
+    // removeEntriesMentions,
+    // deleteEntries,
+    // deleteForums,
+    // deleteFiles,
+    updateCourse,
 );
 
 
@@ -342,10 +359,9 @@ router.put('/',
 
 //TODO change of frontend
 //TODO maybe move this to ./exercises or the correspondent directory!!!!!!!!!!
-router.get('/exercise-summary/:summaryParam',
+router.get('/exercise-summary',
     requireAuthentication,
     userInCourse,
-    configureExerciseSummary,
     getExerciseSummary
     //TODO check with a controller if the user is allowed to edit the exercise
     // (if it is a teacher of a course to which the forum has a ref)

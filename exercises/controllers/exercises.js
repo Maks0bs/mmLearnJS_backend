@@ -2,6 +2,10 @@ let { ExerciseAttempt } = require('../../courses/model');
 let { assign } = require('lodash');
 let User = require('../../users/model')
 
+/**
+ * @class controllers.exercises
+ */
+
 exports.exerciseById = (req, res, next, id) => {
     let { exercises } = req.courseData;
     for (let e = 0; e < exercises.length; e++){
@@ -445,97 +449,12 @@ exports.newExerciseAttempt = async (req, res) => {
         })
 }
 
-exports.configureExerciseSummary = (req, res, next) => {
-    let userIsTeacher = (req.userCourseStatus === 'teacher') || (req.userCourseStatus === 'creator')
-    let param = req.params.summaryParam;
-    if (param === 'all'){
-        if (!userIsTeacher){
-            res.status(401).json({
-                error: {
-                    status: 401,
-                    message: 'Only teachers can view summary on all students'
-                }
-            })
-        }
-        req.exerciseSummaryFilter = 'all';
-    } else {
-        if (!(param == req.auth._id) && !userIsTeacher){
-            res.status(401).json({
-                error: {
-                    status: 401,
-                    message: 'Students can only view their own summary'
-                }
-            })
-        }
-        req.exerciseSummaryFilter = param;
-    }
-    return next();
+const removeExerciseMentions = (req, res, next) => {
+    //TODO remove exercise mentions
 }
+exports.removeExerciseMentions = removeExerciseMentions;
 
-exports.getExerciseSummary = (req, res) => {
-    let course = req.courseData;
-    let usersSet = {}, usersToPopulate = []
-
-    if (req.exerciseSummaryFilter === 'all'){
-        for (let e of course.exercises){
-            for (let p of e.participants){
-                // Add to the map of exercise participants
-                usersSet[p.user._id] = true;
-                usersToPopulate.push(p.user._id)
-            }
-        }
-    } else {
-        usersSet[req.exerciseSummaryFilter] = true;
-        usersToPopulate = [req.exerciseSummaryFilter];
-    }
-
-    return User.find({
-        _id: {
-            $in: usersToPopulate
-        }
-    })
-        .then((users) => {
-            for (let u of users) {
-                usersSet[u._id] = {
-                    userId: u._id,
-                    userName: u.name,
-                    exercises: []
-                }
-            }
-
-
-            // Has only one loop through all exercises for efficiency
-            for (let e of course.exercises){
-                for (let p of e.participants){
-                    if (!usersSet[p.user._id]){
-                        continue;
-                    }
-                    // remove answers in the final response,
-                    // they are irrelevant for this request
-                    for (let a = 0; a < p.attempts.length; a++){
-                        p.attempts[a].answers = undefined;
-                    }
-                    usersSet[p.user._id].exercises.push({
-                        id: e._id,
-                        name: e.name,
-                        attempts: p.attempts
-                    })
-                }
-            }
-
-            let result = [];
-
-            for (let k of Object.keys(usersSet)){
-                result.push(usersSet[k])
-            }
-
-            return res.json(result);
-        })
-        .catch(err => {
-            console.log(err);
-            return res.status(err.status || 400)
-                .json({
-                    error: err
-                })
-        })
+const deleteExercises = (req, res, next) => {
+    //TODO delete exercises
 }
+exports.deleteExercises = deleteExercises;

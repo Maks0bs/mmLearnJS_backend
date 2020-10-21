@@ -1,5 +1,8 @@
+
 let Course = require('../model')
+let { Entry } = require('../model/Entry')
 let User = require('../../users/model');
+let Exercise = require('../../exercises/model');
 let { extend, isEqual, cloneDeep} = require('lodash');
 const {formatMongooseError, handleError} = require("../../helpers");
 
@@ -21,7 +24,10 @@ const {formatMongooseError, handleError} = require("../../helpers");
  */
 const courseById = (req, res, next, id) => {
     return Course.findOne({_id: id})
+        .populate('exercises')
+        .populate('sections.entries')
         .then(course => {
+            console.log('cs', course.sections[0]);
             if (!course) throw {
                 status: 404, error: 'course not found'
             }
@@ -60,192 +66,295 @@ const createCourse = (req, res) => {
         .then(() => (
             course.save()
         ))
-        .then(savedCourse => (
-            res.json({
+        .then(savedCourse => {
+            return res.json({
                 message: 'Your course has been created successfully',
                 course: savedCourse
             })
-        ))
+        })
         .catch(err => handleError(err, res))
 };
 exports.createCourse = createCourse;
 
-exports.getNewCourseData = (req, res, next) => {
-    req.newCourseData = JSON.parse(req.body.newCourseData);
-    req.filesPositions = req.body.filesPositions && JSON.parse(req.body.filesPositions);
-    console.log('body', req.body);
-    console.log('filespos', req.filesPositions);
-    next();
+/**
+ * @type function
+ * @description Extracts new course data and files metadata
+ * from the received FormData which is used to update the course.
+ * New course data is saved under `req.newCourse` and
+ * the positions of entries that contain
+ * newly uploaded files are saved under `req.filesPositions`
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {Object} req.body
+ * @param {string} req.body.newCourse
+ * @param {string} req.body.filesPosition
+ * @param {models.Course} req.newCourse
+ * @param {{section: number, entry: number}[]} [req.filesPositions]
+ * @param {function} next
+ * @memberOf controllers.courses.courseData
+ */
+const getNewCourseData = (req, res, next) => {
+    try {
+        req.newCourse = JSON.parse(req.body.newCourse);
+        req.filesPositions = req.body.filesPositions && JSON.parse(req.body.filesPositions);
+    } catch (err) {
+        return handleError(err, res);
+    }
+
+
+    return next();
 }
+exports.getNewCourseData = getNewCourseData;
 
-exports.cleanupCourseData = (req, res, next) => {
-    // compare entries in found course with the one in req body
-    // if compare file ids in both lists
-    // if some ids that are in mongo course are not present in req body - delete them
-    let curFiles = {}, curEntries = {}, newEntries = [], deletedEntries = [];
-    if (!req.newCourseData.sections){
-        return next();
-    }
-    for (let section of req.course.sections){
-        for (let i of section.entries){
-            if (i.type === 'file'){
-                curFiles[i.content.id] = 'none';
+/**
+ * @type function
+ * @description If the new course data implies
+ * that some entries or exercises have been deleted
+ * then this controller will remove all references
+ * to those pieces of content that aren't used anymore.
+ * This controller is responsible for passing
+ * data about exercises/entries that should be
+ * deleted to the correspondent cleanup-controllers.
+ * See docs for these controllers
+ * (e. g {@link controllers.exercises.deleteExercise deleteExercise})
+ * for details. This controllers also specifies
+ * what kind of news/updates are going to be added
+ * to the course after successfully applying
+ * changes to the course data
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {Object} req.body
+ * @param {models.Course} req.course
+ * @param {models.Course} req.newCourse
+ * @param {models.Course.Entry[]} req.updatesNewEntries
+ * @param {models.Course.Entry[]} req.updatesDeletedEntries
+ * @param {models.Course.Entry[]} req.entriesToDelete
+ * @param {models.Exercise[]} req.updatesNewExercises
+ * @param {models.Exercise[]} req.updatesDeletedExercises
+ * @param {models.Exercise[]} req.exercisesToDelete
+ * @param {function} next
+ * @memberOf controllers.courses.courseData
+ */
+const cleanupCourseData = (req, res, next) => {
+    let { course, newCourse } = req;
+    const UNCHANGED = 'unchanged';
+    let oldEntries = {}, newEntries = [], oldExercises = {}, newExercises = [];
+    // mark all entries, that existed in the old course data
+    course.sections.forEach(s => Array.isArray(s.entries) && s.entries.forEach(
+        e => oldEntries[e._id] = {...e}
+    ))
+    // find out which entries have been added and which ones have been removed
+    if (Array.isArray(newCourse.sections)) req.newCourse.sections.forEach(s => {
+        if (Array.isArray(s.entries)) s.entries.forEach(e => {
+            if (e._id){
+                oldEntries[e._id] = UNCHANGED;
+            } else if (e.access !== 'teachers') {
+                // mark newly added entries to display them in the course news
+                newEntries.push({...e});
             }
-            curEntries[i._id] = {
-                none: true,
-                data: {
-                    name: i.name,
-                    type: i.type,
-                    access: i.access
-                }
-            };
-        }
-    }
+        })
+    })
+    req.updatesNewEntries = newEntries;
 
-    for (let section of req.newCourseData.sections) {
-        for (let i of section.entries){
-            if (i.type === 'file'){
-                curFiles[i.content.id] = 'exist'
-            }
-            if (i._id){
-                curEntries[i._id] = 'exist';
-            } else if (!(i.access === 'teachers')){
-                newEntries.push({
-                    name: i.name,
-                    type: i.type
-                })
-            }
-        }
-    }
+    let entriesToDelete = Object.values(oldEntries)
+        .filter(e => e !== UNCHANGED);
+    req.updatesDeletedEntries = entriesToDelete
+        .filter(e => e.access !== 'teachers')
+    req.entriesToDelete = entriesToDelete.map(e => e._id);
 
-    let filesToDelete = [];
-    for (let i of Object.keys(curFiles)) {
-        if (curFiles[i] === 'none'){
-            filesToDelete.push(i);
-        }
-    }
-    for (let i of Object.keys(curEntries)){
-        let cur = curEntries[i];
-        if (cur !== 'exist' && cur.none && !(cur.data.access === 'teachers') ){
-            deletedEntries.push({
-                name: cur.data.name,
-                type: cur.data.type
-            })
-        }
-    }
+    // mark all exercises, that existed in the old course data
+    course.exercises.forEach(e => oldExercises[e._id] = {...e})
 
-    req.filesToDelete = filesToDelete;
-    req.deletedEntries = deletedEntries;
-    req.newEntries = newEntries;
+    // find out which exercises have been added and which ones have been removed
+    if (Array.isArray(newCourse.exercises)) req.newCourse.exercises.forEach(e => {
+        if (e._id){
+            oldExercises[e._id] = UNCHANGED;
+        } else if (e.available) {
+            newExercises.push({...e});
+        }
+    })
+    req.updatesNewExercises = newExercises;
 
-    next();
+    let exercisesToDelete = Object.values(oldExercises)
+        .filter(e => e !== UNCHANGED);
+    req.updatesDeletedExercises = exercisesToDelete
+        .filter(e => e.available)
+    req.exercisesToDelete = exercisesToDelete.map(e => e._id);
+    return next();
 }
+exports.cleanupCourseData = cleanupCourseData;
 
-// change update, add objectid handling
-exports.updateCourse = async (req, res) => {
-    let newCourseData = req.newCourseData;
-
-    if (req.filesPositions){
-        for (let i = 0; i < req.filesPositions.length; i++){
-            let cur = req.filesPositions[i];
-            if (req.files[i] && req.files[i].id){
-                newCourseData.sections[cur.section].entries[cur.entry].content.file = req.files[i].id
-            } else {
-                newCourseData.sections[cur.section].entries[cur.entry].content.file = null;
-                newCourseData.sections[cur.section].entries[cur.entry].content.fileName = 'No file yet';
-            }
-
-        }
-    }
-
-    let len = 0;
-    if (newCourseData.sections){
-        len = newCourseData.sections.length
-    }
-
-    for (let section = 0; section < len; section++){
-        for (let i = 0; i < newCourseData.sections[section].entries.length; i++){
-            let cur = newCourseData.sections[section].entries[i];
-            if (!cur.content.kind){
-                switch(cur.type){
-                    case 'file': {
-                        newCourseData.sections[section].entries[i].content.kind = 'EntryFile'
-                        break;
-                    }
-                    case 'text': {
-                        newCourseData.sections[section].entries[i].content.kind = 'EntryText'
-                        break;
-                    }
-                    case 'forum': {
-                        newCourseData.sections[section].entries[i].content.kind = 'EntryForum'
-                        break;
-                    }
-                    default: {
-                        newCourseData.sections[section].entries[i].content.kind = 'EntryContent'
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-
-
-    let {course} = req;
-
-    let prevInfo = {
-        name: req.course.name,
-        about: req.course.about
-    }
-    course = extend(course, newCourseData);
-
-    //TODO add new updates when a new exercise gets released. Display it only if it has available == true
-
-
-
-
-    //TODO if previously unavailable / hidden exercises or entries GET published, also add updates for this
-
-
-    if (req.deletedEntries && req.deletedEntries.length > 0){
-        course.updates.push({
+/**
+ * @type function
+ * @throws 401
+ * @description Adds news/updates to the course,
+ * specified under `req.course` !! It doesn't
+ * save the course to the db, the changes
+ * are applied locally to the mentioned object
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {Object} req.body
+ * @param {models.Course} req.course
+ * @param {models.Course} req.newCourse
+ * @param {models.Course.Entry[]} req.updatesNewEntries
+ * @param {models.Course.Entry[]} req.updatesDeletedEntries
+ * @param {models.Exercise[]} req.updatesNewExercises
+ * @param {models.Exercise[]} req.updatesDeletedExercises
+ * @param {function} next
+ * @memberOf controllers.courses.courseData
+ */
+const addUpdatesToCourse = (req, res, next) => {
+    let {
+        updatesDeletedEntries: deletedEntries,
+        updatesNewEntries: newEntries,
+        updatesNewExercises: newExercises,
+        updatesDeletedExercises: deletedExercises,
+    } = req;
+    let mapper = (e) => ({name: e.name, kind: e.kind})
+    if (Array.isArray(deletedEntries) && deletedEntries.length > 0){
+        req.course.updates.push({
             kind: 'UpdateDeletedEntries',
-            deletedEntries: req.deletedEntries
+            deletedEntries: deletedEntries.map(mapper)
         })
     }
-    if (req.newEntries && req.newEntries.length > 0){
-        course.updates.push({
+    if (Array.isArray(newEntries) && newEntries.length > 0){
+        req.course.updates.push({
             kind: 'UpdateNewEntries',
-            newEntries: req.newEntries
+            newEntries: newEntries.map(mapper)
+        })
+    }
+    if (Array.isArray(deletedExercises) && deletedExercises.length > 0){
+        req.course.updates.push({
+            kind: 'UpdateDeletedExercises',
+            deletedExercises: deletedExercises.map(mapper)
+        })
+    }
+    if (Array.isArray(newExercises) && newExercises.length > 0){
+        req.course.updates.push({
+            kind: 'UpdateNewExercises',
+            newExercises: newExercises.map(mapper)
         })
     }
     if (!isEqual(
-        {name: course.name, about: course.about},
-        prevInfo
+        {name: req.newCourse.name, about: req.newCourse.about},
+        {name: req.course.name, about: req.course.about}
     )
     ){
-        course.updates.push({
+        req.course.updates.push({
             kind: 'UpdateNewInfo',
-            oldName: prevInfo.name,
-            newName: newCourseData.name,
-            newAbout: newCourseData.about
+            oldName: req.course.name,
+            newName: req.newCourse.name,
+            newAbout: req.newCourse.about
         })
     }
 
+    //TODO if previously unavailable / hidden exercises or
+    // entries GET published, also add updates for this
 
-
-    course.save()
-        .then((result) => {
-            return res.json(result);
-        })
-        .catch(err => {
-            console.log(err);
-            return res.status(err.status || 400)
-                .json({
-                    error: formatMongooseError(err) || err
-                })
-        })
+    return next();
 }
+exports.addUpdatesToCourse = addUpdatesToCourse;
+
+/**
+ * @type function
+ * @throws 401
+ * @description Extracts new course data and files metadata
+ * from the received FormData which is used to update the course.
+ * New course data is saved under `req.newCourse` and
+ * the positions of entries that contain
+ * newly uploaded files are saved under `req.filesPositions`
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {Object} req.body
+ * @param {string} req.body.course
+ * @param {string} req.body.filesPosition
+ * @param {models.Course} req.newCourse
+ * @param {{section: number, entry: number}[]} [req.filesPositions]
+ * @memberOf controllers.courses.courseData
+ */
+const updateCourse =  async (req, res) => {
+    //TODO specify the new entry type on frontend!!!! via entry.kind
+    let {newCourse, course, filesPositions, files} = req, promises = [];
+
+    if (Array.isArray(filesPositions)){
+        if (filesPositions.length !== files.length){
+            return res.status(400).json({
+                error: {status: 400, message: 'Error uploading files'}
+            })
+        }
+        // attach refs to newly uploaded files to the course entries
+        filesPositions.forEach((f, i) => {
+            let curEntry = newCourse.sections[f.section].entries[f.entry];
+            if (files[i] && files[i].id){
+                curEntry.file = files[i].id;
+            } else {
+                curEntry.file = null;
+                curEntry.fileName = 'No file yet'
+            }
+        })
+    }
+
+    if (Array.isArray(newCourse.sections)){
+        newCourse.sections.forEach((s, i) => {
+            s.entries.forEach((e, j) => {
+                if (!e._id) {
+                    newCourse.sections[i].entries[j] =
+                        new Entry({...e, courseRef: course._id});
+                    promises.push(newCourse.sections[i].entries[j].save());
+                } else {
+                    promises.push(new Promise((resolve, reject) => {
+                        Entry.findById(e._id)
+                            .then(entry => {
+                                entry = extend(entry, newCourse.sections[i].entries[j]);
+                                console.log('nse', entry);
+                                console.log('omg', newCourse.sections[i].entries[j]);
+                                return entry.save();
+                            })
+                            .then(entry => {
+
+                                resolve(entry)
+                            })
+                            .catch(err => reject(err))
+                    }))
+                }
+            })
+        })
+    }
+
+    //TODO disallow changing certain fields (like updates/teachers/...)
+
+    if (Array.isArray(newCourse.exercises)){
+        newCourse.forEach((e, i) => {
+            if (!e._id){
+                newCourse.exercises[i] = new Exercise(e);
+                promises.push(newCourse.exercises[i].save());
+            } else {
+                promises.push(new Promise((resolve, reject) => {
+                    Exercise.findById(e._id)
+                        .then(exercise => {
+                            exercise = extend(exercise, newCourse.exercises[i]);
+                            return exercise.save();
+                        })
+                        .then(ex => resolve(ex))
+                        .catch(err => reject(err))
+                }))
+            }
+        })
+    }
+    try {
+        course = extend(course, newCourse);
+    } catch (err) {
+        return handleError(err, res);
+    }
+
+    //return res.status(400).json({error: {message: 'bruh'}});
+
+    return Promise.all(promises)
+        .then(() => course.save())
+        .then(result => {res.json(result)})
+        .catch(err => {handleError(err, res)})
+}
+exports.updateCourse = updateCourse;
 
 exports.enrollInCourse = (req, res) => {
     let {course} = req;
@@ -331,9 +440,13 @@ exports.getCoursesFiltered = async (req, res) => {
         .populate({path: 'students', select: basicUserFields})
         .populate({path: 'teachers', select: basicUserFields})
         .populate({path: 'creator', select: basicUserFields})
-        .sort('name')//TODO optimize sorting - see bookmarks
+        .populate('exercises', )
+        .populate('sections.entries')
+        .sort('name')
         .then(foundCourses => {
             courses = foundCourses;
+            console.log('fc', foundCourses[0].sections[0].entries);
+            //console.log('fc', foundCourses);
             /*
                 So many checks are used here to provide privacy - users shouldn't see course data, which they aren't meant to receive
              */
@@ -691,29 +804,99 @@ const removeCourseMentions = (req, res, next) => {
 }
 exports.removeCourseMentions = removeCourseMentions;
 
-exports.entryById = (req, res, next, entryId) => {
-    let len = 0;
-    if (req.course.sections){
-        len = req.course.sections.length
-    }
-    for (let section = 0; section < len; section++){
-        for (let i = 0; i < req.course.sections[section].entries.length; i++){
-            let entry = req.course.sections[section].entries[i];
-            if(entry._id == entryId){
-                req.entry = {
-                    data: entry,
-                    section: section,
-                    pos: i
+
+
+/**
+ * @type function
+ * @throws 401
+ * @description Sends the summary on all exercises in which the specified user has
+ * participated. Teacher can view summary for all students in their course
+ * In order to get info about all students, specify
+ * the query param `?all` and set its value to something truthy. If the query is not specified
+ * than only the summary for the authenticated user will be sent
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Course} req.course
+ * @param {models.User} req.auth
+ * @param {string} req.userCourseStatus
+ * @param {string} [req.query.all]
+ * @memberOf controllers.courses.courseData
+ * TODO add normal docs for this
+ */
+const getExerciseSummary = (req, res) => {
+    //TODO refactor this
+    let userIsTeacher =
+        (req.userCourseStatus === 'teacher') || (req.userCourseStatus === 'creator')
+    let course = req.course;
+    let usersSet = {}, usersToPopulate = []
+    if (req.query.all){
+        // only teachers can view summaries for all students
+        if (!userIsTeacher){
+            return res.status(401).json({
+                error: {
+                    status: 401,
+                    message: 'Only teachers can view summary on all students'
                 }
-                return next();
+            })
+        }
+        for (let e of course.exercises){
+            for (let p of e.participants){
+                // Add to the map of exercise participants
+                usersSet[p.user._id] = true;
+                usersToPopulate.push(p.user._id)
             }
         }
+    } else {
+        usersSet[req.auth._id] = true;
+        usersToPopulate = [req.auth._id];
     }
 
-    return res.status(404).json({
-        error: {
-            status: 404,
-            message: "No entry with this id was found"
-        }
+    return User.find({
+        _id: { $in: usersToPopulate }
     })
+        .then((users) => {
+            for (let u of users) {
+                usersSet[u._id] = {
+                    userId: u._id,
+                    userName: u.name,
+                    exercises: []
+                }
+            }
+
+
+            // Has only one loop through all exercises for efficiency
+            for (let e of course.exercises){
+                for (let p of e.participants){
+                    if (!usersSet[p.user._id]){
+                        continue;
+                    }
+                    // remove answers in the final response,
+                    // they are irrelevant for this request
+                    for (let a = 0; a < p.attempts.length; a++){
+                        p.attempts[a].answers = undefined;
+                    }
+                    usersSet[p.user._id].exercises.push({
+                        id: e._id,
+                        name: e.name,
+                        attempts: p.attempts
+                    })
+                }
+            }
+
+            let result = [];
+
+            for (let k of Object.keys(usersSet)){
+                result.push(usersSet[k])
+            }
+
+            return res.json(result);
+        })
+        .catch(err => {
+            console.log(err);
+            return res.status(err.status || 400)
+                .json({
+                    error: err
+                })
+        })
 }
+exports.getExerciseSummary = getExerciseSummary;

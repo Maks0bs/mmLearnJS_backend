@@ -78,6 +78,7 @@ exports.getUser = getUser;
 
 /**
  * @type function
+ * @throws 400
  * @description extracts the new user data (that should be replaced instead of the old one)
  * from `req.body`. This middleware should only be invoked after the FormData-body has been
  * turned into an object, the fields of which are still stringified (normally after calling)
@@ -92,7 +93,11 @@ exports.getUser = getUser;
  * @memberOf controllers.users.usersData
  */
 const deserializeAndCleanUserData = (req, res, next) => {
-	req.body = JSON.parse(req.body.user);//deserialize
+	try { //deserialize
+		req.body = JSON.parse(req.body.user);
+	} catch (err) {
+		return handleError(err, res);
+	}
 	// Removing previous users avatar if new one gets uploaded
 	// or user wants to explicitly delete their photo
 	let filesToDelete = [];

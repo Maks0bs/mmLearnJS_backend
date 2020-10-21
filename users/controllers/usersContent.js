@@ -1,4 +1,4 @@
-let { Course } = require('../../courses/model')
+let Course = require('../../courses/model')
 let User = require('../model');
 let { v1: uuidv1 } = require('uuid');
 let { ObjectId } = require('mongoose').Types;
@@ -9,6 +9,7 @@ let { CONTACT_EMAIL } = require('../../constants').errors
  * @type function
  * @throws 400
  * @description sends the updates/news that happened in the specified
+ * courses in the specified time period. Specify the date in RFC 3339 format.
  * courses in the specified time period. Specify the date in RFC 3339 format.
  * You can also specify the max amount of news entries that will be fetched.
  * In order to view the updates the user has to be subscribed to
@@ -62,6 +63,7 @@ exports.getUpdatesByDate = getUpdatesByDate;
  */
 const getUpdatesNotifications = (req, res) => {
     let lastVisitedSet = {}, { subscribedCourses } = req.auth;
+    console.log('quer', req.query.courses);
     subscribedCourses.forEach(c => lastVisitedSet[c.course] = c.lastVisited);
     return Course.find({ _id: { $in: req.query.courses} })
         .then(courses => {
@@ -206,10 +208,10 @@ exports.configUsersFilter = (req, res, next) => {
     req.usersFilter = req.query;
     return next();
 }
-// TODO maybe move this to ./usersData
-//TODO if we find users by a certain param and
+//TODO maybe move this to ./usersData
+// if we find users by a certain param and
 // this param is in the hiddenFields array, don't include this users
-//TODO however still include, if they could be found by another param, which is not hidden
+// however still include, if they could be found by another param, which is not hidden
 exports.getUsersFiltered = (req, res) => {
     return res.json([]);
     let { usersFilter: filter } = req;
