@@ -99,6 +99,7 @@ let Entry = mongoose.model('Entry', entrySchema);
 exports.Entry = Entry;
 exports.entrySchema = entrySchema;
 
+
 let entryTextSchema = new mongoose.Schema({
     text: String
 })

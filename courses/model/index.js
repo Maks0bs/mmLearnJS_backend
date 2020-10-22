@@ -1,4 +1,7 @@
 let mongoose = require('mongoose');
+const {
+	updateNewEntriesSchema, updateDeletedEntriesSchema, updateNewInfoSchema
+} = require("./CourseUpdate");
 let { ObjectId } = mongoose.Schema;
 let { v1: uuidv1} = require('uuid');
 let { courseUpdateSchema } = require('./CourseUpdate');
@@ -192,10 +195,15 @@ let courseSchema = new mongoose.Schema({
 }, {
 	discriminatorKey: 'kind'
 })
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// courseSchema.path('updates').discriminator('UpdateNewEntries', updateNewEntriesSchema)
-// courseSchema.path('updates').discriminator('UpdateDeletedEntries', updateDeletedEntriesSchema)
-// courseSchema.path('updates').discriminator('UpdateNewInfo', updateNewInfoSchema)
+courseSchema.path('updates').discriminator(
+	'UpdateNewEntries', updateNewEntriesSchema
+)
+courseSchema.path('updates').discriminator(
+	'UpdateDeletedEntries', updateDeletedEntriesSchema
+)
+courseSchema.path('updates').discriminator(
+	'UpdateNewInfo', updateNewInfoSchema
+)
 
 courseSchema
 	.virtual('password')

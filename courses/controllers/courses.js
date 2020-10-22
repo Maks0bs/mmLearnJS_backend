@@ -1,10 +1,16 @@
-
+let mongoose = require('mongoose')
 let Course = require('../model')
 let { Entry } = require('../model/Entry')
 let User = require('../../users/model');
+let Forum = require('../../forums/model');
 let Exercise = require('../../exercises/model');
-let { extend, isEqual, cloneDeep} = require('lodash');
+let { extend, cloneDeep} = require('lodash');
 const {formatMongooseError, handleError} = require("../../helpers");
+
+const CONSTANTS = {
+    UPDATABLE_FORUM_FIELDS: ['descriptions', 'name', 'teachersOnly', 'courseRefs']
+}
+exports.CONSTANTS = CONSTANTS;
 
 /**
  * @class controllers.courses.courseData
@@ -27,7 +33,6 @@ const courseById = (req, res, next, id) => {
         .populate('exercises')
         .populate('sections.entries')
         .then(course => {
-            console.log('cs', course.sections[0]);
             if (!course) throw {
                 status: 404, error: 'course not found'
             }
@@ -44,9 +49,9 @@ exports.courseById = courseById;
 /**
  * @type function
  * @throws 400
- * @description creates a new course with the given type and name. If the `hasPassword` attribute
- * is true, the course password should be provided as well. See {@link models.Course course model}
- * for details
+ * @description creates a new course with the given type and name.
+ * If the `hasPassword` attribute is true, the course password should be
+ * provided as well. See {@link models.Course course model} for details
  * @param {e.Request} req
  * @param {models.User} req.auth
  * @param {e.Response} res
@@ -78,7 +83,7 @@ exports.createCourse = createCourse;
 
 /**
  * @type function
- * @description Extracts new course data and files metadata
+ * @description Extracts new course data and files' metadata
  * from the received FormData which is used to update the course.
  * New course data is saved under `req.newCourse` and
  * the positions of entries that contain
@@ -100,8 +105,6 @@ const getNewCourseData = (req, res, next) => {
     } catch (err) {
         return handleError(err, res);
     }
-
-
     return next();
 }
 exports.getNewCourseData = getNewCourseData;
@@ -139,21 +142,23 @@ const cleanupCourseData = (req, res, next) => {
     let { course, newCourse } = req;
     const UNCHANGED = 'unchanged';
     let oldEntries = {}, newEntries = [], oldExercises = {}, newExercises = [];
-    // mark all entries, that existed in the old course data
-    course.sections.forEach(s => Array.isArray(s.entries) && s.entries.forEach(
-        e => oldEntries[e._id] = {...e}
-    ))
     // find out which entries have been added and which ones have been removed
-    if (Array.isArray(newCourse.sections)) req.newCourse.sections.forEach(s => {
-        if (Array.isArray(s.entries)) s.entries.forEach(e => {
-            if (e._id){
-                oldEntries[e._id] = UNCHANGED;
-            } else if (e.access !== 'teachers') {
-                // mark newly added entries to display them in the course news
-                newEntries.push({...e});
-            }
+    if (Array.isArray(newCourse.sections)) {
+        // mark all entries, that existed in the old course data
+        course.sections.forEach(s => Array.isArray(s.entries) && s.entries.forEach(
+            e => oldEntries[e._id.toString()] = {...e._doc}
+        ))
+        req.newCourse.sections.forEach(s => {
+            if (Array.isArray(s.entries)) s.entries.forEach(e => {
+                if (e._id){
+                    oldEntries[e._id] = UNCHANGED;
+                } else if (e.access !== 'teachers') {
+                    // mark newly added entries to display them in the course news
+                    newEntries.push({...e});
+                }
+            })
         })
-    })
+    }
     req.updatesNewEntries = newEntries;
 
     let entriesToDelete = Object.values(oldEntries)
@@ -162,17 +167,18 @@ const cleanupCourseData = (req, res, next) => {
         .filter(e => e.access !== 'teachers')
     req.entriesToDelete = entriesToDelete.map(e => e._id);
 
-    // mark all exercises, that existed in the old course data
-    course.exercises.forEach(e => oldExercises[e._id] = {...e})
-
     // find out which exercises have been added and which ones have been removed
-    if (Array.isArray(newCourse.exercises)) req.newCourse.exercises.forEach(e => {
-        if (e._id){
-            oldExercises[e._id] = UNCHANGED;
-        } else if (e.available) {
-            newExercises.push({...e});
-        }
-    })
+    if (Array.isArray(newCourse.exercises)) {
+        // mark all exercises, that existed in the old course data
+        course.exercises.forEach(e => oldExercises[e._id.toString()] = {...e._doc})
+        req.newCourse.exercises.forEach(/** @type models.Exercise */ e => {
+            if (e._id){
+                oldExercises[e._id] = UNCHANGED;
+            } else if (e.available) {
+                newExercises.push({...e});
+            }
+        })
+    }
     req.updatesNewExercises = newExercises;
 
     let exercisesToDelete = Object.values(oldExercises)
@@ -186,11 +192,11 @@ exports.cleanupCourseData = cleanupCourseData;
 
 /**
  * @type function
- * @throws 401
+ * @throws 400
  * @description Adds news/updates to the course,
- * specified under `req.course` !! It doesn't
- * save the course to the db, the changes
- * are applied locally to the mentioned object
+ * specified under `req.course`. It !! DOES NOT
+ * SAVE !! the course to the db, the changes
+ * are applied locally to the object, mentioned above
  * @param {e.Request} req
  * @param {e.Response} res
  * @param {Object} req.body
@@ -211,7 +217,7 @@ const addUpdatesToCourse = (req, res, next) => {
         updatesDeletedExercises: deletedExercises,
     } = req;
     let mapper = (e) => ({name: e.name, kind: e.kind})
-    if (Array.isArray(deletedEntries) && deletedEntries.length > 0){
+    if (Array.isArray(deletedEntries) && (deletedEntries.length > 0)){
         req.course.updates.push({
             kind: 'UpdateDeletedEntries',
             deletedEntries: deletedEntries.map(mapper)
@@ -235,11 +241,9 @@ const addUpdatesToCourse = (req, res, next) => {
             newExercises: newExercises.map(mapper)
         })
     }
-    if (!isEqual(
-        {name: req.newCourse.name, about: req.newCourse.about},
-        {name: req.course.name, about: req.course.about}
-    )
-    ){
+    if ((req.newCourse.name && (req.newCourse.name !== req.course.name)) ||
+        (req.newCourse.about && (req.newCourse.about !== req.course.about))
+    ) {
         req.course.updates.push({
             kind: 'UpdateNewInfo',
             oldName: req.course.name,
@@ -257,7 +261,7 @@ exports.addUpdatesToCourse = addUpdatesToCourse;
 
 /**
  * @type function
- * @throws 401
+ * @throws 400
  * @description Extracts new course data and files metadata
  * from the received FormData which is used to update the course.
  * New course data is saved under `req.newCourse` and
@@ -272,18 +276,22 @@ exports.addUpdatesToCourse = addUpdatesToCourse;
  * @param {{section: number, entry: number}[]} [req.filesPositions]
  * @memberOf controllers.courses.courseData
  */
-const updateCourse =  async (req, res) => {
-    //TODO specify the new entry type on frontend!!!! via entry.kind
+const updateCourse = (req, res) => {
     let {newCourse, course, filesPositions, files} = req, promises = [];
 
     if (Array.isArray(filesPositions)){
         if (filesPositions.length !== files.length){
             return res.status(400).json({
-                error: {status: 400, message: 'Error uploading files'}
+                error: {
+                    status: 400,
+                    message: 'Error uploading files. You might have ' +
+                        'forgotten to upload a file in a file-type entry'
+                }
             })
         }
         // attach refs to newly uploaded files to the course entries
         filesPositions.forEach((f, i) => {
+
             let curEntry = newCourse.sections[f.section].entries[f.entry];
             if (files[i] && files[i].id){
                 curEntry.file = files[i].id;
@@ -291,12 +299,34 @@ const updateCourse =  async (req, res) => {
                 curEntry.file = null;
                 curEntry.fileName = 'No file yet'
             }
+            newCourse.sections[f.section].entries[f.entry] = curEntry;
         })
     }
 
     if (Array.isArray(newCourse.sections)){
         newCourse.sections.forEach((s, i) => {
             s.entries.forEach((e, j) => {
+                if (e.kind === 'EntryForum'){
+                    if (!e.forum._id){
+                        newCourse.sections[i].entries[j].forum = new Forum(
+                            {...e.forum, courseRefs: [course._id], name: e.name}
+                        );
+                        promises.push(newCourse.sections[i].entries[j].forum.save());
+                    } else {
+                        promises.push(new Promise((resolve, reject) => {
+                            Forum.findById(e.forum._id)
+                                .then(forum => {
+                                    let newData =
+                                        {...e.forum, name: e.name};
+                                    delete newData._id;
+                                    forum = extend(forum, newData);
+                                    return forum.save();
+                                })
+                                .then(forum => resolve(forum))
+                                .catch(err => reject(err))
+                        }))
+                    }
+                }
                 if (!e._id) {
                     newCourse.sections[i].entries[j] =
                         new Entry({...e, courseRef: course._id});
@@ -306,14 +336,9 @@ const updateCourse =  async (req, res) => {
                         Entry.findById(e._id)
                             .then(entry => {
                                 entry = extend(entry, newCourse.sections[i].entries[j]);
-                                console.log('nse', entry);
-                                console.log('omg', newCourse.sections[i].entries[j]);
                                 return entry.save();
                             })
-                            .then(entry => {
-
-                                resolve(entry)
-                            })
+                            .then(entry => resolve(entry))
                             .catch(err => reject(err))
                     }))
                 }
@@ -343,12 +368,10 @@ const updateCourse =  async (req, res) => {
     }
     try {
         course = extend(course, newCourse);
+        req.course = course;
     } catch (err) {
         return handleError(err, res);
     }
-
-    //return res.status(400).json({error: {message: 'bruh'}});
-
     return Promise.all(promises)
         .then(() => course.save())
         .then(result => {res.json(result)})
@@ -440,12 +463,18 @@ exports.getCoursesFiltered = async (req, res) => {
         .populate({path: 'students', select: basicUserFields})
         .populate({path: 'teachers', select: basicUserFields})
         .populate({path: 'creator', select: basicUserFields})
-        .populate('exercises', )
+        .populate('exercises' )
         .populate('sections.entries')
+        .populate({
+            path: 'sections.entries',
+            populate: {
+                path: 'forum',
+                select:['name', 'description', 'teachersOnly']
+            }
+        })
         .sort('name')
         .then(foundCourses => {
             courses = foundCourses;
-            console.log('fc', foundCourses[0].sections[0].entries);
             //console.log('fc', foundCourses);
             /*
                 So many checks are used here to provide privacy - users shouldn't see course data, which they aren't meant to receive

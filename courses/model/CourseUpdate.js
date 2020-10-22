@@ -84,7 +84,8 @@ let courseUpdateSchema = new mongoose.Schema({
         default: Date.now
     }
 }, {
-    discriminatorKey: 'kind'
+    discriminatorKey: 'kind',
+    _id: false
 })
 let CourseUpdate = mongoose.model('CourseUpdate', courseUpdateSchema);
 exports.CourseUpdate = CourseUpdate;

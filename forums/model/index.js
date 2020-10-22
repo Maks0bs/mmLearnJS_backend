@@ -74,8 +74,7 @@ let { ObjectId } = mongoose.Schema;
  *                     type: array
  *                     items:
  *                       $ref: '#/components/schemas/ForumTopicPost'
- *///TODO don't forget to check if docs are compiled correctly
-
+ */
 let forumSchema = new mongoose.Schema({
     name: {
         type: String,
