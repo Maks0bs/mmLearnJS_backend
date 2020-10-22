@@ -1,0 +1,244 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> courses/controllers/subscription.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">mmLearnJS API</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+                <div class="search-wrapper">
+                    <input id="search" type="text" placeholder="Search docs..." class="input">
+                </div>
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="helpers.html">helpers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="controllers.courses.html">courses</a></li><li><a href="controllers.courses.courseData.html">courseData</a></li><li><a href="controllers.courses.subscription.html">subscription</a></li><li><a href="controllers.courses.teachers.html">teachers</a></li><li><a href="controllers.exercises.html">exercises</a></li><li><a href="controllers.files.html">files</a></li><li><a href="controllers.forum.html">forum</a></li><li><a href="controllers.helpers.html">helpers</a></li><li><a href="controllers.users.html">users</a></li><li><a href="controllers.users.auth.html">auth</a></li><li><a href="controllers.users.usersData.html">usersData</a></li><li><a href="controllers.users.util.html">util</a></li><li><a href="controllers.users.validators.html">validators</a></li><li><a href="models.Course.html">Course</a></li><li><a href="models.Course.CourseSection.html">CourseSection</a></li><li><a href="models.Course.CourseUpdate.html">CourseUpdate</a></li><li><a href="models.Course.CourseUpdateDeletedEntries.html">CourseUpdateDeletedEntries</a></li><li><a href="models.Course.CourseUpdateNewEntries.html">CourseUpdateNewEntries</a></li><li><a href="models.Course.Entry.html">Entry</a></li><li><a href="models.Course.EntryFile.html">EntryFile</a></li><li><a href="models.Course.EntryText.html">EntryText</a></li><li><a href="models.Exercise.html">Exercise</a></li><li><a href="models.Exercise.ExerciseAttempt.html">ExerciseAttempt</a></li><li><a href="models.Exercise.ExerciseAttemptAnswer.html">ExerciseAttemptAnswer</a></li><li><a href="models.Exercise.ExerciseParticipant.html">ExerciseParticipant</a></li><li><a href="models.Exercise.ExerciseTask.html">ExerciseTask</a></li><li><a href="models.Exercise.MultipleChoiceTask.html">MultipleChoiceTask</a></li><li><a href="models.Exercise.OneChoiceTask.html">OneChoiceTask</a></li><li><a href="models.Exercise.TextTask.html">TextTask</a></li><li><a href="models.Forum.html">Forum</a></li><li><a href="models.Forum.ForumTopic.html">ForumTopic</a></li><li><a href="models.Forum.ForumTopic.ForumTopicPost.html">ForumTopicPost</a></li><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#attemptAnswerSchema">attemptAnswerSchema</a></li><li><a href="global.html#courseExerciseSchema">courseExerciseSchema</a></li><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#courseUpdateSchema">courseUpdateSchema</a></li><li><a href="global.html#entrySchema">entrySchema</a></li><li><a href="global.html#exerciseRouter">exerciseRouter</a></li><li><a href="global.html#exerciseTaskSchema">exerciseTaskSchema</a></li><li><a href="global.html#forumRouter">forumRouter</a></li><li><a href="global.html#forumSchema">forumSchema</a></li><li><a href="global.html#forumTopicPostSchema">forumTopicPostSchema</a></li><li><a href="global.html#getForgedId">getForgedId</a></li><li><a href="global.html#getGFS">getGFS</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>courses/controllers/subscription.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>let User = require('../../users/model');
+const { handleError } = require("../../helpers");
+/**
+ * @class controllers.courses.subscription
+ */
+
+/**
+ * @type function
+ * @throws 403
+ * @description subscribes the authenticated user to the given course.
+ * In order to subscribe, the user has to be a member (teacher/student)
+ * of the course.
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Course} req.course
+ * @param {models.User} req.auth
+ * @memberOf controllers.courses.subscription
+ */
+const subscribe = (req, res) => {
+    let {course} = req;
+    if (course.subscribers.includes(req.auth._id)){
+        return res.status(403).json({
+            error: {
+                status: 403,
+                message: 'You are already subscribed to the course'
+            }
+        })
+    }
+    course.subscribers.push(req.auth);
+    return course.save()
+        .then(savedCourse => {
+            let courseData = { lastVisited: Date.now(), course: savedCourse }
+            return User.findByIdAndUpdate(
+                req.auth._id,
+                { $push: { subscribedCourses: courseData } }
+            )
+        })
+        .then(() => {
+            return res.json({
+                message: 'You have subscribed to updates in this course'
+            })
+        })
+        .catch(err => {handleError(err, res)})
+}
+exports.subscribe = subscribe;
+
+/**
+ * @type function
+ * @throws 403
+ * @description removes the subscription of the
+ * authenticated user to the given course.
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Course} req.course
+ * @param {models.User} req.auth
+ * @memberOf controllers.courses.subscription
+ */
+const unsubscribe = (req, res) => {
+    let {course} = req;
+    // there might be several occurrences of one subscribed user (that's a bug)
+    // that's why we don't remove a single instance, but all found instances
+    let newSubscribers = course.subscribers.filter(c => !c.equals(req.auth._id));
+
+    if (newSubscribers.length === course.subscribers.length){
+        return res.status(403).json({
+            error: {
+                status: 403,
+                message:
+                    'You are not subscribed to the course, ' +
+                    'therefore you can\'t unsubscribe'
+            }
+        })
+    }
+    course.subscribers = newSubscribers;
+
+    return course.save()
+        .then(savedCourse => {
+            return User.findByIdAndUpdate(
+                req.auth._id,
+                { $pull: {subscribedCourses: { course: savedCourse._id}}},
+                {new: true}
+            )
+        })
+        .then(() => {
+            return res.json({
+                message: 'You have unsubscribed from updates in this course'
+            })
+        })
+        .catch(err => {handleError(err, res)})
+}
+exports.unsubscribe = unsubscribe;
+
+/**
+ * @type function
+ * @throws 400
+ * @description updates the time which specifies when
+ * the user had viewed the content of the given course for the last time
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Course} req.course
+ * @param {models.User} req.auth
+ * @memberOf controllers.courses.subscription
+ */
+const viewCourse = (req, res) => {
+    let user = req.auth, courseId = req.course._id;
+    // there might be several occurrences (if any) of a course in the
+    // user's subscribed courses list
+    for (let i = 0; i &lt; user.subscribedCourses.length; i++){
+        if (courseId.equals(user.subscribedCourses[i].course)){
+            user.subscribedCourses[i].lastVisited = new Date();
+        }
+    }
+    return user.save()
+        .then(() => {
+            return res.json({ message: 'course has been viewed'})
+        })
+        .catch(err => handleError(err, res))
+}
+exports.viewCourse = viewCourse;</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+<script src="scripts/search.js"> </script>
+
+</body>
+</html>

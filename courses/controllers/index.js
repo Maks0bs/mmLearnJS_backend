@@ -1,9 +1,10 @@
 module.exports = {
-	...require('./courses'),
-	...require('../../exercises/controllers/exercises'),
-	...require('../../forums/controllers/forums'),
+	...require('./courseData'),
 	...require('./subscription'),
-	...require('./teachers')
+	...require('./teachers'),
+	...require('./students'),
+	...require('./entries'),
+	...require('./updateCourse')
 }
 /**
  * @class controllers.courses

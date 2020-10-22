@@ -11,10 +11,11 @@ let {
 } = require('../../users/controllers')
 let { validate } = require('../../helpers')
 let {
-    enrollInCourse, updateCourse, cleanupCourseData, getNewCourseData,
+    enrollInCourse, updateCourseSections, cleanupCourseData, getNewCourseData,
     deleteCourse, removeCourseMentions, subscribe, unsubscribe, viewCourse,
     sendTeacherInvite, addToInvitedList, acceptTeacherInvite, getExerciseSummary,
-    addUpdatesToCourse
+    addUpdatesToCourse, mergeCourseBasicFields, updateCourseExercises,
+    saveCourseChanges
 } = require('../controllers')
 let {
     deleteFiles, uploadFiles
@@ -39,6 +40,13 @@ let router = require('express').Router()
  *      operationId: enrollInCourse
  *      security:
  *        - cookieAuth: []
+ *      parameters:
+ *        - name: courseId
+ *          in: path
+ *          description: >
+ *            the id of the course to perform operations with
+ *          required: true
+ *          type: string
  *      tags:
  *        - "/course/..."
  *      requestBody:
@@ -96,6 +104,13 @@ router.post('/enroll',
  *        If the user with such email is a teacher, add a notification in their account.
  *        Otherwise send an invitation link in the email to signup with a special token.
  *      operationId: sendTeacherInvite
+ *      parameters:
+ *        - name: courseId
+ *          in: path
+ *          description: >
+ *            the id of the course to perform operations with
+ *          required: true
+ *          type: string
  *      security:
  *        - cookieAuth: []
  *      tags:
@@ -163,6 +178,13 @@ router.post('/send-teacher-invitation',
  *        had a notification that mentioned, that the user was
  *        invited to this course, this notification is removed.
  *      operationId: acceptTeacherInvite
+ *      parameters:
+ *        - name: courseId
+ *          in: path
+ *          description: >
+ *            the id of the course to perform operations with
+ *          required: true
+ *          type: string
  *      security:
  *        - cookieAuth: []
  *      tags:
@@ -207,6 +229,13 @@ router.post('/accept-teacher-invitation',
  *        In order to subscribe, the user has to be a member (teacher/student)
  *        of the course.
  *      operationId: subscribeToCourse
+ *      parameters:
+ *        - name: courseId
+ *          in: path
+ *          description: >
+ *            the id of the course to perform operations with
+ *          required: true
+ *          type: string
  *      security:
  *        - cookieAuth: []
  *      tags:
@@ -252,6 +281,13 @@ router.post('/subscribe',
  *      operationId: unsubscribeFromCourse
  *      security:
  *        - cookieAuth: []
+ *      parameters:
+ *        - name: courseId
+ *          in: path
+ *          description: >
+ *            the id of the course to perform operations with
+ *          required: true
+ *          type: string
  *      tags:
  *        - "/course/..."
  *      responses:
@@ -293,6 +329,13 @@ router.post('/unsubscribe',
  *        updates the time which specifies when
  *        the user had viewed the content of the given course for the last time
  *      operationId: viewCourse
+ *      parameters:
+ *        - name: courseId
+ *          in: path
+ *          description: >
+ *            the id of the course to perform operations with
+ *          required: true
+ *          type: string
  *      security:
  *        - cookieAuth: []
  *      tags:
@@ -341,13 +384,16 @@ router.put('/',
     getNewCourseData,
     cleanupCourseData,
     addUpdatesToCourse,
+    updateCourseSections,
+    updateCourseExercises,
+    mergeCourseBasicFields,
     // removeExerciseMentions,
     // deleteExercises,
     // removeEntriesMentions,
     // deleteEntries,
     // deleteForums,
     // deleteFiles,
-    updateCourse,
+    saveCourseChanges,
 );
 
 

@@ -1,4 +1,5 @@
 const nodeMailer = require('nodemailer');
+const {getGFS} = require("../files/model");
 let { validationResult } = require('express-validator');
 let { gmailClientCredentials } = require('../constants').mail
 
@@ -56,6 +57,9 @@ const validate = (req, res, next) => {
     let { errors } = validationResult(req);
     if (errors.length > 0){
         let firstError = errors.map((error) => error.msg)[0];
+        if (Array.isArray(req.files) && req.files.length > 0){
+            deleteFilesAsyncIndependent(req.files);
+        }
         return res.status(400).json({
             error: { status: 400, message: firstError}
         })
@@ -86,6 +90,23 @@ const handleError = (err, res, options) => {
         })
 }
 exports.handleError = handleError;
+
+/**
+ * @type function
+ * @description deletes the files with the given IDs
+ * @param {string[]|ObjectId[]} [files]
+ * @memberOf helpers
+ */
+const deleteFilesAsyncIndependent = (files) => {
+    const gfs = getGFS();
+    if (!gfs || !Array.isArray(files)) return;
+    return Promise.all(files.map(id => new Promise((resolve, reject ) => {
+        gfs.remove({_id: id, root: 'uploads'}, (err) => (
+            err ? reject(err) : resolve(id)
+        ))
+    })))
+}
+exports.deleteFilesAsyncIndependent = deleteFilesAsyncIndependent;
 
 /**
  * @deprecated

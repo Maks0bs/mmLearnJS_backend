@@ -1,277 +1,139 @@
-let { 
-	ForumTopicPost
-} = require('../../courses/model')
-let mongoose = require('mongoose');
-let User = require('../../users/model');
-const {formatMongooseError} = require("../../helpers");
+let {ForumTopicPost} = require('../model/ForumTopicPost')
+const {handleError} = require("../../helpers");
 
-exports.forumById = (req, res, next, forumId) => {
-	let len = 0;
-	if (req.courseData.sections){
-		len = req.courseData.sections.length
-	}
-	for (let section = 0; section < len; section++){
-		for (let i = 0; i < req.courseData.sections[section].entries.length; i++){
-			let entry = req.courseData.sections[section].entries[i];
-			if(entry._id == forumId){
-				req.forum = entry;
-				return next();
-			}
-		}
-	}
-
-	return res.status(404).json({
-		error: {
-			status: 404,
-			message: "No entry with this id was found"
-		}
-	})
-}
-
-exports.getForumById = (req, res) => {
-	let usersToPopulate = [], usersToPopulateSet = {}
+/**
+ * @class controllers.forum
+ */
+/**
+ * @type function
+ * @description returns the forum with hidden
+ * topics/posts creators data, which was
+ * found via {@link controllers.forum.forumById forumById}
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Forum} req.forum
+ * @memberOf controllers.forum
+ */
+const getForumById = (req, res) => {
 	let { forum } = req;
-	for (let t of forum.content.topics){
-		if (!usersToPopulateSet[t.creator._id]){
-			usersToPopulateSet[t.creator._id] = 1;
-			usersToPopulate.push(t.creator._id);
-		}
-		for (let p of t.posts){
-			if (!usersToPopulateSet[p.creator._id]){
-				usersToPopulateSet[p.creator._id] = 1;
-				usersToPopulate.push(p.creator._id);
-			}
-		}
-	}
-	return User.find({
-		_id: {
-			$in: usersToPopulate
-		}
-	})
-		.select('_id name photo hiddenFields')
-		.then((users) => {
-			for (let user of users){
-				user.hideFields();
-				user.hiddenFields = undefined;
-				usersToPopulateSet[user._id] = user;
-			}
-			for (let t of forum.content.topics){
-				t.creator = usersToPopulateSet[t.creator._id]
-				for (let p of t.posts){
-					p.creator = usersToPopulateSet[t.creator._id];
-				}
-			}
-			return new Promise((resolve) => {
-				resolve(true);
-			})
-		})
-		.then(() => res.json(forum))
-		.catch(err => {
-			console.log(err);
-			res.status(err.status || 400)
-				.json({
-					error: formatMongooseError(err)
-				})
-		})
+	return res.json(forum);
 }
+exports.getForumById = getForumById;
 
-exports.topicById = (req, res, next, topicId) => {
-	let len = 0;
-	if (req.entry.data.content.topics){
-		len = req.entry.data.content.topics.length;
-	}
 
-	for (let i = 0; i < len; i++){
-		let topic = req.entry.data.content.topics[i];
-		if (topic._id == topicId){
-			req.topic = {
-				data: topic,
-				pos: i
-			}
-			return next();
-		}
-	}
-
-	return res.status(404).json({
-		error: {
-			status: 404,
-			message: "No topic with this id was found"
-		}
-	})
-}
-
-exports.postById = (req, res, next, postId) => {
-	let len = 0;
-	if (req.topic.data.posts){
-		len = req.topic.data.posts.length;
-	}
-
-	for (let i = 0; i < len; i++){
-		let post = req.topic.data.posts[i];
-		if (post._id == postId){
-			req.post = {
-				data: post,
-				pos: i
-			}
-			return next();
-		}
-	}
-
-	return res.status(404).json({
-		error: {
-			status: 404,
-			message: "No POST with this id was found"
-		}
-	})
-}
-
-// req.body = {
-// 	name,
-// 	initContent
-// }
-exports.createForumTopic = (req, res) => {
-	let entry = req.entry.data;
-	if (req.userCourseStatus === 'student' && entry.content.teachersOnly){
-		return res.status(401).json({
-			error: {
-				status: 401,
-				message: 'only teachers can create topics in this forum'
-			}
-		})
-	}
+/**
+ * @type function
+ * @throws 401
+ * @description creates a new topic in the
+ * forum with the given id.
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Forum} req.forum
+ * @param {Object} req.body
+ * @param {string} req.body.name
+ * @param {string} req.body.content
+ * @param {models.User} req.auth
+ * @memberOf controllers.forum
+ */
+const createForumTopic = (req, res) => {
+	let {forum} = req;
 	let newTopic = {
 		name: req.body.name,
 		creator: req.auth,
 		posts: [
 			{
 				creator: req.auth,
-				content: req.body.initContent,
+				content: req.body.content,
 				answers: []
 			}
 		]
 	};
-	entry.content.topics.push(newTopic);
-	let course = req.courseData;
-	course.sections[req.entry.section].entries[req.entry.pos] = entry;
-	course.save()
-	.then(result => {
-		return res.json(result);
-	})
-	.catch(err => {
-		console.log(err);
-		return res.status(err.status || 400)
-			.json({
-				error: err
-			})
-	})
+	forum.topics.push(newTopic);
+	return forum.save()
+		.then(result => res.json(result) )
+		.catch(err => handleError(err, res))
 }
 
-exports.answerTopicPost = async (req, res) => {
-	let entry = req.entry.data;
-	if (req.userCourseStatus === 'student' && entry.content.teachersOnly){
-		return res.status(401).json({
-			error: {
-				status: 401,
-				message: 'only teachers can create topics in this forum'
-			}
-		})
-	}
+exports.createForumTopic = createForumTopic;
+
+/**
+ * @type function
+ * @throws 401
+ * @description creates a new post in the specified forum
+ * which is the answer to the post under `req.post`
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Forum} req.forum
+ * @param {ForumTopicPost} req.post
+ * @param {models.Forum.ForumTopic} req.topic
+ * @param {Object} req.body
+ * @param {string} req.body.content
+ * @param {models.User} req.auth
+ * @memberOf controllers.forum
+ */
+const answerTopicPost = (req, res) => {
 	let rawPost = {
 		creator: req.auth,
 		content: req.body.content,
 		answers: []
 	};
-	let post = await new ForumTopicPost(rawPost);
-	let course = req.courseData;
-	course.sections[req.entry.section].entries[req.entry.pos]
-		.content.topics[req.topic.pos].posts.push(post);
-	course.sections[req.entry.section].entries[req.entry.pos]
-		.content.topics[req.topic.pos].posts[req.post.pos].answers
-		.push(mongoose.mongo.ObjectId(post._id));
-	course.save()
-	.then(result => {
-		return res.json(result);
-	})
-	.catch(err => {
-		console.log(err);
-		return res.status(err.status || 400)
-			.json({
-				error: err
-			})
-	})
+	let post = new ForumTopicPost(rawPost);
+	let {forum} = req;
+	forum.topics[req.topic.pos].posts.push(post);
+	forum.topics[req.topic.pos].posts[req.post.pos].answers.push(post._id);
+	return forum.save()
+		.then(result => res.json(result) )
+		.catch(err => handleError(err, res))
 }
+exports.answerTopicPost = answerTopicPost;
 
-exports.deleteTopicPost = (req, res) => {
-	let course = req.courseData;
-	let post = req.post.data;
-	if (req.userCourseStatus === 'teacher' || req.userCourseStatus === 'creator' 
-	){
-		/*course.sections[req.entry.section].entries[req.entry.pos].content
-			.topics[req.topic.pos].posts[req.POST.pos] = undefined;*/
-
+/**
+ * @type function
+ * @throws 401
+ * @description deletes the post with the specified ID.
+ * If this post has any answers and the authenticated
+ * user is a teacher at a course, to which the given
+ * forum has a reference, then also delete the
+ * children-answers of this post.
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Forum} req.forum
+ * @param {ForumTopicPost} req.post
+ * @param {models.Forum.ForumTopic} req.topic
+ * @param {boolean} req.isAuthorizedForumTeacher
+ * @param {models.User} req.auth
+ * @memberOf controllers.forum
+ */
+const deleteTopicPost = (req, res) => {
+	let post = req.post.data, topic = req.topic.data, {forum} = req, newPosts = [];
+	if (req.isAuthorizedForumTeacher){
 		let postsMap = {};
-		for (let post of course.sections[req.entry.section]
-			.entries[req.entry.pos].content
-			.topics[req.topic.pos].posts
-		){
-			postsMap[post._id] = post;
-		}
-
-		let q = [req.post.data], head = 0, postsToDeleteMap = {}, 
-			postsToDelete = [req.post.data._id];
-		postsToDeleteMap[post._id] = 1;
-
-		while(head !== q.length){
-			let cur = q[head];
-			head++;//pop
-			if (!cur){
-				//TODO this solution is disguisting. No idea why undefineds are pushed in q
-				continue;
-			}
-			if (!cur.answers || cur.answers.length === 0){
-				continue;
-			}
+		topic.posts.forEach(p => postsMap[p._id] = p);
+		let queue = [post], head = 0, postsToDeleteMap = {[post._id]: true};
+		// Use BFS to iterate through all nested answers and delete them
+		while(head !== queue.length){
+			let cur = queue[head];
+			// just increment head to avoid calling Array.shift(), which is very slow
+			head++;
+			if (!cur || !Array.isArray(cur.answers)) continue;
 			for (let answerId of cur.answers){
 				if (!postsToDeleteMap[answerId]){
-					q.push(postsMap[answerId]);
-					postsToDeleteMap[answerId] = 1;
+					// add a yet unvisited vertex to the queue to
+					// iterate through its neighbours afterwards
+					queue.push(postsMap[answerId]);
+					postsToDeleteMap[answerId] = true;
 				}
 			}
 		}
-
-		let newPosts = [];
-
-		//TODO delete references to the deleted POST in the parent POST
-
-		for (let i = 0; i < req.topic.data.posts.length; i++){
-			let post = course.sections[req.entry.section].entries[req.entry.pos]
-			.content.topics[req.topic.pos].posts[i];
-			if (!postsToDeleteMap[post._id]){
-				newPosts.push(course.sections[req.entry.section].entries[req.entry.pos]
-					.content.topics[req.topic.pos].posts[i]
-				);
-			}
-			
-		}
-
-		if (newPosts.length === 0){
-			course.sections[req.entry.section].entries[req.entry.pos]
-				.content.topics.splice(req.topic.pos, 1);
-		} else {
-			course.sections[req.entry.section].entries[req.entry.pos]
-				.content.topics[req.topic.pos].posts = newPosts;
-		}
-
-	} else if (req.userCourseStatus === 'student'){
-		if (!req.post.data.creator.equals(req.auth._id)){
+		// only undeleted posts are left in the topic
+		newPosts = topic.posts.filter(p => !postsToDeleteMap[p._id])
+	} else {
+		if (!post.creator._id.equals(req.auth._id)){
 			return res.status(401).json({
-				error: {
-					status: 401,
-					message: 'You are not the creator of the POST'
-				}
+				error: {status: 401, message: 'You are not the creator of the POST'}
 			})
 		} else {
-			if (req.post.data.answers && req.post.data.answers.length > 0){
+			if (Array.isArray(post.answers) && post.answers.length > 0){
 				return res.status(403).json({
 					error: {
 						status: 403,
@@ -279,58 +141,24 @@ exports.deleteTopicPost = (req, res) => {
 					}
 				})
 			} else {
-				let newPosts = [];
-
-				//TODO delete references to the deleted POST in the parent POST
-				for (let i = 0; i < req.topic.data.posts.length; i++){
-					let post = req.topic.data.posts[i];
-					if (!post._id.equals(req.post.data._id)){
-						newPosts.push(post);
-					}
-				}
-
-				if (newPosts.length === 0){
-					course.sections[req.entry.section].entries[req.entry.pos]
-						.content.topics.splice(req.topic.pos, 1);
-				} else {
-					course.sections[req.entry.section].entries[req.entry.pos]
-						.content.topics[req.topic.pos].posts = newPosts;
-				}
-
-				
+				newPosts = topic.posts.filter(p => !p._id.equals(post._id));
 			}
 		}
-	} else if (req.userCourseStatus === 'not enrolled'){
-		return res.status(401).json({
-			error: {
-				status: 401,
-				message: 'You are not authorized to delete posts'
-			}
-		})
 	}
-
-	course.save()
-	.then((result) => {
-		return res.json({
-			message: 'forum POST(s) deleted successfully'
+	if (newPosts.length === 0){
+		//remove topic if no posts are left there
+		forum.topics.splice(req.topic.pos, 1);
+	} else {
+		let newPostsSet = {};
+		newPosts.forEach(p => newPostsSet[p._id] = true);
+		newPosts.forEach((p, i) => {
+			newPosts[i].answers = p.answers.filter(a => newPostsSet[a]);
 		})
-	})
-	.catch(err => {
-		console.log(err);
-		return res.status(err.status || 400)
-			.json({
-				error: err
-			})
-	}) 
+		forum.topics[req.topic.pos].posts = [];
+		forum.topics[req.topic.pos].posts.push(...newPosts);
+	}
+	return forum.save()
+		.then(result => res.json(result))
+		.catch(err => handleError(err, res))
 }
-
-
-const deleteForums = (req, res, next) => {
-	//TODO delete forums
-}
-exports.deleteForums = deleteForums;
-
-const updateForums = (req, res, next) => {
-	//TODO update forums with given data
-}
-exports.updateForums = updateForums;
+exports.deleteTopicPost = deleteTopicPost;

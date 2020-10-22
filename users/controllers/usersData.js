@@ -1,7 +1,7 @@
 let User = require('../model');
 let { extend } = require('lodash');
 let { ObjectId } = require('mongoose').Types;
-const {handleError} = require("../../helpers");
+const {handleError, deleteFilesAsyncIndependent} = require("../../helpers");
 const CONSTANTS = {
 	NON_UPDATABLE_USER_FIELDS: [
 		'email', 'hashed_password', 'created', 'updated', 'salt', 'role', 'activated',
@@ -96,6 +96,7 @@ const deserializeAndCleanUserData = (req, res, next) => {
 	try { //deserialize
 		req.body = JSON.parse(req.body.user);
 	} catch (err) {
+		deleteFilesAsyncIndependent(req.files);
 		return handleError(err, res);
 	}
 	// Removing previous users avatar if new one gets uploaded

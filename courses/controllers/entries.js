@@ -1,8 +1,7 @@
 let Course = require('../model')
 let User = require('../../users/model');
 let Exercise = require('../../exercises/model');
-let { extend, isEqual, cloneDeep} = require('lodash');
-const {formatMongooseError, handleError} = require("../../helpers");
+const { handleError} = require("../../helpers");
 
 const entryById = (req, res, next, entryId) => {
     let len = 0;
