@@ -7,10 +7,6 @@ let { COURSE_TEACHER_INVITATION } = constants.notifications,
 	{ CLIENT_URL } = constants.client,
 	{ COURSE_INVITATION_DURATION} = constants.users
 /**
- * @class controllers.courses.teachers
- */
-
-/**
  * @type function
  * @throws 403
  * @description sends the invitation to the course to the specified email address.
@@ -24,7 +20,7 @@ let { COURSE_TEACHER_INVITATION } = constants.notifications,
  * @param {models.Course} req.course
  * @param {models.User} [req.invitedTeacher]
  * @param {function} next
- * @memberOf controllers.courses.teachers
+ * @memberOf controllers.courses
  */
 const sendTeacherInvite = (req, res, next) => {
 	let newUser = false;
@@ -114,7 +110,7 @@ exports.sendTeacherInvite = sendTeacherInvite;
  * @param {e.Response} res
  * @param {models.Course} req.course
  * @param {models.User} [req.invitedTeacher]
- * @memberOf controllers.courses.teachers
+ * @memberOf controllers.courses
  */
 const addToInvitedList = (req, res) => {
 	let {course, invitedTeacher} = req;
@@ -140,7 +136,7 @@ exports.addToInvitedList = addToInvitedList;
  * @param {e.Response} res
  * @param {models.Course} req.course
  * @param {models.User} req.auth
- * @memberOf controllers.courses.teachers
+ * @memberOf controllers.courses
  */
 const acceptTeacherInvite = (req, res) => {
 	let {course} = req;

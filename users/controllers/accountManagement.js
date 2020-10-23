@@ -7,9 +7,6 @@ let { JWT_SECRET } = constants.auth,
     { ACTIVATION_TIME_PERIOD } = constants.users,
     { ACTIVATE_ACCOUNT } = constants.notifications
 /**
- * @class controllers.users.auth
- */
-/**
  * @typedef BasicAuthUserData
  * @type Object
  * @property {string} email
@@ -31,7 +28,7 @@ let { JWT_SECRET } = constants.auth,
  * @param {e.Request} req
  * @param {models.User} req.auth
  * @param {e.Response} res
- * @memberOf controllers.users.auth
+ * @memberOf controllers.users
  */
 const sendActivationLink = (req, res) => {
     if (req.auth.activated){
@@ -73,7 +70,7 @@ exports.sendActivationLink = sendActivationLink
  * @param {object} req.params
  * @param {string} req.params.activationToken
  * @param {e.Response} res
- * @memberOf controllers.users.auth
+ * @memberOf controllers.users
  */
 const activateAccount = (req, res) => {
     let token = req.params.activationToken, userData;
@@ -124,7 +121,7 @@ exports.activateAccount = activateAccount;
  * @param {Object} req.body
  * @param {string} req.body.email
  * @param {e.Response} res
- * @memberOf controllers.users.auth
+ * @memberOf controllers.users
  */
 const forgotPassword = (req, res) => {
     if (!req.body || !req.body.email)
@@ -159,7 +156,6 @@ const forgotPassword = (req, res) => {
                     <p>${CLIENT_URL}/reset-password/${token}</p>
                 `
             };
-
             return sendEmail(emailData);
         })
         .then(() => {
@@ -184,7 +180,7 @@ exports.forgotPassword = forgotPassword;
  * @param {Object} req.params
  * @param {string} req.params.resetToken
  * @param {e.Response} res
- * @memberOf controllers.users.auth
+ * @memberOf controllers.users
  */
 const resetPassword = (req, res) => {
     const token = req.params.resetToken;

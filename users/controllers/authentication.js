@@ -16,7 +16,7 @@ let { JWT_SECRET } = constants.auth,
  * @param {e.Request} req
  * @param {SignupData|any} req.body
  * @param {e.Response} res
- * @memberOf controllers.users.auth
+ * @memberOf controllers.users
  */
 const signup = (req, res) => {
     let { email, teacher, teacherPassword } = req.body, token;
@@ -80,7 +80,7 @@ exports.signup = signup
  * @param {object} req.params
  * @param {string} req.params.inviteToken
  * @param {e.Response} res
- * @memberOf controllers.users.auth
+ * @memberOf controllers.users
  */
 const inviteSignup = (req, res) => {
     let token, inviteData;
@@ -199,7 +199,7 @@ exports.inviteSignup = inviteSignup;
  * @param {e.Request} req
  * @param {BasicAuthUserData} req.body
  * @param {e.Response} res
- * @memberOf controllers.users.auth
+ * @memberOf controllers.users
  */
 const signin = (req, res) => {
     let { email, password } = req.body;

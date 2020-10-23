@@ -123,7 +123,7 @@ let exerciseTaskSchema = new mongoose.Schema({
     description: String,
     score: {
         type: Number,
-        required: true
+        required: 'The score for the task is required'
     },
     exerciseRefs: [
         {
@@ -169,8 +169,8 @@ let oneChoiceTaskSchema = new mongoose.Schema({
                 if (!this.correctAnswer){
                     return false;
                 }
-                return this.correctAnswers
-                    .findIndex(a => a.key === this.correctAnswer) > -1;
+                return this.options
+                    .findIndex(a => a.key === this.correctAnswer) >= -1;
             },
             message: 'There should be a correct answer which is ' +
                 'equal to one of the options in every one-choice exercise'
@@ -205,9 +205,10 @@ let multipleChoiceTaskSchema = new mongoose.Schema({
                 if (!Array.isArray(this.correctAnswers)){
                     return false;
                 }
-                // all correct answers should be one of option keys
-                return this.correctAnswers
-                    .findIndex(a => !this.options.includes(a)) < 0;
+                let index = this.correctAnswers.findIndex(a => {
+                    return this.options.findIndex(o => o.key === a) < 0;
+                })
+                return index < 0;
             },
             message: 'Correct answers in multiple choice tasks ' +
                 'should be the keys of other options of the given task'

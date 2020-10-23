@@ -120,7 +120,6 @@ let courseExerciseSchema = new mongoose.Schema({
 let Exercise = mongoose.model('Exercise', courseExerciseSchema);
 module.exports = Exercise;
 
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // courseExerciseSchema.path('tasks').discriminator('OneChoiceTask', oneChoiceTaskSchema)
 // courseExerciseSchema.path('tasks').discriminator('MultipleChoiceTask', multipleChoiceTaskSchema)
 // courseExerciseSchema.path('tasks').discriminator('TextTask', textTaskSchema)

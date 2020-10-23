@@ -1,10 +1,6 @@
 let User = require('../../users/model');
 const { handleError } = require("../../helpers");
 /**
- * @class controllers.courses.subscription
- */
-
-/**
  * @type function
  * @throws 403
  * @description subscribes the authenticated user to the given course.
@@ -14,7 +10,7 @@ const { handleError } = require("../../helpers");
  * @param {e.Response} res
  * @param {models.Course} req.course
  * @param {models.User} req.auth
- * @memberOf controllers.courses.subscription
+ * @memberOf controllers.courses
  */
 const subscribe = (req, res) => {
     let {course} = req;
@@ -53,7 +49,7 @@ exports.subscribe = subscribe;
  * @param {e.Response} res
  * @param {models.Course} req.course
  * @param {models.User} req.auth
- * @memberOf controllers.courses.subscription
+ * @memberOf controllers.courses
  */
 const unsubscribe = (req, res) => {
     let {course} = req;
@@ -99,7 +95,7 @@ exports.unsubscribe = unsubscribe;
  * @param {e.Response} res
  * @param {models.Course} req.course
  * @param {models.User} req.auth
- * @memberOf controllers.courses.subscription
+ * @memberOf controllers.courses
  */
 const viewCourse = (req, res) => {
     let user = req.auth, courseId = req.course._id;

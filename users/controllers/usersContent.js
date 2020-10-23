@@ -23,7 +23,7 @@ let { CONTACT_EMAIL } = require('../../constants').errors
  * @param {string} req.query.cnt
  * @param {string[]} req.query.courses
  * @param {e.Response} res
- * @memberOf controllers.users.usersData
+ * @memberOf controllers.users
  */
 const getUpdatesByDate = (req, res) => {
     let { courses: courseIds, dateTo, dateFrom, starting, cnt } = req.query;
@@ -59,7 +59,7 @@ exports.getUpdatesByDate = getUpdatesByDate;
  * @param {models.User} req.auth
  * @param {string[]} req.query.courses
  * @param {e.Response} res
- * @memberOf controllers.users.usersData
+ * @memberOf controllers.users
  */
 const getUpdatesNotifications = (req, res) => {
     let lastVisitedSet = {}, { subscribedCourses } = req.auth;
@@ -90,7 +90,7 @@ exports.getUpdatesNotifications = getUpdatesNotifications;
  * @param {{data: UserNotification[], user: ObjectId|string}[]} req.notificationsToAdd
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers.users.usersData
+ * @memberOf controllers.users
  */
 const addNotifications = (req, res, next) => {
     let notifications = req.notificationsToAdd.data;
@@ -115,7 +115,7 @@ exports.addNotifications = addNotifications;
  * @param {models.User} [req.user]
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers.users.usersData
+ * @memberOf controllers.users
  */
 const removeUserMentions = (req, res, next) => {
     let user = req.user;

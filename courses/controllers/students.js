@@ -12,7 +12,7 @@ const {handleError} = require("../../helpers");
  * @param {models.User} req.auth
  * @param {string} req.userCourseStatus
  * @param {string} [req.query.all]
- * @memberOf controllers.courses.courseData
+ * @memberOf controllers.courses
  */
 const enrollInCourse = (req, res) => {
     let {course} = req;
@@ -54,7 +54,7 @@ exports.enrollInCourse = enrollInCourse;
  * @param {models.User} req.auth
  * @param {string} req.userCourseStatus
  * @param {string} [req.query.all]
- * @memberOf controllers.courses.courseData
+ * @memberOf controllers.courses
  * TODO add normal docs for this
  */
 const getExerciseSummary = (req, res) => {

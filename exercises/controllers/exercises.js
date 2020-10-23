@@ -449,6 +449,11 @@ exports.newExerciseAttempt = async (req, res) => {
         })
 }
 
+const saveExercises = (req, res, next) => {
+    //TODO save exercises
+}
+exports.saveExercises = saveExercises;
+
 const removeExerciseMentions = (req, res, next) => {
     //TODO remove exercise mentions
 }

@@ -213,9 +213,16 @@ exports.deleteFile = deleteFile;
 /**
  * @type function
  * @description deletes the files with the IDs, which are specified in the
- * `req.filesToDelete` array;
+ * `req.filesToDelete` array; This controller can be configured
+ * to work asynchronously. Set `req.deleteFilesPromises` to `true`
+ * before calling this middleware in order for this
+ * controller to push all promises of removing files
+ * to `req.promises` and call next middleware right away. Otherwise
+ * wait until all files files are fully deleted from DB and then call next middleware
  * @param {e.Request} req
  * @param {models.User} [req.auth]
+ * @param {boolean} [req.deleteFilesPromises]
+ * @param {Promise[]} [req.promises]
  * @param {string|ObjectId[]} [req.filesToDelete]
  * @param {e.Response} res
  * @param {function} next
@@ -229,11 +236,21 @@ const deleteFiles = (req, res, next) => {
     if (!gfs) {
         return handleError(gfsError, res);
     }
-    return Promise.all(req.filesToDelete.map(id => new Promise((resolve, reject ) => {
+    let promises = req.filesToDelete.map(id => new Promise((resolve, reject ) => {
         gfs.remove({_id: id, root: 'uploads'}, (err) => (
             err ? reject(err) : resolve(id)
         ))
-    })))
+    }))
+    if (req.deleteFilesPromises){
+        if (!Array.isArray(req.promises)){
+            req.promises = promises;
+        } else {
+            req.promises.push(...promises);
+        }
+
+        return next();
+    }
+    return Promise.all(promises)
         .then(() => next())
         .catch(err => {handleError(err, res)})
 }

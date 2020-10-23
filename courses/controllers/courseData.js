@@ -2,11 +2,6 @@ let Course = require('../model')
 let User = require('../../users/model');
 const {handleError} = require("../../helpers");
 let {cloneDeep} = require('lodash')
-
-
-/**
- * @class controllers.courses.courseData
- */
 /**
  * @type function
  * @throws 400, 404
@@ -18,11 +13,12 @@ let {cloneDeep} = require('lodash')
  * @param {models.Course} req.course
  * @param {function} next
  * @param {string} id - the id of the course that should be found
- * @memberOf controllers.courses.courseData
+ * @memberOf controllers.courses
  */
 const courseById = (req, res, next, id) => {
     return Course.findOne({_id: id})
         .populate('exercises')
+        .populate('exercises.tasks')
         .populate('sections.entries')
         .then(course => {
             if (!course) throw {
@@ -48,7 +44,7 @@ exports.courseById = courseById;
  * @param {models.User} req.auth
  * @param {e.Response} res
  * @param {models.Course.Entry} req.course
- * @memberOf controllers.courses.courseData
+ * @memberOf controllers.courses
  */
 const createCourse = (req, res) => {
     let courseData = req.body;
@@ -135,7 +131,14 @@ exports.getCoursesFiltered = async (req, res) => {
         .populate({path: 'students', select: basicUserFields})
         .populate({path: 'teachers', select: basicUserFields})
         .populate({path: 'creator', select: basicUserFields})
-        .populate('exercises' )
+        .populate('exercises', '-__v')
+        .populate({
+            path: 'exercises',
+            populate: {
+                path: 'tasks',
+                select: '-__v'
+            }
+        })
         .populate('sections.entries')
         .populate({
             path: 'sections.entries',
@@ -436,13 +439,13 @@ exports.getCoursesFiltered = async (req, res) => {
 /**
  * @type function
  * @description deletes the course from the database. Please use this
- * {@link controllers.courses.courseData.removeCourseMentions cleanup controller}
+ * {@link controllers.courses.removeCourseMentions cleanup controller}
  * to remove all references to this course beforehand.
  * @param {e.Request} req
  * @param {e.Response} res
  * @param {models.Course} req.course
  * @param {models.User} req.auth
- * @memberOf controllers.courses.courseData
+ * @memberOf controllers.courses
  */
 const deleteCourse = (req, res) => {
     return Course.deleteOne({ _id: req.course._id})
@@ -465,7 +468,7 @@ exports.deleteCourse = deleteCourse;
  * @param {models.Course} req.course
  * @param {models.User} req.auth
  * @param {function} next
- * @memberOf controllers.courses.courseData
+ * @memberOf controllers.courses
  */
 const removeCourseMentions = (req, res, next) => {
     //TODO remove exercises/forums/entries documents if they

@@ -1,6 +1,7 @@
 let { Entry } = require('../model/Entry')
 let Forum = require('../../forums/model');
 let Exercise = require('../../exercises/model');
+let {ExerciseTask} = require('../../exercises/model/ExerciseTask')
 let { extend } = require('lodash');
 const { handleError, deleteFilesAsyncIndependent } = require("../../helpers");
 
@@ -28,7 +29,7 @@ exports.UPDATE_COURSE_CONSTANTS = CONSTANTS;
  * @param {Promise[]} req.promises
  * @param {{section: number, entry: number}[]} [req.filesPositions]
  * @param {function} next
- * @memberOf controllers.courses.courseData
+ * @memberOf controllers.courses
  */
 const getNewCourseData = (req, res, next) => {
     try {
@@ -70,7 +71,7 @@ exports.getNewCourseData = getNewCourseData;
  * @param {models.Exercise[]} req.updatesDeletedExercises
  * @param {models.Exercise[]} req.exercisesToDelete
  * @param {function} next
- * @memberOf controllers.courses.courseData
+ * @memberOf controllers.courses
  */
 const cleanupCourseData = (req, res, next) => {
     let { course, newCourse } = req;
@@ -141,7 +142,7 @@ exports.cleanupCourseData = cleanupCourseData;
  * @param {models.Exercise[]} req.updatesNewExercises
  * @param {models.Exercise[]} req.updatesDeletedExercises
  * @param {function} next
- * @memberOf controllers.courses.courseData
+ * @memberOf controllers.courses
  */
 const addUpdatesToCourse = (req, res, next) => {
     let {
@@ -209,7 +210,7 @@ exports.addUpdatesToCourse = addUpdatesToCourse;
  * @param {Promise[]} req.promises
  * @param {function} next
  * @param {{section: number, entry: number}[]} [req.filesPositions]
- * @memberOf controllers.courses.courseData
+ * @memberOf controllers.courses
  */
 const updateCourseSections = (req, res, next) => {
     let {newCourse, course, filesPositions, files} = req;
@@ -307,7 +308,7 @@ exports.updateCourseSections = updateCourseSections;
  * @param {Promise[]} req.promises
  * @param {function} next
  * @param {{section: number, entry: number}[]} [req.filesPositions]
- * @memberOf controllers.courses.courseData
+ * @memberOf controllers.courses
  */
 const updateCourseExercises = (req, res, next) => {
     let {newCourse, course} = req;
@@ -317,12 +318,47 @@ const updateCourseExercises = (req, res, next) => {
         return next();
     }
     newExercises.forEach((e, i) => {
+        let saveTasks = (i, tasks, id) => {
+            if (Array.isArray(tasks)) tasks.forEach((t, j) => {
+                if (!t._id){
+                    tasks[j] = new ExerciseTask({...t, exerciseRefs: [id]});
+                    req.promises.push(tasks[j].save());
+                } else {
+                    req.promises.push(new Promise((resolve, reject) => {
+                        return ExerciseTask.findById(t._id)
+                            .then(task => {
+                                task = extend(task, tasks[j]);
+                                tasks[j] = task;
+                                return task.save()
+                            })
+                            .then(ex => resolve(ex))
+                            .catch(err => reject(err))
+                    }))
+                }
+            })
+            return tasks;
+        }
+
         if (!e._id){
-            newCourse.exercises[i] = new Exercise(e);
+            let tasks = [...newCourse.exercises[i].tasks];
+            // First save the exercise without tasks
+            // and then add them via saveTasks.
+            // This has to be done this way, because
+            // all tasks require the reference to the exercise they are in.
+            // if this were to be done the other way around,
+            // the exercise would not have an Id at the
+            // moment its tasks were getting saved, which would cause errors.
+            newExercises[i].tasks = [];
+            newExercises[i] =
+                new Exercise({...e, courseRefs: [course._id]});
+            newExercises[i].tasks = saveTasks(i, tasks, newExercises[i]._id);
             req.promises.push(newExercises[i].save());
+
         } else {
+            newExercises[i].tasks =
+                saveTasks(i, newExercises[i].tasks, newExercises[i]._id);
             req.promises.push(new Promise((resolve, reject) => {
-                Exercise.findById(e._id)
+                return Exercise.findById(e._id)
                     .then(exercise => {
                         exercise = extend(exercise, newExercises[i]);
                         return exercise.save();
@@ -357,7 +393,7 @@ exports.updateCourseExercises = updateCourseExercises;
  * @param {models.Course} req.course
  * @param {function} next
  * @param {models.Course} req.newCourse
- * @memberOf controllers.courses.courseData
+ * @memberOf controllers.courses
  */
 const mergeCourseBasicFields = (req, res, next) => {
     let extender = {};
@@ -387,10 +423,10 @@ exports.mergeCourseBasicFields = mergeCourseBasicFields;
  * @param {Object} req.body
  * @param {models.Course} req.course
  * @param {Promise[]} req.promises
- * @memberOf controllers.courses.courseData
+ * @memberOf controllers.courses
  */
 const saveCourseChanges = (req, res) => {
-    return Promise.all(req.promises)
+    return Promise.all(Array.isArray(req.promises) ? req.promises : [])
         .then(() => req.course.save())
         .then(result => {res.json(result)})
         .catch(err => {

@@ -12,9 +12,7 @@ const CONSTANTS = {
 	]
 }
 exports.CONSTANTS = CONSTANTS;
-/**
- * @class controllers.users.usersData
- */
+
 /**
  * @type function
  * @throws 400, 404
@@ -27,7 +25,7 @@ exports.CONSTANTS = CONSTANTS;
  * @param {e.Response} res
  * @param {function} next
  * @param {string} id - the id of the user that should be found and saved
- * @memberOf controllers.users.usersData
+ * @memberOf controllers.users
  */
 const userById = (req, res, next, id) => {
 	return User.findOne({_id: id})
@@ -48,12 +46,12 @@ exports.userById = userById;
  * @type function
  * @throws 404
  * @description returns the formatted user from the `req.user` object. Normally
- * works with the {@link controllers.users.usersData.userById userById} controller
+ * works with the {@link controllers.users.userById userById} controller
  * @param {e.Request} req
  * @param {models.User} [req.auth]
  * @param {models.User} [req.user]
  * @param {e.Response} res
- * @memberOf controllers.users.usersData
+ * @memberOf controllers.users
  */
 const getUser = (req, res) => {
 	if (!req.user){
@@ -90,7 +88,7 @@ exports.getUser = getUser;
  * @param {models.User} [req.user]
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers.users.usersData
+ * @memberOf controllers.users
  */
 const deserializeAndCleanUserData = (req, res, next) => {
 	try { //deserialize
@@ -116,7 +114,7 @@ exports.deserializeAndCleanUserData = deserializeAndCleanUserData;
  * @type function
  * @description updates the user, provided in the `req.user` object with the new data from the
  * request body. If the body was FormData, then this controller should only be called after
- * {@link controllers.users.usersData.deserializeAndCleanUserData deserialization}
+ * {@link controllers.users.deserializeAndCleanUserData deserialization}
  * @param {e.Request} req
  * @param {models.User} [req.auth]
  * @param {models.User & {oldPassword: string}} [req.body]
@@ -124,7 +122,7 @@ exports.deserializeAndCleanUserData = deserializeAndCleanUserData;
  * @param {[]} [req.filesToDelete]
  * @param {models.User} [req.user]
  * @param {e.Response} res
- * @memberOf controllers.users.usersData
+ * @memberOf controllers.users
  */
 const updateUser = (req, res) => {
 	let newData = {...req.body};
@@ -182,14 +180,14 @@ exports.updateUser = updateUser;
  * @type function
  * @throws 401
  * @description lets subsequent middleware be invoked only if the authenticated user is equal
- * to the user who was found by id with the {@link controllers.users.usersData.userById} and
+ * to the user who was found by id with the {@link controllers.users.userById} and
  * is present in the `req.user` object
  * @param {e.Request} req
  * @param {models.User} [req.auth]
  * @param {models.User} [req.user]
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers.users.usersData
+ * @memberOf controllers.users
  */
 const isAuthenticatedUser = (req, res, next) => {
 	if (!req.auth._id.equals(req.user._id)){
@@ -209,7 +207,7 @@ exports.isAuthenticatedUser = isAuthenticatedUser;
  * @param {e.Request} req
  * @param {models.User} req.user
  * @param {e.Response} res
- * @memberOf controllers.users.usersData
+ * @memberOf controllers.users
  */
 const deleteUser = (req, res) => {
 	return User.deleteOne({ _id: req.user._id})
