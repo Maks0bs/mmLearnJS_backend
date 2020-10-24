@@ -149,7 +149,8 @@ let exerciseAttemptSchema = new mongoose.Schema({
         default: null
     }
 }, {
-    discriminatorKey: 'kind'
+    discriminatorKey: 'kind',
+    autoCreate: true
 })
 
 let ExerciseAttempt = mongoose.model('ExerciseAttempt', exerciseAttemptSchema);

@@ -114,7 +114,8 @@ let courseExerciseSchema = new mongoose.Schema({
         default: 1
     }
 }, {
-    discriminatorKey: 'kind'
+    discriminatorKey: 'kind',
+    autoCreate: true
 })
 
 let Exercise = mongoose.model('Exercise', courseExerciseSchema);

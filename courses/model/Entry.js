@@ -93,7 +93,8 @@ let entrySchema = new mongoose.Schema({
         required: true
     }
 }, {
-    discriminatorKey: 'kind'
+    discriminatorKey: 'kind',
+    autoCreate: true
 })
 let Entry = mongoose.model('Entry', entrySchema);
 exports.Entry = Entry;

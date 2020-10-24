@@ -1,6 +1,8 @@
 let { ExerciseAttempt } = require('../../courses/model');
 let { assign } = require('lodash');
 let User = require('../../users/model')
+let Exercise = require('../model')
+let { getExerciseUserStatus } = require('../helpers')
 
 /**
  * @class controllers.exercises
@@ -28,75 +30,107 @@ exports.exerciseById = (req, res, next, id) => {
     }
 }
 
-exports.getExercise = (req, res) => {
+exports.getExercise = (req, res) => {}
 
-    let exercise = req.exercise.data;
-    let usersToPopulate = [], usersToPopulateSet = {}
-    let { participants } = exercise;
-    if (req.userCourseStatus === 'student'){
-        exercise.participants = undefined;
+/**
+ * @type function
+ * @description Saves the exercises, which match the MongoDB
+ * query criteria, described in `req.exercisesConfig.filter` to `req.exercises`.
+ * Please also provide the reference to the course which
+ * contains a member who wants to perform further actions
+ * with exercises in `req.exercisesConfig.course`. Some data
+ * will be hidden to only show data which is relevant from
+ * the perspective of a member of this course. Optionally,
+ * the relation to the given course can be provided
+ * under `req.exercisesConfig.userStatus` which can be falsy
+ * or equal to `student` or `teacher`.
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {Object} req.exercisesConfig
+ * @param {models.User} req.auth
+ * @param {models.Exercise[]} req.exercises
+ * @param {models.Course} req.exercisesConfig.course
+ * @param {string} req.exercisesConfig.userStatus
+ * @param {Object} req.exercisesConfig.filter
+ * @param {function} next
+ * @memberOf controllers.exercises
+ */
+const getExercises = (req, res, next) => {
+    let memberSet = {}, teacherSet = {}, { exercisesConfig: config } = req;
+    req.auth.enrolledCourses.forEach(c => memberSet[c] = true);
+    if (Array.isArray(req.auth.teacherCourses)){
+        req.auth.teacherCourses.forEach(c => {
+            memberSet[c] = true
+            teacherSet[c] = true
+        });
     }
-    let hasActiveAttempt = false;
-
-    for (let p of participants){
-        if (p.user.equals(req.auth._id)){
-            for (let a of p.attempts){
-                if (!a.endTime){
-                    hasActiveAttempt = true;
-                    break;
-                }
-            }
-        }
-
-        if (!usersToPopulateSet[p.user._id]){
-            usersToPopulateSet[p.user._id] = 1;
-            usersToPopulate.push(p.user._id);
-        }
-    }
-
-    if (!(hasActiveAttempt && exercise.available)){
-        //Don't send tasks data if users is not currently doing the exercise or if the exercise is not available
-        exercise.tasks = undefined;
-    } else {
-
-        //Otherwise remove correct answers from task data
-        for (let t = 0; t < exercise.tasks.length; t++){
-            exercise.tasks[t].correctAnswer = undefined;
-            exercise.tasks[t].correctAnswers = undefined;
-        }
-    }
-
-    if (!exercise.participants){
-        return res.json(exercise);
-    }
-
-    return User.find({
-        _id: {
-            $in: usersToPopulate
-        }
-    })
-        .then(users => {
-            for (let user of users){
-                user.hideFields();
-                usersToPopulateSet[user._id] = user;
-            }
-
-            for (let j = 0; j < exercise.participants.length; j++){
-                exercise.participants[j].user = usersToPopulateSet[exercise.participants[j].user._id];
-            }
-
-            return res.json(exercise);
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(err.status || 400)
-                .json({
-                    error: err
+    let {course, filter } = config, courseMembersSet = {};
+    req.exercises = [];
+    // s._id || s is used to work with both direct ObjectIDs and mongo Documents
+    course.students.forEach(s => courseMembersSet[s._id || s] = true)
+    course.teachers.forEach(t => courseMembersSet[t._id || t] = true)
+    return Exercise.find({...filter})
+        .populate(
+            'participants.user',
+            ['_id', 'name', 'photo', 'hiddenFields', 'teacherCourses', 'enrolledCourses']
+        )
+        .populate('tasks')
+        .then(exercises => {
+            return exercises.forEach(e => {
+                let status = getExerciseUserStatus(e, req.auth, memberSet, teacherSet),
+                    hasActiveAttempt = false;
+                e.courseRefs = undefined;
+                if (!status || ((status === 'student') && !e.available)) return;
+                // leave only participants that are relevant for the provided course
+                e.participants = e.participants && e.participants.filter(
+                    p => courseMembersSet[p.user._id]
+                )
+                e.participants.forEach(p => p.user.hideFields());
+                if (Array.isArray(e.tasks)) e.tasks.forEach((t, j) => {
+                    e.tasks[j].exerciseRefs = undefined;
                 })
+                if (status === 'teacher') return req.exercises.push(e);
+                e.weight = undefined;
+                e.participants = e.participants && e.participants.filter(
+                    p => p.user._id.equals(req.auth._id)
+                )
+                // still running through all participants (even though there is supposed
+                // to be only one) to avoid errors
+                for (let p of e.participants){
+                    if (p.user.equals(req.auth._id)){
+                        hasActiveAttempt = p.attempts.findIndex(a => !a.endTime) >= 0;
+                    }
+                    if (hasActiveAttempt) break;
+                }
+                e.participants = undefined;
+                if (!hasActiveAttempt || !e.available){
+                    e.tasks = undefined;
+                } else if (Array.isArray(e.tasks)){
+                    //Otherwise remove correct answers from task data
+                    e.tasks.forEach((t, i) => {
+                        e.tasks[t].correctAnswer = undefined;
+                        e.tasks[t].correctAnswers = undefined;
+                    })
+                }
+                req.exercises.push(e);
+            })
         })
-
-
+        .then(() => next())
 }
+exports.getExercises = getExercises;
+
+/**
+ * @type function
+ * @description Sends exercises under `req.exercises` as a response
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Exercise[]} req.exercises
+ * @memberOf controllers.courses
+ */
+const sendExercises = (req, res) => {
+    return res.json(req.exercises);
+}
+exports.sendExercises = sendExercises;
 
 
 //TODO getGrades (for students)
@@ -449,10 +483,6 @@ exports.newExerciseAttempt = async (req, res) => {
         })
 }
 
-const saveExercises = (req, res, next) => {
-    //TODO save exercises
-}
-exports.saveExercises = saveExercises;
 
 const removeExerciseMentions = (req, res, next) => {
     //TODO remove exercise mentions

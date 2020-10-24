@@ -255,7 +255,7 @@ let userSchema = new mongoose.Schema({
             }
         }
     ]
-});
+}, {autoCreate: true});
 
 // when setting the password, the validation occurs right away (before saving document to database)
 // Because of that, always wrap the operation, where you try to set the password in a try...catch block

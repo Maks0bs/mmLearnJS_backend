@@ -3,7 +3,7 @@ const {
     deleteEntries, removeEntriesMentions
 } = require("../controllers/entries");
 const {
-    deleteExercises, removeExerciseMentions
+    deleteExercises, removeExerciseMentions, getExercises, sendExercises
 } = require("../../exercises/controllers");
 let {
     isTeacher, isCourseCreator, teacherInCourse, userInCourse,
@@ -11,11 +11,11 @@ let {
 } = require('../../users/controllers')
 let { validate } = require('../../helpers')
 let {
-    enrollInCourse, updateCourseSections, cleanupCourseData, getNewCourseData,
+    enrollInCourse, updateCourseSections, cleanupCourseData, initCourseEditing,
     deleteCourse, removeCourseMentions, subscribe, unsubscribe, viewCourse,
     sendTeacherInvite, addToInvitedList, acceptTeacherInvite, getExerciseSummary,
     addUpdatesToCourse, mergeCourseBasicFields, updateCourseExercises,
-    saveCourseChanges
+    saveCourseChanges, getCourseExercisesConfigure
 } = require('../controllers')
 let {
     deleteFiles, uploadFiles
@@ -363,6 +363,60 @@ router.get('/view',
     viewCourse
 )//TODO add tests for this
 
+/**
+ * @swagger
+ * path:
+ *  /course/:courseId/exercises:
+ *    get:
+ *      summary: >
+ *        Sends relevant all available and relevant data
+ *        about each exercise that exists in the course with given Id.
+ *      description: >
+ *        Returns data about each exercise in the given course.
+ *        If the authenticated user is a teacher at this course
+ *        than they will receive all available data about the
+ *        exercise (except for where else this exercise is used and
+ *        the participants from other courses are excluded).
+ *        If they are a student then they won't receive
+ *        data about other participants. If the student has
+ *        a running attempt at this course, they will receive
+ *        the list of tasks in this course. Otherwise tasks are not available
+ *      operationId: getCourseExercises
+ *      security:
+ *        - cookieAuth: []
+ *      parameters:
+ *        - name: courseId
+ *          in: path
+ *          description: >
+ *            the id of the course to perform operations with
+ *          required: true
+ *          type: string
+ *      tags:
+ *        - "/course/..."
+ *      responses:
+ *        "200":
+ *          description: Send an array with all proper exercise data
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: array
+ *                items:
+ *                  $ref: '#/components/schemas/Exercise'
+ *        "401":
+ *          description: unauthorized (unauthenticated / can't access course or some exercise)
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
+router.get('/exercises',
+    requireAuthentication,
+    userInCourse,
+    getCourseExercisesConfigure,
+    getExercises,
+    sendExercises
+)
+
 //TODO !!!!!!!!!!!!!!!!!!!!!!!!!
 // !!!!!!!!!!!!!!!!!!!!!!!!!
 // !!!!!!!!!!!!!!!!!!!!!!!!!
@@ -376,12 +430,13 @@ router.delete('/',
 );//TODO add tests for this
 
 //TODO huge refactoring should be done
+// mention that this thing works with a MongoDB session
 router.put('/',
     requireAuthentication,
     isTeacher,
     teacherInCourse,
     uploadFiles,
-    getNewCourseData,
+    initCourseEditing,
     cleanupCourseData,
     addUpdatesToCourse,
     updateCourseSections,

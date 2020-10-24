@@ -135,7 +135,8 @@ let exerciseTaskSchema = new mongoose.Schema({
     // because it enables more flexibility:
     // one task can be used in several exercises
 }, {
-    discriminatorKey: 'kind'
+    discriminatorKey: 'kind',
+    autoCreate: true
 })
 
 let ExerciseTask = mongoose.model('ExerciseTask', exerciseTaskSchema);

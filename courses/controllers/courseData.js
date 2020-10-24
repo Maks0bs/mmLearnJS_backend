@@ -17,8 +17,12 @@ let {cloneDeep} = require('lodash')
  */
 const courseById = (req, res, next, id) => {
     return Course.findOne({_id: id})
-        .populate('exercises')
-        .populate('exercises.tasks')
+        .populate({
+            path: 'exercises',
+            populate: {
+                path: 'tasks'
+            }
+        })
         .populate('sections.entries')
         .then(course => {
             if (!course) throw {
@@ -131,13 +135,13 @@ exports.getCoursesFiltered = async (req, res) => {
         .populate({path: 'students', select: basicUserFields})
         .populate({path: 'teachers', select: basicUserFields})
         .populate({path: 'creator', select: basicUserFields})
-        .populate('exercises', '-__v')
         .populate({
             path: 'exercises',
             populate: {
                 path: 'tasks',
                 select: '-__v'
-            }
+            },
+            select: '-__v -courseRefs'
         })
         .populate('sections.entries')
         .populate({
@@ -255,12 +259,7 @@ exports.getCoursesFiltered = async (req, res) => {
                         }
                     } else {
                         exercises.push(exercise);
-                        for (let p of exercise.participants){
-                            if (!usersToPopulateSet[p.user._id]){
-                                usersToPopulateSet[p.user._id] = 1;
-                                usersToPopulate.push(p.user._id);
-                            }
-                        }
+
                     }
 
 
@@ -386,23 +385,6 @@ exports.getCoursesFiltered = async (req, res) => {
                         }
                     }
                 }
-
-                for (let i = 0; i < courses[c].exercises.length; i++){
-                    if (courses[c].exercises[i].participants){
-                        for (let j = 0; j < courses[c].exercises[i].participants.length; j++){
-                            courses[c]
-                                .exercises[i]
-                                .participants[j]
-                                .user =
-                                usersToPopulateSet[courses[c]
-                                    .exercises[i]
-                                    .participants[j]
-                                    .user
-                                    ._id
-                                    ];
-                        }
-                    }
-                }
             }
 
             return new Promise((resolve) => {
@@ -435,6 +417,37 @@ exports.getCoursesFiltered = async (req, res) => {
                 })
         })
 }
+
+/**
+ * @type function
+ * @description configures the
+ * {@link controllers.exercises.getExercises getExercises} controller
+ * to get the exercises of the course, provided in `req.course`,
+ * adding the ref to course data to the configuration object
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Course} req.course
+ * @param {string} req.userCourseStatus
+ * @param {Object} req.exercisesConfig
+ * @param {models.Course} req.exercisesConfig.course
+ * @param {string} req.exercisesConfig.userStatus
+ * @param {Object} req.exercisesConfig.filter
+ * @param {function} next
+ * @memberOf controllers.courses
+ */
+const getCourseExercisesConfigure = (req, res, next) => {
+    let { course } = req;
+    req.exercisesConfig = {
+        course: course,
+        userStatus: req.userCourseStatus,
+        filter: {
+            _id: { $in: course.exercises.map(e => e._id)}
+        }
+    }
+    if (!course.exercises) return res.json([]);
+    return next();
+}
+exports.getCourseExercisesConfigure = getCourseExercisesConfigure;
 
 /**
  * @type function

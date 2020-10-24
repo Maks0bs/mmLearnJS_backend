@@ -13,14 +13,28 @@ let mongoose = require('mongoose');
  * @augments models.Course.CourseUpdate
  * @memberOf models.Course
  * @name CourseUpdateNewEntries
- * @property {{name: string, type: string}[]} newEntries
+ * @property {{name: string, kind: string}[]} newEntries
  */
 /**
  * @class CourseUpdateDeletedEntries
  * @augments models.Course.CourseUpdate
  * @memberOf models.Course
  * @name CourseUpdateDeletedEntries
- * @property {{name: string, type: string}[]} deletedEntries
+ * @property {{name: string, kind: string}[]} deletedEntries
+ */
+/**
+ * @class CourseUpdateNewExercises
+ * @augments models.Course.CourseUpdate
+ * @memberOf models.Course
+ * @name CourseUpdateNewExercises
+ * @property {{name: string}[]} newExercises
+ */
+/**
+ * @class CourseUpdateDeletedExercises
+ * @augments models.Course.CourseUpdate
+ * @memberOf models.Course
+ * @name CourseUpdateDeletedExercises
+ * @property {{name: string}[]} deletedExercises
  */
 /**
  * @class CourseUpdateNewInfo
@@ -71,6 +85,24 @@ let mongoose = require('mongoose');
  *                       type: string
  *           - type: object
  *             properties:
+ *               newExercises:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *           - type: object
+ *             properties:
+ *               deletedExercises:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *           - type: object
+ *             properties:
  *               newName:
  *                 type: string
  *               oldName:
@@ -95,7 +127,7 @@ let updateNewEntriesSchema = new mongoose.Schema({
     newEntries: [
         {
             name: String,
-            type: { type: String }
+            kind: String
         }
     ]
 })
@@ -109,7 +141,7 @@ let updateDeletedEntriesSchema = new mongoose.Schema({
     deletedEntries: [
         {
             name: String,
-            type: { type: String }
+            kind: String
         }
     ]
 })
@@ -118,6 +150,32 @@ let UpdateDeletedEntries = CourseUpdate.discriminator(
 );
 exports.UpdateDeletedEntries = UpdateDeletedEntries;
 exports.updateDeletedEntriesSchema = updateDeletedEntriesSchema;
+
+let updateNewExercisesSchema = new mongoose.Schema({
+    newExercises: [
+        {
+            name: String,
+        }
+    ]
+})
+let UpdateNewExercises = CourseUpdate.discriminator(
+    'UpdateNewExercises', updateNewExercisesSchema
+);
+exports.UpdateNewExercises = UpdateNewExercises;
+exports.updateNewExercisesSchema = updateNewExercisesSchema;
+
+let updateDeletedExercisesSchema = new mongoose.Schema({
+    deletedExercises: [
+        {
+            name: String
+        }
+    ]
+})
+let UpdateDeletedExercises = CourseUpdate.discriminator(
+    'UpdateDeletedExercises', updateDeletedEntriesSchema
+);
+exports.UpdateDeletedExercises = UpdateDeletedExercises;
+exports.updateDeletedExercisesSchema = updateDeletedExercisesSchema;
 
 let updateNewInfoSchema = new mongoose.Schema({
     oldName: String,

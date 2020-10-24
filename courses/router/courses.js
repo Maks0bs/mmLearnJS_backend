@@ -91,6 +91,7 @@ router.post('/create',
 
 //TODO change of frontend
 //TODO change to get with url params
+//TODO specify that it doesn't provide exhaustive data about exercises
 router.post('/', getCoursesFiltered)
 
 module.exports = router;

@@ -1,6 +1,7 @@
 let mongoose = require('mongoose');
 const {
-	updateNewEntriesSchema, updateDeletedEntriesSchema, updateNewInfoSchema
+	updateNewEntriesSchema, updateDeletedEntriesSchema, updateNewInfoSchema,
+	updateDeletedExercisesSchema, updateNewExercisesSchema
 } = require("./CourseUpdate");
 let { ObjectId } = mongoose.Schema;
 let { v1: uuidv1} = require('uuid');
@@ -194,12 +195,18 @@ let courseSchema = new mongoose.Schema({
 	]
 }, {
 	discriminatorKey: 'kind'
-})
+}, {autoCreate: true})
 courseSchema.path('updates').discriminator(
 	'UpdateNewEntries', updateNewEntriesSchema
 )
 courseSchema.path('updates').discriminator(
 	'UpdateDeletedEntries', updateDeletedEntriesSchema
+)
+courseSchema.path('updates').discriminator(
+	'UpdateNewExercises', updateNewExercisesSchema
+)
+courseSchema.path('updates').discriminator(
+	'UpdateDeletedExercises', updateDeletedExercisesSchema
 )
 courseSchema.path('updates').discriminator(
 	'UpdateNewInfo', updateNewInfoSchema

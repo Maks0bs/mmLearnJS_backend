@@ -105,6 +105,6 @@ let forumSchema = new mongoose.Schema({
             ]
         }
     ]
-})
+}, {autoCreate: true})
 let Forum = mongoose.model('Forum', forumSchema);
 module.exports = Forum;

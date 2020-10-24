@@ -1,6 +1,4 @@
 module.exports = {
     ...require('./exercises'),
+    ...require('./util'),
 }
-/**
- * @class controllers.exercises
- */
