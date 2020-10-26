@@ -7,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> forums/controllers/util.js</title>
+  <title> exercises/controllers/attempts.js</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -84,7 +84,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Source</p>
-                    <h1>forums/controllers/util.js</h1>
+                    <h1>exercises/controllers/attempts.js</h1>
                 </header>
                 
 
@@ -93,231 +93,157 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>let Forum = require('../model');
-let {ForumTopicPost} = require('../model/ForumTopicPost')
-const {handleError} = require("../../helpers");
+            <pre class="prettyprint source linenums"><code>const {handleError} = require("../../helpers");
 
 /**
  * @type function
- * @throws 400, 404
- * @description works with the `:forumId` param in the url. Adds all the data
- * about the forum with the ID the provided parameter. Adds all forum data to
- * the request object under the `req.forum` property
+ * @description sends the exercise attempt from `req.attempt` as a response
+ * @param {models.Exercise.ExerciseAttempt} req.attempt
  * @param {e.Request} req
  * @param {e.Response} res
- * @param {models.Forum} req.forum
- * @param {function} next
- * @param {string} id - the id of the forum that should be found
- * @memberOf controllers.forum
+ * @memberOf controllers.exercises
  */
-const forumById = (req, res, next, id) => {
-    let basicUserFields = ['name', 'photo', '_id', 'hiddenFields'];
-    return Forum.findOne({_id: id})
-        .populate({
-            path: 'topics',
-            populate:{
-                path: 'creator', select: basicUserFields
+const getAttempt = (req, res) => {
+    req.attempt.exerciseRef = req.attempt.exerciseRef._id;
+    return res.json(req.attempt);
+}
+exports.getAttempt = getAttempt;
+
+/**
+ * @type function
+ * @throws 400, 403
+ * @description updates the attempt under `req.attempt` with new
+ * answers' data from the `req.body`
+ * @param {models.Exercise.ExerciseAttempt} req.attempt
+ * @param {models.Exercise.ExerciseAttemptAnswer[]} req.body
+ * @param {string} req.userAttemptStatus
+ * @param {models.User} req.auth
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @memberOf controllers.exercises
+ */
+const updateAttemptAnswers = (req, res) => {
+    let newAnswers = req.body, {attempt} = req;
+    let { answers } = attempt;
+    if (attempt.endTime &amp;&amp; req.userAttemptStatus === 'student'){
+        return res.status(403).json({
+            error: {
+                status: 403,
+                message: 'Cannot update attempt, it is already finished'
             }
         })
-        .populate({
-            path: 'topics.posts',
-            populate:{
-                path: 'creator', select: basicUserFields
+    }
+    if (newAnswers.length !== answers.length){
+        return res.status(400).json({
+            error: {
+                status: 400,
+                message: 'Wrong amount of answers in the new attempt data'
             }
         })
-        .then(forum => {
-            if (!forum) throw {
-                status: 404, error: 'Forum not found'
-            }
-            return forum;
-        })
-        .then(forum => {
-            // hide fields of topic/post creators
-            if (Array.isArray(forum.topics)) forum.topics.forEach((t, i) => {
-                let newCreator = t.creator;
-                newCreator.hideFields();
-                forum.topics[i].creator = newCreator;
-                if (Array.isArray(t.posts)) t.posts.forEach((p, j) => {
-                    let newPostCreator = p.creator;
-                    newPostCreator.hideFields();
-                    forum.topics[i].posts[j].creator = newPostCreator;
-                })
+    }
+    for (let i = 0; i &lt; newAnswers.length; i++){
+        // verify that new answers are in correct order
+        if (newAnswers[i].taskRef !== answers[i].taskRef._id.toString()){
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    message: 'The order of new answers is incorrect or answers ' +
+                        'to some tasks are missing'
+                }
             })
-            req.forum = forum;
-            return next();
-        })
-        .catch(err => {handleError(err, res)})
-}
-exports.forumById = forumById;
-
-/**
- * @type function
- * @throws 400, 404
- * @description works with the `:topicId` param in the url. Adds all the data
- * about the forum's topic with the ID in the provided parameter. Adds all topic data to
- * the request object under the `req.topic` property and also its index among other topics
- * @param {e.Request} req
- * @param {e.Response} res
- * @param {models.Forum} req.forum
- * @param {{data: ForumTopic, pos: number}} req.topic
- * @param {function} next
- * @param {string} topicId
- * @memberOf controllers.forum
- */
-const topicById = (req, res, next, topicId) => {
-    if (Array.isArray(req.forum.topics)){
-        req.forum.topics.forEach((t, i) => {
-            if (t._id.toString() === topicId){
-                req.topic = { data: t, pos: i};
-            }
-        })
-    }
-    if (req.topic){
-        return next();
-    }
-    return res.status(404).json({
-        error: {
-            status: 404,
-            message: "No forum's topic with this id was found"
         }
-    })
-}
-exports.topicById = topicById;
+        // do not let modification of answer score
+        newAnswers[i].score = answers[i].score;
 
-/**
- * @type function
- * @throws 400, 404
- * @description works with the `:postId` param in the url. Adds all the data
- * about the forum's topic post with the ID in the provided parameter.
- * Adds all post data to the request object under the `req.topic`
- * property and also its index among other posts in the parent topic
- * @param {e.Request} req
- * @param {e.Response} res
- * @param {models.Forum} req.forum
- * @param {{data: ForumTopicPost, pos: number}} req.post
- * @param {{data: ForumTopic, pos: number}} req.topic
- * @param {function} next
- * @param {string} postId
- * @memberOf controllers.forum
- */
-const postById = (req, res, next, postId) => {
-    if (Array.isArray(req.topic.data.posts)){
-        req.topic.data.posts.forEach((p, i) => {
-            if (p._id.toString() === postId){
-                req.post = { data: p, pos: i};
+        switch(newAnswers[i].kind){
+            case 'MultipleChoiceTaskAttempt': {
+                if (!newAnswers[i].values){
+                    newAnswers[i].values = [];
+                }
+                break;
             }
-        })
-    }
-    if (req.post){
-        return next();
-    }
-    return res.status(404).json({
-        error: {
-            status: 404,
-            message: "No forum's topic post with this id was found"
+            case 'TextTaskAttempt':
+            case 'OneChoiceTaskAttempt':
+            default: {
+                if (newAnswers[i].value === undefined){
+                    newAnswers[i].value = null;
+                }
+                break;
+            }
         }
+    }
+    attempt.answers = newAnswers;
+    return attempt.save()
+        .then(savedAttempt => {
+            savedAttempt.exerciseRef = savedAttempt.exerciseRef._id;
+            return res.json(savedAttempt)
+        })
+        .catch(err => handleError(err, res))
+}
+exports.updateAttemptAnswers = updateAttemptAnswers;
+
+/**
+ * @type function
+ * @throws 400, 403
+ * @description Finishes the attempt with the given Id,
+ * calculates the score for this attempt and saves the finish time
+ * @param {models.Exercise.ExerciseAttempt} req.attempt
+ * @param {string} req.userAttemptStatus
+ * @param {models.User} req.auth
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @memberOf controllers.exercises
+ */
+const finishAttempt = (req, res) => {
+    let {attempt} = req, score = 0;
+    let { tasks } = attempt.exerciseRef, { answers } = attempt;
+    attempt.endTime = new Date();
+
+    tasks.forEach((t, i) => {
+        let taskScore = 0;
+        switch (t.kind){
+            case 'OneChoiceTask': {
+                if (answers[i].value === t.correctAnswer) {
+                    taskScore += t.score;
+                }
+                break;
+            }
+            case 'TextTask': {
+                if (t.correctAnswers.indexOf(answers[i].value) >= 0){
+                    taskScore += t.score;
+                }
+                break;
+            }
+            case 'MultipleChoiceTask': {
+                let cntCorrect = 0;
+                t.options.forEach(o => {
+                    let optionIsCorrect = t.correctAnswers.indexOf(o.key) >= 0,
+                        optionWasSelected = answers[i].values.indexOf(o.key) >= 0;
+                    if (!(optionIsCorrect ^ optionWasSelected)){
+                        cntCorrect++;
+                    }
+                })
+                if (!t.onlyFull){
+                    taskScore += t.score * (cntCorrect / t.options.length);
+                } else {
+                    taskScore += t.score * (cntCorrect === t.options.length);
+                }
+                break;
+            }
+        }
+        score += taskScore;
+        attempt.answers[i].score = taskScore;
     })
-}
-exports.postById = postById;
+    attempt.score = score;
 
-/**
- * @type function
- * @throws 401
- * @description lets subsequent middleware get invoked
- * only if the authenticated user, who performs operations
- * with the forum under `req.forum` is a member of
- * a course, to which the mentioned forum has a reference (`courseRefs`)
- * @param {e.Request} req
- * @param {e.Response} res
- * @param {models.Forum} req.forum
- * @param {models.User} req.auth
- * @param {function} next
- * @memberOf controllers.forum
- */
-const canAccessForum = (req, res, next) => {
-    let memberCoursesSet = {};
-    req.auth.enrolledCourses.forEach(c => memberCoursesSet[c] = true);
-    if (Array.isArray(req.auth.teacherCourses)){
-        req.auth.teacherCourses.forEach(c => memberCoursesSet[c] = true);
-    }
-    if(req.forum.courseRefs.findIndex(c => memberCoursesSet[c]) >= 0){
-        return next();
-    } else {
-        return res.status(401).json({
-            error: { status: 401, message: 'You are not allowed to access this forum'}
+    return attempt.save()
+        .then(savedAttempt => {
+            savedAttempt.exerciseRef = savedAttempt.exerciseRef._id;
+            return res.json(savedAttempt)
         })
-    }
+        .catch(err => handleError(err, res))
 }
-exports.canAccessForum = canAccessForum;
-
-/**
- * @type function
- * @throws 401
- * @description lets subsequent middleware get invoked
- * only if the authenticated user is allowed to
- * modify the course, specified under `req.forum`.
- * If the authenticated user is a teacher,
- * who is allowed to modify the forum,
- * add set `req.isAuthorizedForumTeacher` to `true`
- * @param {e.Request} req
- * @param {e.Response} res
- * @param {models.Forum} req.forum
- * @param {models.User} req.auth
- * @param {boolean} req.isAuthorizedForumTeacher
- * @param {function} next
- * @memberOf controllers.forum
- */
-const canEditForum = (req, res, next) => {
-    let memberCoursesSet = {}, teacherCoursesSet = {};
-    req.auth.enrolledCourses.forEach(c => memberCoursesSet[c] = true);
-    if (Array.isArray(req.auth.teacherCourses)){
-        req.auth.teacherCourses.forEach(c => {
-            memberCoursesSet[c] = true
-            teacherCoursesSet[c] = true
-        });
-    }
-    let isMember = req.forum.courseRefs.findIndex(c => memberCoursesSet[c]) >= 0,
-        isTeacher = req.forum.courseRefs.findIndex(c => teacherCoursesSet[c]) >= 0
-    if (isTeacher){
-        req.isAuthorizedForumTeacher = true;
-    }
-    if(isTeacher || (isMember &amp;&amp; !req.forum.teachersOnly)){
-        return next();
-    } else {
-        return res.status(401).json({
-            error: { status: 401, message: 'You are not allowed to edit this forum'}
-        })
-    }
-}
-exports.canEditForum = canEditForum;
-
-
-/**
- * @type function
- * @description deletes the forums with IDs,
- * specified under the array `req.forumsToDelete`.
- * This controller is async, the next middleware
- * gets invoked, the result of removing forums gets
- * added to `req.promises`
- * @param {e.Request} req
- * @param {e.Response} res
- * @param {?Promise[]} req.promises
- * @param {models.Forum[]|ObjectId[]|string[]} req.forumsToDelete
- * @param {function} next
- * @memberOf controllers.forum
- */
-const deleteForums = (req, res, next) => {
-    if (!Array.isArray(req.promises)){
-        req.promises = []
-    }
-    req.promises.push(new Promise((resolve, reject) => {
-        Forum.deleteMany({_id: {$in: req.forumsToDelete } })
-            .then(result => resolve(result))
-            .catch(err => reject(err))
-    }));
-    return next();
-}
-exports.deleteForums = deleteForums;</code></pre>
+exports.finishAttempt = finishAttempt;</code></pre>
         </article>
     </section>
 

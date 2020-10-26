@@ -94,7 +94,7 @@ exports.attemptAnswerSchema = attemptAnswerSchema;
 
 let oneChoiceTaskAttemptSchema = new mongoose.Schema({
     value: String
-})
+}, {_id: false})
 
 let OneChoiceTaskAttempt = AttemptAnswer.discriminator(
     'OneChoiceTaskAttempt', oneChoiceTaskAttemptSchema
@@ -102,17 +102,20 @@ let OneChoiceTaskAttempt = AttemptAnswer.discriminator(
 exports.OneChoiceTaskAttempt = OneChoiceTaskAttempt;
 exports.oneChoiceTaskAttemptSchema = oneChoiceTaskAttemptSchema;
 // text tasks only have one answer option, the same as one choice tasks
+let textTaskAttemptSchema = new mongoose.Schema({
+    value: String
+}, {_id: false})
 let TextTaskAttempt = AttemptAnswer.discriminator(
-    'TextTaskAttempt', oneChoiceTaskAttemptSchema
+    'TextTaskAttempt', textTaskAttemptSchema
 );
 exports.TextTaskAttempt = TextTaskAttempt;
-exports.textTaskAttemptSchema = oneChoiceTaskAttemptSchema;
+exports.textTaskAttemptSchema = textTaskAttemptSchema;
 
 let multipleChoiceTaskAttemptSchema = new mongoose.Schema({
     values: [
         String
     ]
-})
+}, {_id: false})
 
 let MultipleChoiceTaskAttempt = AttemptAnswer.discriminator(
     'MultipleChoiceTaskAttempt', multipleChoiceTaskAttemptSchema
@@ -128,7 +131,7 @@ let exerciseAttemptSchema = new mongoose.Schema({
     },
     exerciseRef: {
         type: ObjectId,
-        ref: 'User',
+        ref: 'Exercise',
         required: 'The link to the exercise, which the attempt refers to, is required'
     },
     startTime: {
@@ -139,7 +142,12 @@ let exerciseAttemptSchema = new mongoose.Schema({
     endTime: {
         type: Date,
         default: null,
-        required: 'The ending time of the attempt is required'
+        validate: {
+            validator: function (){
+                return (this.endTime === null) || (!!this.endTime)
+            },
+            message: 'Ending time of the attempt should be defined'
+        }
     },
     answers: [
         attemptAnswerSchema
@@ -164,5 +172,5 @@ exerciseAttemptSchema.path('answers').discriminator(
     'MultipleChoiceTaskAttempt', multipleChoiceTaskAttemptSchema
 )
 exerciseAttemptSchema.path('answers').discriminator(
-    'TextTaskAttempt', oneChoiceTaskAttemptSchema
+    'TextTaskAttempt', textTaskAttemptSchema
 )

@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> TextTask</title>
+  <title> exercises/helpers/index.js</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -81,236 +83,65 @@
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Class</p>
-                    <h1>TextTask</h1>
+                    <p>Source</p>
+                    <h1>exercises/helpers/index.js</h1>
                 </header>
                 
 
 
 
-
-<section>
-
-<header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>
-            <span class="ancestors"><a href="models.html">models</a><a href="models.Exercise.html">.Exercise</a>.</span>TextTask<span class="signature">()</span><span class="type-signature"></span></h2>
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class='vertical-section'>
-                <div class="members">
-                    <div class="member">
-                        <div class=name>
-                            <span class="tag">Constructor</span>
-                        </div>
-                        
-
-
-    
-    <h4 class="name" id="TextTask">
-        <a class="href-link" href="#TextTask">#</a>
-        
-        <span class="code-name">
-            
-                new TextTask<span class="signature">()</span><span class="type-signature"></span>
-            
-        </span>
-    </h4>
-    
-
-    
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h5 class="subsection-title">Properties:</h5>
-
-    
-<div class="table-container">
-    <table class="props table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-            
-<tr class="deep-level-0">
-    
-        <td class="name"><code></code></td>
-    
-
-    <td class="type">
-    
-    </td>
-
-    
-
-    
-
-    <td class="description last"></td>
-</tr>
-
-        
-            
-<tr class="deep-level-0">
-    
-        <td class="name"><code>interpretMath</code></td>
-    
-
-    <td class="type">
-    
-        
-<span class="param-type">boolean</span>
-
-
-    
-    </td>
-
-    
-
-    
-
-    <td class="description last"></td>
-</tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="exercises_model_ExerciseTask.js.html" class="button">View Source</a>
-            <span>
-                <a href="exercises_model_ExerciseTask.js.html">exercises/model/ExerciseTask.js</a>, <a href="exercises_model_ExerciseTask.js.html#line30">line 30</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    </div>
-                </div>
-            </div>
-        
-    
-    </div>
-    
-    
-        <h3 class="subsection-title">Extends</h3>
-
-        
-
-
-    <ul>
-        <li><a href="models.Exercise.ExerciseTask.html">models.Exercise.ExerciseTask</a></li>
-    </ul>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @description returns the status of the user in relation to
+ * the provided exercise. Possible statuses: &lt;br/> 1) the user is a student
+ * in the course to which the exercise has a reference and this
+ * student can participate in the exercise (make an attempt); &lt;br/> 2) The user
+ * is a teacher in the course to which the exercise has a reference
+ * and therefore is allowed to edit the given exercise view its
+ * tasks without limitations
+ * @param {models.Exercise} exercise
+ * @param {models.User} user
+ * @param {Object.&lt;string, boolean>} [memberSet] - optional param with
+ * already provided set of courses in a form of dictionary which
+ * assigns the course ID to `true` if the user is a member at the
+ * course with the given ID.
+ * @param {Object.&lt;string, boolean>} [teacherSet] - optional param with
+ * already provided set of courses in a form of dictionary which
+ * assigns the course ID to `true` if the user is a teacher at the
+ * course with the given ID.
+ * @return {string|null} - `"student"` or `"teacher"` or `null`
+ * are possible return values
+ */
+const getExerciseUserStatus = (exercise, user, memberSet, teacherSet) => {
+    let memberCoursesSet = {}, teacherCoursesSet = {};
+    if (!memberSet &amp;&amp; Array.isArray(user.enrolledCourses)){
+        user.enrolledCourses.forEach(c => memberCoursesSet[c] = true);
+    } else {
+        memberCoursesSet = memberSet || {};
+    }
+    if (!teacherSet &amp;&amp; Array.isArray(user.teacherCourses)){
+        user.teacherCourses.forEach(c => {
+            memberCoursesSet[c] = true
+            teacherCoursesSet[c] = true
+        });
+    } else {
+        teacherCoursesSet = teacherSet || {};
+    }
+    let isMember = exercise.courseRefs.findIndex(c => memberCoursesSet[c]) >= 0,
+        isTeacher = exercise.courseRefs.findIndex(c => teacherCoursesSet[c]) >= 0;
+    if (!isMember &amp;&amp; !isTeacher){
+        return null;
+    } else if (isMember &amp;&amp; !isTeacher){
+        return 'student';
+    } else if (isMember &amp;&amp; isTeacher){
+        return 'teacher';
+    }
+}
+exports.getExerciseUserStatus = getExerciseUserStatus;</code></pre>
+        </article>
+    </section>
 
 
 

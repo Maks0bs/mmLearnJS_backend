@@ -12,7 +12,7 @@ let { COURSE_TEACHER_INVITATION } = constants.notifications,
  * @description sends the invitation to the course to the specified email address.
  * If the user with such email is a teacher, add a notification in their account.
  * Otherwise send an invitation link in the email to signup with a special token.
- * See {@link controllers.users.usersData.inviteSignup inviteSignup controller}
+ * See {@link controllers.users.inviteSignup inviteSignup controller}
  * for details on the token. If the invited user was a teacher, add the
  * teacher's data with the new notification to the `req.invitedTeacher` object
  * @param {e.Request} req

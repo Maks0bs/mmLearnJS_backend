@@ -347,6 +347,8 @@ exports.updateCourseSections = updateCourseSections;
  * @memberOf controllers.courses
  */
 const updateCourseExercises = (req, res, next) => {
+    //TODO disallow updating exercises, where there is a running attempt
+    // maybe implement this via model.methods
     let {newCourse, course, mongooseSession: session} = req;
     let {exercises: newExercises} = newCourse;
 

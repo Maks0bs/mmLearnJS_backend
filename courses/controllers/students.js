@@ -55,14 +55,11 @@ exports.enrollInCourse = enrollInCourse;
  * @param {string} req.userCourseStatus
  * @param {string} [req.query.all]
  * @memberOf controllers.courses
- * TODO add normal docs for this
  */
 const getExerciseSummary = (req, res) => {
-    //TODO refactor this
     let userIsTeacher =
-        (req.userCourseStatus === 'teacher') || (req.userCourseStatus === 'creator')
-    let course = req.course;
-    let usersSet = {}, usersToPopulate = []
+        (req.userCourseStatus === 'teacher') || (req.userCourseStatus === 'creator');
+    let {course} = req, usersSet = {}, users = []
     if (req.query.all){
         // only teachers can view summaries for all students
         if (!userIsTeacher){
@@ -73,64 +70,29 @@ const getExerciseSummary = (req, res) => {
                 }
             })
         }
-        for (let e of course.exercises){
-            for (let p of e.participants){
-                // Add to the map of exercise participants
-                usersSet[p.user._id] = true;
-                usersToPopulate.push(p.user._id)
-            }
-        }
+        if (Array.isArray(course.exercises)) course.exercises.forEach(e => {
+            if (Array.isArray(e.participants)) e.participants.forEach(p => {
+                users.push(p.user)
+            })
+        })
     } else {
-        usersSet[req.auth._id] = true;
-        usersToPopulate = [req.auth._id];
+        users = [req.auth];
     }
-
-    return User.find({
-        _id: { $in: usersToPopulate }
+    users.forEach(u => usersSet[u._id] = {
+        userId: u._id, userName: u.name, exercises: []
     })
-        .then((users) => {
-            for (let u of users) {
-                usersSet[u._id] = {
-                    userId: u._id,
-                    userName: u.name,
-                    exercises: []
-                }
-            }
-
-
-            // Has only one loop through all exercises for efficiency
-            for (let e of course.exercises){
-                for (let p of e.participants){
-                    if (!usersSet[p.user._id]){
-                        continue;
-                    }
-                    // remove answers in the final response,
-                    // they are irrelevant for this request
-                    for (let a = 0; a < p.attempts.length; a++){
-                        p.attempts[a].answers = undefined;
-                    }
-                    usersSet[p.user._id].exercises.push({
-                        id: e._id,
-                        name: e.name,
-                        attempts: p.attempts
-                    })
-                }
-            }
-
-            let result = [];
-
-            for (let k of Object.keys(usersSet)){
-                result.push(usersSet[k])
-            }
-
-            return res.json(result);
+    if (Array.isArray(course.exercises)) course.exercises.forEach(e => {
+        if (Array.isArray(e.participants)) e.participants.forEach(p => {
+            if (!usersSet[p.user._id]) return;
+            // remove answers, they are irrelevant for this request
+            if (Array.isArray(p.attempts)) p.attempts.forEach((a, index) => {
+                p.attempts[index].answers = undefined;
+            })
+            let exerciseData = { id: e._id, name: e.name, attempts: p.attempts}
+            usersSet[p.user._id].exercises.push(exerciseData);
         })
-        .catch(err => {
-            console.log(err);
-            return res.status(err.status || 400)
-                .json({
-                    error: err
-                })
-        })
+    })
+    let result = users.map(u => usersSet[u._id]);
+    return res.json(result);
 }
 exports.getExerciseSummary = getExerciseSummary;

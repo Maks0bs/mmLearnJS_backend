@@ -19,9 +19,16 @@ const courseById = (req, res, next, id) => {
     return Course.findOne({_id: id})
         .populate({
             path: 'exercises',
-            populate: {
-                path: 'tasks'
-            }
+            populate: [
+                {path: 'tasks'},
+                {
+                    path: 'participants',
+                    populate: [
+                        {path: 'attempts'},
+                        {path: 'user'}
+                    ]
+                }
+            ]
         })
         .populate('sections.entries')
         .then(course => {
@@ -421,7 +428,7 @@ exports.getCoursesFiltered = async (req, res) => {
 /**
  * @type function
  * @description configures the
- * {@link controllers.exercises.getExercises getExercises} controller
+ * {@link controllers.exercises.getFormattedExercises getExercises} controller
  * to get the exercises of the course, provided in `req.course`,
  * adding the ref to course data to the configuration object
  * @param {e.Request} req

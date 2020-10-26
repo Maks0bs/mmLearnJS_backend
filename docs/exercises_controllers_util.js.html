@@ -7,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> forums/controllers/util.js</title>
+  <title> exercises/controllers/util.js</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -84,7 +84,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Source</p>
-                    <h1>forums/controllers/util.js</h1>
+                    <h1>exercises/controllers/util.js</h1>
                 </header>
                 
 
@@ -93,231 +93,227 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>let Forum = require('../model');
-let {ForumTopicPost} = require('../model/ForumTopicPost')
+            <pre class="prettyprint source linenums"><code>let Course = require('../../courses/model')
+let Exercise = require('../model')
+let { ExerciseAttempt } = require('../model/ExerciseAttempt')
 const {handleError} = require("../../helpers");
-
+let { getExerciseUserStatus } = require('../helpers')
+let {EXERCISE_DATA_CONSTANTS} = require('./exercises')
+let { RELEVANT_EXERCISE_USER_FIELDS} = EXERCISE_DATA_CONSTANTS
 /**
  * @type function
  * @throws 400, 404
- * @description works with the `:forumId` param in the url. Adds all the data
- * about the forum with the ID the provided parameter. Adds all forum data to
- * the request object under the `req.forum` property
+ * @description works with the `:exerciseId` param in the url. Adds all the data
+ * about the exercise with the ID the provided parameter. Adds all exercise data to
+ * the request object under the `req.exercise` property
  * @param {e.Request} req
  * @param {e.Response} res
- * @param {models.Forum} req.forum
+ * @param {models.Exercise} req.exercise
  * @param {function} next
- * @param {string} id - the id of the forum that should be found
- * @memberOf controllers.forum
+ * @param {string} id - the id of the exercise that should be found
+ * @memberOf controllers.exercises
  */
-const forumById = (req, res, next, id) => {
-    let basicUserFields = ['name', 'photo', '_id', 'hiddenFields'];
-    return Forum.findOne({_id: id})
+const exerciseById = (req, res, next, id) => {
+    return Exercise.findOne({_id: id})
+        .populate('tasks')
         .populate({
-            path: 'topics',
-            populate:{
-                path: 'creator', select: basicUserFields
-            }
+            path: 'participants',
+            populate:[
+                {path: 'user', select: RELEVANT_EXERCISE_USER_FIELDS},
+                {path: 'attempts'}
+            ]
         })
-        .populate({
-            path: 'topics.posts',
-            populate:{
-                path: 'creator', select: basicUserFields
+        .then(exercise => {
+            if (!exercise) throw {
+                status: 404, error: 'Exercise not found'
             }
+            return exercise;
         })
-        .then(forum => {
-            if (!forum) throw {
-                status: 404, error: 'Forum not found'
-            }
-            return forum;
-        })
-        .then(forum => {
+        .then(ex => {
             // hide fields of topic/post creators
-            if (Array.isArray(forum.topics)) forum.topics.forEach((t, i) => {
-                let newCreator = t.creator;
-                newCreator.hideFields();
-                forum.topics[i].creator = newCreator;
-                if (Array.isArray(t.posts)) t.posts.forEach((p, j) => {
-                    let newPostCreator = p.creator;
-                    newPostCreator.hideFields();
-                    forum.topics[i].posts[j].creator = newPostCreator;
-                })
+            if (Array.isArray(ex.participants)) ex.participants.forEach((p, i) => {
+                let newUser = p.user;
+                newUser.hideFields();
+                ex.participants[i].user = newUser;
             })
-            req.forum = forum;
+            req.exercise = ex;
             return next();
         })
-        .catch(err => {handleError(err, res)})
+        .catch(err => handleError(err, res))
 }
-exports.forumById = forumById;
+exports.exerciseById = exerciseById;
 
 /**
  * @type function
  * @throws 400, 404
- * @description works with the `:topicId` param in the url. Adds all the data
- * about the forum's topic with the ID in the provided parameter. Adds all topic data to
- * the request object under the `req.topic` property and also its index among other topics
+ * @description it configure the
+ * {@link controllers.exercises.getFormattedExercises getFormattedExercises}
+ * controller to work with the course, which was found previously via the
+ * {@link controllers.exercises.exerciseById exerciseById} controller.
  * @param {e.Request} req
  * @param {e.Response} res
- * @param {models.Forum} req.forum
- * @param {{data: ForumTopic, pos: number}} req.topic
+ * @param {models.Exercise} req.exercise
+ * @param {models.Course} [req.exercisesConfig.course]
+ * @param {models.Exercise[]} [req.exercisesConfig.foundExercises]
+ * @param {string} req.exercisesConfig.userStatus
+ * @param {Object} req.exercisesConfig.filter
  * @param {function} next
- * @param {string} topicId
- * @memberOf controllers.forum
+ * @memberOf controllers.exercises
  */
-const topicById = (req, res, next, topicId) => {
-    if (Array.isArray(req.forum.topics)){
-        req.forum.topics.forEach((t, i) => {
-            if (t._id.toString() === topicId){
-                req.topic = { data: t, pos: i};
-            }
-        })
+const configureFormatSingleExercise = (req, res, next) => {
+    let courseRef = req.query.courseRef || req.query.courseref;
+    req.exercisesConfig = {
+        filter: { _id: req.exercise._id },
+        foundExercises: [req.exercise]
     }
-    if (req.topic){
+    if (!courseRef){
         return next();
+    } else {
+        return Course.findById(courseRef)
+            .then(course => {
+                if (!course) throw {
+                    status: 404, error: 'Course in query param not found'
+                }
+                req.exercisesConfig.course = course;
+            })
+            .then(() => next())
+            .catch(err => handleError(err, res))
     }
-    return res.status(404).json({
-        error: {
-            status: 404,
-            message: "No forum's topic with this id was found"
-        }
-    })
 }
-exports.topicById = topicById;
+exports.configureFormatSingleExercise = configureFormatSingleExercise;
 
-/**
- * @type function
- * @throws 400, 404
- * @description works with the `:postId` param in the url. Adds all the data
- * about the forum's topic post with the ID in the provided parameter.
- * Adds all post data to the request object under the `req.topic`
- * property and also its index among other posts in the parent topic
- * @param {e.Request} req
- * @param {e.Response} res
- * @param {models.Forum} req.forum
- * @param {{data: ForumTopicPost, pos: number}} req.post
- * @param {{data: ForumTopic, pos: number}} req.topic
- * @param {function} next
- * @param {string} postId
- * @memberOf controllers.forum
- */
-const postById = (req, res, next, postId) => {
-    if (Array.isArray(req.topic.data.posts)){
-        req.topic.data.posts.forEach((p, i) => {
-            if (p._id.toString() === postId){
-                req.post = { data: p, pos: i};
-            }
-        })
-    }
-    if (req.post){
-        return next();
-    }
-    return res.status(404).json({
-        error: {
-            status: 404,
-            message: "No forum's topic post with this id was found"
-        }
-    })
-}
-exports.postById = postById;
 
 /**
  * @type function
  * @throws 401
  * @description lets subsequent middleware get invoked
- * only if the authenticated user, who performs operations
- * with the forum under `req.forum` is a member of
- * a course, to which the mentioned forum has a reference (`courseRefs`)
+ * only if the authenticated user is a member of
+ * a course to which the given exercise has a reference.
+ * If the authenticated user is authorized
+ * for further actions, this middleware
+ * also adds the user's status to `req.userExerciseStatus`
+ * which can be equal to `student` or `teacher`
  * @param {e.Request} req
  * @param {e.Response} res
- * @param {models.Forum} req.forum
+ * @param {models.Exercise} req.exercise
  * @param {models.User} req.auth
+ * @param {string} req.userExerciseStatus
  * @param {function} next
- * @memberOf controllers.forum
+ * @memberOf controllers.exercises
  */
-const canAccessForum = (req, res, next) => {
-    let memberCoursesSet = {};
-    req.auth.enrolledCourses.forEach(c => memberCoursesSet[c] = true);
-    if (Array.isArray(req.auth.teacherCourses)){
-        req.auth.teacherCourses.forEach(c => memberCoursesSet[c] = true);
-    }
-    if(req.forum.courseRefs.findIndex(c => memberCoursesSet[c]) >= 0){
+const userInExercise = (req, res, next) => {
+    let status = getExerciseUserStatus(req.exercise, req.auth) || undefined;
+    if(status === 'teacher' || ((status === 'student') &amp;&amp; req.exercise.available)){
+        req.userExerciseStatus = status;
         return next();
     } else {
         return res.status(401).json({
-            error: { status: 401, message: 'You are not allowed to access this forum'}
+            error: {
+                status: 401,
+                message: 'You are not allowed to access this exercise'
+            }
         })
     }
 }
-exports.canAccessForum = canAccessForum;
+exports.userInExercise = userInExercise;
 
 /**
  * @type function
- * @throws 401
+ * @description Sends exercises under `req.exercises` as a response
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Exercise[]} req.exercises
+ * @memberOf controllers.courses
+ */
+const sendExercises = (req, res) => {
+    return res.json(req.exercises);
+}
+exports.sendExercises = sendExercises;
+
+/**
+ * @type function
+ * @description Sends the first exercise in the `req.exercises` array as a response
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Exercise[]} req.exercises
+ * @memberOf controllers.courses
+ */
+const sendSingleExercise = (req, res) => {
+    return res.json(req.exercises[0] || {});
+}
+exports.sendSingleExercise = sendSingleExercise;
+
+/**
+ * @type function
+ * @throws 400, 404
+ * @description works with the `:attemptId` param in the url. Adds all the data
+ * about the exercise attempt with the ID from the provided parameter.
+ * Adds all attempt data to the request object under the `req.attempt` property.
+ * NOTE: this controller should always be invoked after calling the
+ * {@link controllers.exercises.exerciseById exerciseById} controller.
+ * If the exerciseRef is not equal to the id of the exercise in `req.exercise`
+ * than
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Exercise.ExerciseAttempt} req.attempt
+ * @param {function} next
+ * @param {string} id - the id of the attempt that should be found
+ * @memberOf controllers.exercises
+ */
+const attemptById = (req, res, next, id) => {
+    return ExerciseAttempt.findOne({_id: id})
+        .populate('respondent', RELEVANT_EXERCISE_USER_FIELDS)
+        .populate({
+            path: 'exerciseRef',
+            populate: {path: 'tasks'}
+        })
+        .then(attempt => {
+            if (!attempt) throw {
+                status: 404, error: 'Exercise attempt not found'
+            }
+            return attempt;
+        })
+        .then(attempt => {
+            let newRespondent = attempt.respondent;
+            newRespondent.hideFields();
+            attempt.respondent = newRespondent;
+            req.attempt = attempt;
+            return next();
+        })
+        .catch(err => handleError(err, res))
+}
+exports.attemptById = attemptById;
+
+/**
+ * @type function
+ * @throws 403
  * @description lets subsequent middleware get invoked
- * only if the authenticated user is allowed to
- * modify the course, specified under `req.forum`.
- * If the authenticated user is a teacher,
- * who is allowed to modify the forum,
- * add set `req.isAuthorizedForumTeacher` to `true`
+ * only if the authenticated user is the the owner of
+ * the attempt in `req.attempt` or the user is allowed
+ * to view/modify this attempt (is a teacher)
+ * This middleware
+ * also adds the user's status to `req.userAttemptStatus`
+ * which can be equal to `student` or `teacher`
  * @param {e.Request} req
  * @param {e.Response} res
- * @param {models.Forum} req.forum
+ * @param {models.Exercise.ExerciseAttempt} req.attempt
+ * @param {string} req.userAttemptStatus
  * @param {models.User} req.auth
- * @param {boolean} req.isAuthorizedForumTeacher
  * @param {function} next
- * @memberOf controllers.forum
+ * @memberOf controllers.exercises
  */
-const canEditForum = (req, res, next) => {
-    let memberCoursesSet = {}, teacherCoursesSet = {};
-    req.auth.enrolledCourses.forEach(c => memberCoursesSet[c] = true);
-    if (Array.isArray(req.auth.teacherCourses)){
-        req.auth.teacherCourses.forEach(c => {
-            memberCoursesSet[c] = true
-            teacherCoursesSet[c] = true
-        });
-    }
-    let isMember = req.forum.courseRefs.findIndex(c => memberCoursesSet[c]) >= 0,
-        isTeacher = req.forum.courseRefs.findIndex(c => teacherCoursesSet[c]) >= 0
-    if (isTeacher){
-        req.isAuthorizedForumTeacher = true;
-    }
-    if(isTeacher || (isMember &amp;&amp; !req.forum.teachersOnly)){
-        return next();
-    } else {
-        return res.status(401).json({
-            error: { status: 401, message: 'You are not allowed to edit this forum'}
-        })
-    }
+const correctAttemptOwner = (req, res, next) => {
+    let status = getExerciseUserStatus(req.attempt.exerciseRef, req.auth);
+    req.userAttemptStatus = status;
+    let isTeacher = status === 'teacher';
+    let isAttemptOwner = req.auth._id.equals(req.attempt.respondent._id);
+    let isStudent = (status === 'student') &amp;&amp; isAttemptOwner;
+    if (isTeacher || isStudent) return next();
+    return res.status(403).json({
+        error: {status: 403, message: 'You are not authorized to view this attempt'}
+    })
 }
-exports.canEditForum = canEditForum;
-
-
-/**
- * @type function
- * @description deletes the forums with IDs,
- * specified under the array `req.forumsToDelete`.
- * This controller is async, the next middleware
- * gets invoked, the result of removing forums gets
- * added to `req.promises`
- * @param {e.Request} req
- * @param {e.Response} res
- * @param {?Promise[]} req.promises
- * @param {models.Forum[]|ObjectId[]|string[]} req.forumsToDelete
- * @param {function} next
- * @memberOf controllers.forum
- */
-const deleteForums = (req, res, next) => {
-    if (!Array.isArray(req.promises)){
-        req.promises = []
-    }
-    req.promises.push(new Promise((resolve, reject) => {
-        Forum.deleteMany({_id: {$in: req.forumsToDelete } })
-            .then(result => resolve(result))
-            .catch(err => reject(err))
-    }));
-    return next();
-}
-exports.deleteForums = deleteForums;</code></pre>
+exports.correctAttemptOwner = correctAttemptOwner;</code></pre>
         </article>
     </section>
 

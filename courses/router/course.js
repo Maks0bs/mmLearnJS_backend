@@ -3,7 +3,7 @@ const {
     deleteEntries, removeEntriesMentions
 } = require("../controllers/entries");
 const {
-    deleteExercises, removeExerciseMentions, getExercises, sendExercises
+    deleteExercises, removeExerciseMentions, getFormattedExercises, sendExercises
 } = require("../../exercises/controllers");
 let {
     isTeacher, isCourseCreator, teacherInCourse, userInCourse,
@@ -413,9 +413,9 @@ router.get('/exercises',
     requireAuthentication,
     userInCourse,
     getCourseExercisesConfigure,
-    getExercises,
+    getFormattedExercises,
     sendExercises
-)
+)//TODO add tests for this
 
 //TODO !!!!!!!!!!!!!!!!!!!!!!!!!
 // !!!!!!!!!!!!!!!!!!!!!!!!!
@@ -458,14 +458,11 @@ router.put('/',
 
 
 
-//TODO change of frontend
-//TODO maybe move this to ./exercises or the correspondent directory!!!!!!!!!!
+//TODO note what this endpoint sends back
 router.get('/exercise-summary',
     requireAuthentication,
     userInCourse,
     getExerciseSummary
-    //TODO check with a controller if the user is allowed to edit the exercise
-    // (if it is a teacher of a course to which the forum has a ref)
 )
 
 
