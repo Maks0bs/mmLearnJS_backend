@@ -128,6 +128,7 @@ exports.getFormattedExercises = getFormattedExercises;
 
 /**
  * @type function
+ * @throws 403
  * @description Creates a new attempt in the given exercise, whereas
  * the participant of this attempt is the authenticated user
  * @param {e.Request} req
@@ -143,9 +144,9 @@ const newExerciseAttempt = (req, res) => {
     if (!Array.isArray(participants)) participants = [];
 
     if (!exercise.available || !(req.userExerciseStatus === 'student')){
-        return res.status(401).json({
+        return res.status(403).json({
             error: {
-                status: 401,
+                status: 403,
                 message: 'Not authorized! Only students can create attempts for ' +
                     'exercises that are exercises'
             }
@@ -157,9 +158,9 @@ const newExerciseAttempt = (req, res) => {
         hasRunningAttempt = index >= 0;
     }
     if (hasRunningAttempt){
-        return res.status(401).json({
+        return res.status(403).json({
             error: {
-                status: 401,
+                status: 403,
                 message: 'You already have a running attempt on this course. ' +
                     'Finish it and then you will be able to start a new one'
             }
@@ -221,8 +222,8 @@ exports.newExerciseAttempt = newExerciseAttempt;
 const getExerciseAttempts = (req, res) => {
     let {exercise} = req;
     if (req.userExerciseStatus === 'teacher'){
-        return res.status(404).json({
-            error: {status: 404, message: 'Teachers do not have any attempts'}
+        return res.status(403).json({
+            error: {status: 403, message: 'Teachers do not have any attempts'}
         })
     }
     if (!Array.isArray(exercise.participants)){

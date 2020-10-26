@@ -77,7 +77,7 @@ const configureFormatSingleExercise = (req, res, next) => {
         return Course.findById(courseRef)
             .then(course => {
                 if (!course) throw {
-                    status: 404, error: 'Course in query param not found'
+                    status: 404, error: 'Course from query param not found'
                 }
                 req.exercisesConfig.course = course;
             })

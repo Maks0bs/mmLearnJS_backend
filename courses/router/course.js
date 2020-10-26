@@ -251,6 +251,12 @@ router.post('/accept-teacher-invitation',
  *                properties:
  *                  message:
  *                    type: string
+ *        "400":
+ *          description: course Id might be invalid
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  *        "401":
  *          description: unauthorized (most likely unauthenticated)
  *          content:
@@ -301,6 +307,12 @@ router.post('/subscribe',
  *                properties:
  *                  message:
  *                    type: string
+ *        "400":
+ *          description: course Id might be invalid
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  *        "401":
  *          description: unauthorized (most likely unauthenticated)
  *          content:
@@ -351,6 +363,12 @@ router.post('/unsubscribe',
  *                properties:
  *                  message:
  *                    type: string
+ *        "400":
+ *          description: course Id might be invalid
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
  *        "401":
  *          description: unauthorized (most likely unauthenticated)
  *          content:
@@ -417,10 +435,100 @@ router.get('/exercises',
     sendExercises
 )//TODO add tests for this
 
+/**
+ * @swagger
+ * path:
+ *  /course/:courseId/exercise-summary:
+ *    get:
+ *      summary: >
+ *        Sends the summary about participation in the exercises of the given
+ *        course for the authenticated student or info about the participation
+ *        of all students for the teacher
+ *      description: >
+ *        Sends the summary about participation in the exercises of the given
+ *        course for the authenticated student or info about the participation
+ *        of all students for the teacher. The values that the students
+ *        provided as answers during various attempts in the exercise
+ *        are not provided in this endpoint.
+ *      operationId: getCourseExercisesSummary
+ *      security:
+ *        - cookieAuth: []
+ *      parameters:
+ *        - name: courseId
+ *          in: path
+ *          description: >
+ *            the id of the course to perform operations with
+ *          required: true
+ *          type: string
+ *      tags:
+ *        - "/course/..."
+ *      responses:
+ *        "200":
+ *          description: >
+ *            Send an array with summaries for each user
+ *            (contains one element - the summary for authenticated user
+ *            if the user is a student)
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: array
+ *                items:
+ *                  type: object
+ *                  properties:
+ *                    userId:
+ *                      type: string
+ *                    userName:
+ *                      type: string
+ *                    exercises:
+ *                      type: array
+ *                      items:
+ *                        type: object
+ *                        properties:
+ *                          id:
+ *                            type: string
+ *                            description: >
+ *                              the ID of the exercise in which the user has
+ *                              participated
+ *                          name:
+ *                            type: string
+ *                            description: >
+ *                              the name of the exercise in which the user has
+ *                              participated
+ *                          attempts:
+ *                            type: array
+ *                            items:
+ *                              $ref: '#/components/schemas/ExerciseAttempt'
+ *        "400":
+ *          description: course Id might be invalid
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *        "401":
+ *          description: unauthorized (unauthenticated / can't access course or some exercise)
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
+router.get('/exercise-summary',
+    requireAuthentication,
+    userInCourse,
+    getExerciseSummary
+)
+
 //TODO !!!!!!!!!!!!!!!!!!!!!!!!!
 // !!!!!!!!!!!!!!!!!!!!!!!!!
 // !!!!!!!!!!!!!!!!!!!!!!!!!
 // add functionality to remove refs to existing exercises/entries/forums!!!!!
+// add delete methods to forums/entry/exercise/... models;
+// these methods should return a promise
+// inside controllers, where deletion is necessary,
+// call forum.delete()/exercise.delete()/etc and wrap
+// the return value of these function into another promise
+// and add this promise to req.promises to hanlde them at the end
+// !!!!!TRY NOT TO USE ADDITIONAL CONTROLLERS FOR THIS!!!!!!
+//
 router.delete('/',
     requireAuthentication,
     isCourseCreator,
@@ -453,17 +561,6 @@ router.put('/',
 
 
 //TODO add a getter for a single course (GET /course/:courseId/)
-
-
-
-
-
-//TODO note what this endpoint sends back
-router.get('/exercise-summary',
-    requireAuthentication,
-    userInCourse,
-    getExerciseSummary
-)
 
 
 module.exports = router;

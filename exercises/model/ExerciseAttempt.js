@@ -73,7 +73,7 @@ let { ObjectId } = mongoose.Schema;
  *                     type: array
  *                     items:
  *                       type: string
- *///TODO don't forget to check if docs are compiled correctly
+ */
 let attemptAnswerSchema = new mongoose.Schema({
     taskRef: {
         type: ObjectId,

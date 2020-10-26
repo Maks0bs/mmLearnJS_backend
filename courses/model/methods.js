@@ -48,6 +48,6 @@ exports.entryMethods = {
      * to check if this user has enough authorization
      */
     delete: function (options) {
-
+        //TODO
     }
 }
