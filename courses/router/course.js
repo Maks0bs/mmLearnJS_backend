@@ -1,9 +1,5 @@
-const {deleteForums} = require("../../forums/controllers");
 const {
-    deleteEntries, removeEntriesMentions
-} = require("../controllers/entries");
-const {
-    deleteExercises, removeExerciseMentions, getFormattedExercises, sendExercises
+    getFormattedExercises, sendExercises
 } = require("../../exercises/controllers");
 let {
     isTeacher, isCourseCreator, teacherInCourse, userInCourse,
@@ -538,7 +534,7 @@ router.delete('/',
 );//TODO add tests for this
 
 //TODO huge refactoring should be done
-// mention that this thing works with a MongoDB session
+//TODO mention that this thing works with a MongoDB session
 router.put('/',
     requireAuthentication,
     isTeacher,
@@ -550,14 +546,9 @@ router.put('/',
     updateCourseSections,
     updateCourseExercises,
     mergeCourseBasicFields,
-    // removeExerciseMentions,
-    // deleteExercises,
-    // removeEntriesMentions,
-    // deleteEntries,
-    // deleteForums,
-    // deleteFiles,
+    deleteFiles,
     saveCourseChanges,
-);
+)//TODO add tests for this
 
 
 //TODO add a getter for a single course (GET /course/:courseId/)

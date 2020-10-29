@@ -91,7 +91,9 @@ exports.initCourseEditing = initCourseEditing;
  * @param {e.Response} res
  * @param {Object} req.body
  * @param {models.Course} req.course
+ * @param {models.User} req.auth
  * @param {models.Course} req.newCourse
+ * @param {Promise[]} req.promises
  * @param {models.Course.Entry[]} req.updatesNewEntries
  * @param {models.Course.Entry[]} req.updatesDeletedEntries
  * @param {models.Course.Entry[]} req.entriesToDelete
@@ -102,14 +104,15 @@ exports.initCourseEditing = initCourseEditing;
  * @memberOf controllers.courses
  */
 const cleanupCourseData = (req, res, next) => {
-    let { course, newCourse } = req;
+    let { course, newCourse } = req,
+        deleteOptions = { userId: req.auth._id, deleteFiles: true}
     const UNCHANGED = 'unchanged';
     let oldEntries = {}, newEntries = [], oldExercises = {}, newExercises = [];
     // find out which entries have been added and which ones have been removed
     if (Array.isArray(newCourse.sections)) {
         // mark all entries, that existed in the old course data
         course.sections.forEach(s => Array.isArray(s.entries) && s.entries.forEach(
-            e => oldEntries[e._id.toString()] = {...e._doc}
+            e => oldEntries[e._id.toString()] = e
         ))
         req.newCourse.sections.forEach(s => {
             if (Array.isArray(s.entries)) s.entries.forEach(e => {
@@ -128,12 +131,12 @@ const cleanupCourseData = (req, res, next) => {
         .filter(e => e !== UNCHANGED);
     req.updatesDeletedEntries = entriesToDelete
         .filter(e => e.access !== 'teachers')
-    req.entriesToDelete = entriesToDelete.map(e => e._id);
+    entriesToDelete.forEach(e => req.promises.push(e.delete(deleteOptions)));
 
     // find out which exercises have been added and which ones have been removed
     if (Array.isArray(newCourse.exercises)) {
         // mark all exercises, that existed in the old course data
-        course.exercises.forEach(e => oldExercises[e._id.toString()] = {...e._doc})
+        course.exercises.forEach(e => oldExercises[e._id.toString()] = e)
         req.newCourse.exercises.forEach(/** @type models.Exercise */ e => {
             if (e._id){
                 oldExercises[e._id] = UNCHANGED;
@@ -148,7 +151,7 @@ const cleanupCourseData = (req, res, next) => {
         .filter(e => e !== UNCHANGED);
     req.updatesDeletedExercises = exercisesToDelete
         .filter(e => e.available)
-    req.exercisesToDelete = exercisesToDelete.map(e => e._id);
+    exercisesToDelete.forEach(e => req.promises.push(e.delete(deleteOptions)));
     return next();
 }
 exports.cleanupCourseData = cleanupCourseData;
@@ -179,8 +182,6 @@ const addUpdatesToCourse = (req, res, next) => {
         updatesNewExercises: newExercises,
         updatesDeletedExercises: deletedExercises,
     } = req;
-    console.log('nex', newExercises);
-    console.log('dex', deletedExercises);
     let mapper = (e) => ({name: e.name, kind: e.kind})
     if (Array.isArray(deletedEntries) && (deletedEntries.length > 0)){
         req.course.updates.push({
@@ -216,7 +217,6 @@ const addUpdatesToCourse = (req, res, next) => {
             newAbout: req.newCourse.about
         })
     }
-
     //TODO if previously unavailable / hidden exercises or
     // entries GET published, also add updates for this
 
@@ -477,7 +477,7 @@ const saveCourseChanges = (req, res) => {
         .catch(err => {
             //session gets aborted automatically
             // when a MongoDB query promise gets rejected
-            //session && session.abortTransaction();
+            // session && session.abortTransaction()
             deleteFilesAsyncIndependent(req.files.map(f => f.id));
             handleError(err, res);
         })

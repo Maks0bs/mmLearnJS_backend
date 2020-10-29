@@ -1,9 +1,5 @@
 let mongoose = require('mongoose');
 let { ObjectId } = mongoose.Schema;
-const {
-    oneChoiceTaskSchema, multipleChoiceTaskSchema,
-    textTaskSchema
-} = require('./ExerciseTask')
 /**
  * @class ExerciseParticipant
  * @memberOf models.Exercise
@@ -71,7 +67,7 @@ const {
  *                 oneOf:
  *                   - $ref: '#/components/schemas/ExerciseAttempt'
  *                   - $ref: '#/components/schemas/ObjectId'
- *///TODO don't forget to check if docs are compiled correctly
+ */
 let courseExerciseSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -117,10 +113,7 @@ let courseExerciseSchema = new mongoose.Schema({
     discriminatorKey: 'kind',
     autoCreate: true
 })
+courseExerciseSchema.methods = require('./methods').exerciseMethods
 
 let Exercise = mongoose.model('Exercise', courseExerciseSchema);
 module.exports = Exercise;
-
-// courseExerciseSchema.path('tasks').discriminator('OneChoiceTask', oneChoiceTaskSchema)
-// courseExerciseSchema.path('tasks').discriminator('MultipleChoiceTask', multipleChoiceTaskSchema)
-// courseExerciseSchema.path('tasks').discriminator('TextTask', textTaskSchema)

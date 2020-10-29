@@ -226,7 +226,7 @@ exports.deleteFile = deleteFile;
  * @param {string|ObjectId[]} [req.filesToDelete]
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers.users.usersData
+ * @memberOf controllers.files
  */
 const deleteFiles = (req, res, next) => {
     if (!req.filesToDelete || req.filesToDelete.length === 0){

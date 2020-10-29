@@ -96,6 +96,7 @@ let entrySchema = new mongoose.Schema({
     discriminatorKey: 'kind',
     autoCreate: true
 })
+entrySchema.methods = require('./methods').entryMethods;
 let Entry = mongoose.model('Entry', entrySchema);
 exports.Entry = Entry;
 exports.entrySchema = entrySchema;

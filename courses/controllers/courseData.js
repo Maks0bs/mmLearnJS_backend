@@ -491,16 +491,14 @@ exports.deleteCourse = deleteCourse;
  * @memberOf controllers.courses
  */
 const removeCourseMentions = (req, res, next) => {
-    //TODO remove exercises/forums/entries documents if they
-    // only have one single courseRef which is the course to be deleted
-    let filesToDelete = [], {course} = req;
+    let {course} = req, contentPromises = []
 
-    course.sections.forEach(s => s.entries.forEach(
-        e => (e.kind === 'EntryFile') && filesToDelete.push(e.file)
-    ))
-    req.filesToDelete = filesToDelete;
+    //TODO this is newly added, might not function
+    course.sections.forEach(s => s.entries.forEach(e => contentPromises.push(e.delete())))
+    course.exercises.forEach(e => contentPromises.push(e.delete()))
     let usersWithRefs = [...course.subscribers, ...course.teachers, ...course.students];
-    return User.find({ _id: { $in: usersWithRefs}})
+    return Promise.all(contentPromises)
+        .then(() => User.find({ _id: { $in: usersWithRefs}}))
         .then(users => {
             let promises = [];
             for (let u of users){
@@ -521,9 +519,7 @@ const removeCourseMentions = (req, res, next) => {
             }
             return Promise.all(promises);
         })
-        //TODO iterate through all exercises and call exercise.cleanup()
-        // this method should remove all tasks
         .then(() => next())
-        .catch(err => handleError(err, res))
+        .catch(err => {handleError(err, res)})
 }
 exports.removeCourseMentions = removeCourseMentions;

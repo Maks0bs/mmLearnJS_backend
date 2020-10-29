@@ -1,4 +1,5 @@
 let crypto = require('crypto');
+let { getGFS } = require('../../files/model')
 
 exports.courseMethods = {
     /**
@@ -38,16 +39,61 @@ exports.courseMethods = {
 
 exports.entryMethods = {
     /**
-     *
      * @param {Object} options
      * @param {boolean} [options.deleteFiles] - set to true if
      * the files that are referenced in the entries should
      * also be removed from the DB
-     * @param {string} options.userId - required option! The user
+     * @param {string|ObjectId} options.userId - required option! The user
      * who performs the operation about deleting entries. Required
      * to check if this user has enough authorization
+     * @return {Promise} - the promise that gets resolved
+     * if all object that this entry references were
+     * deleted successfully, it gets rejected if there
+     * was a problem deleting some object. Please note
+     * that this promise does not handle errors
+     * automatically, they should be caught manually
      */
     delete: function (options) {
-        //TODO
+        const {Entry} = require('./Entry');
+        const Forum = require('../../forums/model')
+        let entryRef = this;
+        return Entry.findById(this._id)
+            .populate('courseRef', ['_id', 'name', 'teachers', 'students'])
+            .then(entry => {
+                let criteria = u => u.toString() === options.userId.toString();
+                if (!entry.courseRef.teachers.find(criteria)){
+                    throw {
+                        message: 'The authenticated user is not authorized ' +
+                            'to remove this entry'
+                    }
+                }
+                switch (entry.kind){
+                    case 'EntryForum':{
+                        return Forum.findById(entry.forum)
+                            .then(forum => {
+                                if (forum.courseRefs.length === 1 &&
+                                    forum.courseRefs[0].equals(entry.courseRef._id)
+                                ){
+                                    return Forum.deleteOne({ _id: forum._id })
+                                } else {
+                                    return Promise.resolve(forum)
+                                }
+                            })
+                    }
+                    case 'EntryFile':{
+                        let gfs = getGFS();
+                        if (!gfs || !options.deleteFiles) return Promise.resolve(true);
+                        return new Promise((resolve, reject) => {
+                            gfs.remove({_id: entry.file, root: 'uploads'}, err => (
+                                err ? reject(err) : resolve(entry.file)
+                            ))
+                        })
+                    }
+                    default: {
+                        return Promise.resolve(true)
+                    }
+                }
+            })
+            .then(() => Entry.deleteOne({_id: entryRef._id}))
     }
 }

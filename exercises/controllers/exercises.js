@@ -235,14 +235,3 @@ const getExerciseAttempts = (req, res) => {
     return res.json(attempts);
 }
 exports.getExerciseAttempts = getExerciseAttempts;
-
-const removeExerciseMentions = (req, res, next) => {
-    //TODO remove exercise mentions
-}
-exports.removeExerciseMentions = removeExerciseMentions;
-
-const deleteExercises = (req, res, next) => {
-    //TODO delete exercises
-}
-exports.deleteExercises = deleteExercises;
-
