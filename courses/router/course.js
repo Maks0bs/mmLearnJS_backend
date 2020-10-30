@@ -513,18 +513,7 @@ router.get('/exercise-summary',
     getExerciseSummary
 )
 
-//TODO !!!!!!!!!!!!!!!!!!!!!!!!!
-// !!!!!!!!!!!!!!!!!!!!!!!!!
-// !!!!!!!!!!!!!!!!!!!!!!!!!
-// add functionality to remove refs to existing exercises/entries/forums!!!!!
-// add delete methods to forums/entry/exercise/... models;
-// these methods should return a promise
-// inside controllers, where deletion is necessary,
-// call forum.delete()/exercise.delete()/etc and wrap
-// the return value of these function into another promise
-// and add this promise to req.promises to hanlde them at the end
-// !!!!!TRY NOT TO USE ADDITIONAL CONTROLLERS FOR THIS!!!!!!
-//
+//TODO add swagger docs for this
 router.delete('/',
     requireAuthentication,
     isCourseCreator,
@@ -533,8 +522,7 @@ router.delete('/',
     deleteCourse
 );//TODO add tests for this
 
-//TODO huge refactoring should be done
-//TODO mention that this thing works with a MongoDB session
+//TODO add swagger docs for this
 router.put('/',
     requireAuthentication,
     isTeacher,

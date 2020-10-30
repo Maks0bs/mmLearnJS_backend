@@ -1,6 +1,6 @@
 let {validate} = require("../../helpers");
 let {
-    requireAuthentication, getUser, userById, getUsersFiltered,
+    requireAuthentication, getUser, userById,
     updateUser, deserializeAndCleanUserData, isAuthenticatedUser, getUpdatesByDate,
     deleteUser, removeUserMentions, getUpdatesNotifications
 } = require('../controllers');
@@ -216,7 +216,10 @@ router.get('/updates-notifications',
 router.get('/:userId', getUser);
 
 //TODO create basic functionality for this endpoint
-router.get('/', getUsersFiltered)
+router.get('/',
+    (req, res) =>
+        res.json([])
+)
 
 /**
  * @swagger

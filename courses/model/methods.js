@@ -71,10 +71,15 @@ exports.entryMethods = {
                     case 'EntryForum':{
                         return Forum.findById(entry.forum)
                             .then(forum => {
-                                if (forum.courseRefs.length === 1 &&
-                                    forum.courseRefs[0].equals(entry.courseRef._id)
-                                ){
-                                    return Forum.deleteOne({ _id: forum._id })
+                                let courseRefIndex = forum.courseRefs
+                                    .findIndex(f => f.equals(entry.courseRef._id))
+                                if (courseRefIndex >= 0){
+                                    forum.courseRefs.splice(courseRefIndex, 1);
+                                    if (forum.courseRefs.length === 0){
+                                        return Forum.deleteOne({ _id: forum._id })
+                                    } else {
+                                        return forum.save();
+                                    }
                                 } else {
                                     return Promise.resolve(forum)
                                 }

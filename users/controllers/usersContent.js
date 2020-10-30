@@ -63,7 +63,6 @@ exports.getUpdatesByDate = getUpdatesByDate;
  */
 const getUpdatesNotifications = (req, res) => {
     let lastVisitedSet = {}, { subscribedCourses } = req.auth;
-    console.log('quer', req.query.courses);
     subscribedCourses.forEach(c => lastVisitedSet[c.course] = c.lastVisited);
     return Course.find({ _id: { $in: req.query.courses} })
         .then(courses => {
@@ -199,25 +198,29 @@ const removeUserMentions = (req, res, next) => {
 }
 exports.removeUserMentions = removeUserMentions;
 
+
 // -----------------------------------------------------------------------
 // this lower part is still not finished or not implemented.
 // The endpoints there don't work
 //
 
-exports.configUsersFilter = (req, res, next) => {
-    req.usersFilter = req.query;
-    return next();
-}
+// exports.configUsersFilter = (req, res, next) => {
+//     req.usersFilter = req.query;
+//     return next();
+// }
 //TODO maybe move this to ./usersData
 // if we find users by a certain param and
 // this param is in the hiddenFields array, don't include this users
 // however still include, if they could be found by another param, which is not hidden
-exports.getUsersFiltered = (req, res) => {
-    return res.json([]);
-    let { usersFilter: filter } = req;
-    return User.find({filter})
-        .then((users) => (
-            res.json(users)
-        ))
-        .catch(err => handleError(err, res))
-}
+
+
+
+// exports.getUsersFiltered = (req, res) => {
+//     return res.json([]);
+//     let { usersFilter: filter } = req;
+//     return User.find({filter})
+//         .then((users) => (
+//             res.json(users)
+//         ))
+//         .catch(err => handleError(err, res))
+// }

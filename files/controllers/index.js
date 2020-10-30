@@ -256,36 +256,38 @@ const deleteFiles = (req, res, next) => {
 }
 exports.deleteFiles = deleteFiles;
 
+
 // -----------------------------------------------------------------------
 // this lower part is still not finished or not implemented.
 // The endpoints there don't work
 //
 
 //TODO implement this controller
-exports.getFilesFiltered = (req, res) => {
-    let filter = {}
-    if (req.body.fileId){
-        filter._id = mongoose.mongo.ObjectId(req.body.fileId);
-    }
-    const gfs = getGFS();
-    if (!gfs) {
-        return handleError(gfsError, res);
-    }
-    gfs.files.find(filter).toArray((err, files) =>{
-        if (err) {
-            return res.status(400).json({
-                error: err
-            })
-        }
 
-        if (!files || files.length === 0){
-            return res.status(404).json({
-                error: {
-                    status: 404,
-                    message: 'files do not exist'
-                }
-            })
-        }
-        res.json(files);
-    })
-}
+// exports.getFilesFiltered = (req, res) => {
+//     let filter = {}
+//     if (req.body.fileId){
+//         filter._id = mongoose.mongo.ObjectId(req.body.fileId);
+//     }
+//     const gfs = getGFS();
+//     if (!gfs) {
+//         return handleError(gfsError, res);
+//     }
+//     gfs.files.find(filter).toArray((err, files) =>{
+//         if (err) {
+//             return res.status(400).json({
+//                 error: err
+//             })
+//         }
+//
+//         if (!files || files.length === 0){
+//             return res.status(404).json({
+//                 error: {
+//                     status: 404,
+//                     message: 'files do not exist'
+//                 }
+//             })
+//         }
+//         res.json(files);
+//     })
+// }

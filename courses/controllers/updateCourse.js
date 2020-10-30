@@ -151,7 +151,21 @@ const cleanupCourseData = (req, res, next) => {
         .filter(e => e !== UNCHANGED);
     req.updatesDeletedExercises = exercisesToDelete
         .filter(e => e.available)
-    exercisesToDelete.forEach(e => req.promises.push(e.delete(deleteOptions)));
+    exercisesToDelete.forEach(e => {
+        try{
+            let courseRefIndex = e.courseRefs.findIndex(c => c.equals(course._id))
+            if (courseRefIndex >= 0){
+                e.courseRefs.splice(courseRefIndex)
+                if (e.courseRefs.length === 0){
+                    req.promises.push(e.delete(deleteOptions))
+                } else {
+                    req.promises.push(e.save())
+                }
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    });
     return next();
 }
 exports.cleanupCourseData = cleanupCourseData;

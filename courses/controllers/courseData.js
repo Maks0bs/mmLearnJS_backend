@@ -492,10 +492,30 @@ exports.deleteCourse = deleteCourse;
  */
 const removeCourseMentions = (req, res, next) => {
     let {course} = req, contentPromises = []
+    let deleteOptions = { userId: req.auth._id, deleteFiles: true}
 
     //TODO this is newly added, might not function
-    course.sections.forEach(s => s.entries.forEach(e => contentPromises.push(e.delete())))
-    course.exercises.forEach(e => contentPromises.push(e.delete()))
+    try{
+        course.sections.forEach(s =>
+            s.entries.forEach(e => contentPromises.push(e.delete(deleteOptions)))
+        )
+        course.exercises.forEach(e => {
+            let courseRefIndex = e.courseRefs.findIndex(c => c.equals(course._id))
+            if (courseRefIndex >= 0){
+                e.courseRefs.splice(courseRefIndex)
+                if (e.courseRefs.length === 0){
+                    contentPromises.push(e.delete(deleteOptions))
+                } else {
+                    contentPromises.push(e.save())
+                }
+            }
+        });
+    } catch (err) {
+        console.log(err);
+    }
+
+    console.log(contentPromises);
+
     let usersWithRefs = [...course.subscribers, ...course.teachers, ...course.students];
     return Promise.all(contentPromises)
         .then(() => User.find({ _id: { $in: usersWithRefs}}))
