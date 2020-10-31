@@ -1,6 +1,18 @@
 let crypto = require('crypto');
 let { getGFS } = require('../../files/model')
 
+const USER_STATS = {
+    NOT_ENROLLED: 'not enrolled',
+    TEACHER: 'teacher',
+    CREATOR: 'creator',
+    INVITED_TEACHER: 'invited teacher',
+    STUDENT: 'student'
+}
+const CONSTANTS = {
+    USER_COURSE_STATUSES: USER_STATS
+}
+exports.COURSE_DATA_CONSTANTS = CONSTANTS;
+
 exports.courseMethods = {
     /**
      * @function checkPassword
@@ -34,6 +46,54 @@ exports.courseMethods = {
             console.log(err);
             return '';
         }
+    },
+    /**
+     * @description Cleans up some course data so that
+     * all the data that is left can be displayed to
+     * unauthenticated users that don't have any special access to course
+     * @return undefined
+     * @memberOf models.Course
+     */
+    leavePublicData: function(){
+        delete this.sections;
+        delete this.actions;
+        delete this.students;
+        delete this.invitedTeachers;
+        delete this.creator;
+        delete this.updates;
+        delete this.exercises;
+    },
+    /**
+     * @description Returns the status of the provided
+     * user in relation to this course. The user
+     * can be a teacher, creator, invited teacher, student
+     * or not have any relation to the course
+     * @param {string|ObjectId} userId
+     * @return {string}
+     * @memberOf models.Course
+     */
+    getUserCourseStatus: function(userId){
+        if (Array.isArray(this.invitedTeachers)){
+            for (let invited of this.invitedTeachers){
+                if (invited.toString() === userId.toString()){
+                    return USER_STATS.INVITED_TEACHER
+                }
+            }
+        }
+        for (let student of this.students){
+            if (student.toString() === userId.toString()){
+                return USER_STATS.STUDENT
+            }
+        }
+        for (let teacher of this.teachers){
+            if (teacher.toString() === userId.toString()){
+                return USER_STATS.TEACHER
+            }
+        }
+        if (this.creator && this.creator.toString() === userId.toString()){
+            return USER_STATS.CREATOR
+        }
+        return USER_STATS.NOT_ENROLLED
     }
 }
 

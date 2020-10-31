@@ -72,7 +72,7 @@ router.get('/user-attempts',
     requireAuthentication,
     userInExercise,
     getExerciseAttempts
-);//TODO add tests for this
+);
 
 /**
  * @swagger
@@ -141,7 +141,7 @@ router.get('/',
     configureFormatSingleExercise,
     getFormattedExercises,
     sendSingleExercise
-)//TODO add tests for this
+)
 
 /**
  * @swagger
@@ -195,6 +195,6 @@ router.post('/new-attempt',
     requireAuthentication,
     userInExercise,
     newExerciseAttempt
-)//TODO add tests for this
+)
 
 module.exports = router;

@@ -194,8 +194,9 @@ let courseSchema = new mongoose.Schema({
 		}
 	]
 }, {
-	discriminatorKey: 'kind'
-}, {autoCreate: true})
+	discriminatorKey: 'kind',
+	autoCreate: true
+})
 courseSchema.path('updates').discriminator(
 	'UpdateNewEntries', updateNewEntriesSchema
 )
@@ -222,6 +223,8 @@ courseSchema
 	.get(function() {
 		return this._password;
 	})
+
 courseSchema.methods = require('./methods').courseMethods;
+
 let Course = mongoose.model('Course', courseSchema);
 module.exports = Course;

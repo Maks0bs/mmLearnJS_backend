@@ -6,7 +6,6 @@ describe('GET /users/...', () => {
         return User.remove({});
     })
     require('./users$#userId');
-    require('./users');
     require('./updates-by-date');
 })
 

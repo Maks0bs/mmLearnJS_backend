@@ -58,7 +58,7 @@ router.get('/',
     requireAuthentication,
     correctAttemptOwner,
     getAttempt
-)//TODO add tests for this
+)
 
 /**
  * @swagger
@@ -137,7 +137,7 @@ router.put('/',
     requireAuthentication,
     correctAttemptOwner,
     updateAttemptAnswers
-)//TODO add tests for this
+)
 
 /**
  * @swagger
@@ -184,6 +184,6 @@ router.post('/finish',
     requireAuthentication,
     correctAttemptOwner,
     finishAttempt
-)//TODO add tests for this
+)
 
 module.exports = router;

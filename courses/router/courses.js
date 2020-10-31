@@ -87,7 +87,7 @@ router.post('/create',
     requireAuthentication,
     isTeacher,
     createCourse
-);//TODO write tests for this
+);
 
 //TODO change of frontend
 //TODO change to get with url params

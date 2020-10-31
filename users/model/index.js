@@ -240,7 +240,6 @@ let userSchema = new mongoose.Schema({
     ],
     notifications: [
         {
-            //TODO add discriminators for different types of notifications
             type: {
                 type: String,
             },

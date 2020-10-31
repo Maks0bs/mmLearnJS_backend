@@ -2,6 +2,11 @@ let Course = require('../model')
 let User = require('../../users/model');
 const {handleError} = require("../../helpers");
 let {cloneDeep} = require('lodash')
+let {USER_COURSE_STATUSES} = require('../model/methods').COURSE_DATA_CONSTANTS
+let {NOT_ENROLLED, CREATOR, TEACHER, STUDENT, INVITED_TEACHER} = USER_COURSE_STATUSES
+
+
+
 /**
  * @type function
  * @throws 400, 404
@@ -80,65 +85,59 @@ const createCourse = (req, res) => {
 };
 exports.createCourse = createCourse;
 
-
-
-
-exports.getCoursesFiltered = async (req, res) => {
-
-    //!!! add validation for sane request (e. g. can't POST enrolled + teacher)
-    let filter = {}, usersToPopulate = [], usersToPopulateSet = {}, courses;
-    if (req.body.courseId){
-        filter._id = req.body.courseId;
-    }
-    if (req.body.type){
-        filter.type = req.body.type;
-    }
+/**
+ * @type function
+ * @description Extracts params that specify what kind of courses
+ * should be found in the DB and sent via the
+ * {@link controllers.courses.getCoursesFiltered getCoursesFiltered}
+ * controller from the request query string. The appropriate filter object is stored
+ * under `req.courseFilter` and is used for the
+ * mongoose `model.find()` call
+ * @param {e.Request} req
+ * @param {models.User} req.auth
+ * @param {Object} [req.courseFilter]
+ * @param {Object} req.body
+ * @param {e.Response} res
+ * @param {models.Course.Entry} req.course
+ * @param {function} next
+ * @memberOf controllers.courses
+ */
+const configureCourseFilter = (req, res, next) => {
+    //TODO add validation for sane request (e. g. can't POST enrolled + teacher)
+    let filter = {}, {body} = req, filterPromises = []
+    //TODO change body to req.query
+    filter._id = body.courseId ? body.courseId : undefined;
+    filter.type = body.type ? body.type : undefined;
     if (req.body.enrolled){
-        await User.findOne({_id: req.body.enrolled})
-            .populate('enrolledCourses', '_id')
-            .then(user => {
-                filter._id = {
-                    $in: user.enrolledCourses
-                }
-            })
-            .catch(err => {
-                console.log(err);
-                res.status(err.status || 400)
-                    .json({
-                        error: err
-                    })
-            })
+        filterPromises.push(User.findOne({_id: body.enrolled})
+            .then(user => filter._id = {$in: user.enrolledCourses})
+            .catch(err => handleError(err, res))
+        )
+    }
+    if (body.teacher){
+        filterPromises.push(User.findOne({_id: body.teacher})
+            .then(user => filter._id = {$in: user.teacherCourses})
+            .catch(err => handleError(err, res))
+        )
+    }
+    if (body.searchWord){
+        let reOptions = { $regex: body.searchWord, $options: 'i'}
+        filter.$or = [ { name: reOptions }, { about: reOptions }]
+    }
+    Promise.all(filterPromises)
+        .then(() => {
+            req.courseFilter = filter;
+            return next();
+        })
+}
+exports.configureCourseFilter = configureCourseFilter;
 
-    }
-    if (req.body.teacher){
-        await User.findOne({_id: req.body.teacher})
-            .populate('teacherCourses', '_id')
-            .then(user => {
-                filter._id = {
-                    $in: user.teacherCourses
-                }
-            })
-            .catch(err => {
-                console.log(err);
-                res.status(err.status || 400)
-                    .json({
-                        error: err
-                    })
-            })
-    }
-    if (req.body.searchWord){
-        let reOptions = {
-            $regex: req.body.searchWord,
-            $options: 'i'
-        }
-        filter.$or = [
-            { name: reOptions },
-            { about: reOptions }
-        ]
-    }
-    let basicUserFields = ['name', 'photo', '_id', 'hiddenFields'];
-    Course.find({...filter})
-        //maybe select only necessary info
+//TODO add normal docs for this controller
+const getCoursesFiltered = async (req, res) => {
+    let {courseFilter: filter} = req, usersToPopulate = [], usersToPopulateSet = {},
+        courses, basicUserFields = ['name', 'photo', '_id', 'hiddenFields'];
+    //TODO replace usersToPopulate with .populate(...)
+    return Course.find({...filter})
         .populate({path: 'students', select: basicUserFields})
         .populate({path: 'teachers', select: basicUserFields})
         .populate({path: 'creator', select: basicUserFields})
@@ -158,92 +157,40 @@ exports.getCoursesFiltered = async (req, res) => {
                 select:['name', 'description', 'teachersOnly']
             }
         })
-        .sort('name')
+        .sort({name: 'asc', type: 'desc'})
         .then(foundCourses => {
             courses = foundCourses;
-            //console.log('fc', foundCourses);
-            /*
-                So many checks are used here to provide privacy - users shouldn't see course data, which they aren't meant to receive
-             */
-            let userStatuses = [];
-            for (let i = 0; i < courses.length; i++){
-                userStatuses.push('');
-            }
-            for (let i = 0; i < courses.length; i++){
-                userStatuses[i] = 'not enrolled';
+            let userStatuses = courses.map(() => 'not enrolled')
+            courses.forEach((c, i) => {
+                userStatuses[i] = c.getUserCourseStatus(req.auth._id);
                 courses[i].salt = undefined;
                 courses[i].hashed_password = undefined;
-                if (courses[i].type === 'public'){
-                    continue;
-                }
-                if (!req.auth){
-                    courses[i].sections = undefined;
-                    courses[i].actions = undefined;
-                    courses[i].students = undefined;
-                    courses[i].creator = undefined;
-                    courses[i].updates = undefined;
-                    courses[i].exercises = undefined;
-                    continue;
-                }
-
-                if (courses[i].invitedTeachers){
-                    let invitedTeachers = cloneDeep(courses[i].invitedTeachers);
-                    courses[i].invitedTeachers = undefined;
-                    for (let invited of invitedTeachers){
-                        if (invited.equals(req.auth._id)){
-                            courses[i].invitedTeachers = invitedTeachers;
-                            userStatuses[i] = 'invited teacher';
-                            break;
-                        }
+                if (c.type === 'public') return;
+                switch (userStatuses[i]) {
+                    case NOT_ENROLLED: {
+                        return courses[i].leavePublicData();
+                    }
+                    case CREATOR:
+                    case TEACHER: {
+                        return;
+                    }
+                    case INVITED_TEACHER:
+                    case STUDENT: {
+                        courses[i].creator = undefined;
+                        courses[i].invitedTeachers = undefined;
                     }
                 }
-
-                let isTeacher = false, isStudent = false;
-
-                for (let student of courses[i].students){
-                    if (student.equals(req.auth._id)){
-                        isStudent = true;
-                        userStatuses[i] = 'student';
-                    }
-                    if (student && student.hideFields){
-                        student.hideFields();
-                    }
-                }
-                for (let teacher of courses[i].teachers){
-                    if (teacher.equals(req.auth._id)){
-                        isTeacher = true;
-                        userStatuses[i] = 'teacher';
-                    }
-                    if (teacher && teacher.hideFields){
-                        teacher.hideFields();
-                    }
-                }
-                if (courses[i].creator && courses[i].creator.hideFields){
-                    courses[i].creator.hideFields();
-                }
-
-                if (courses[i].creator && courses[i].creator._id.equals(req.auth._id)){
-                    userStatuses[i] = 'creator';
-                    continue;
-                }
-                if (isTeacher){
-                    continue;
-                }
-                if (isStudent){
-                    courses[i].creator = undefined;
-                    continue;
-                }
-
-                courses[i].creator = undefined;
-                courses[i].actions = undefined;
-                courses[i].sections = undefined;
-                courses[i].students = undefined;
-                courses[i].updates = undefined;
-                courses[i].exercises = undefined;
-            }
-
-            //Populating different fields in this loop
-            //This loop can be used not only for forums, but for all other types of entries
+                if (Array.isArray(c.invitedTeachers)) c.invitedTeachers.forEach((t, j) => {
+                    if (t && t.hideFields) courses[i].invitedTeachers[j].hideFields();
+                })
+                if (Array.isArray(c.students)) c.students.forEach((s, j) => {
+                    if (s && s.hideFields) courses[i].students[j].hideFields();
+                })
+                if (Array.isArray(c.teachers)) c.teachers.forEach((t, j) => {
+                    if (t && t.hideFields) courses[i].teachers[j].hideFields();
+                })
+                if (c.creator && c.creator.hideFields) courses[i].creator.hideFields();
+            })
 
             for (let c = 0; c < courses.length; c++){
                 if (!courses[c].sections){
@@ -416,14 +363,11 @@ exports.getCoursesFiltered = async (req, res) => {
 
             return res.json(courses);
         })
-        .catch(err => {
-            console.log(err);
-            res.status(err.status || 400)
-                .json({
-                    error: err
-                })
-        })
+        .catch(err => {handleError(err, res)})
 }
+
+
+exports.getCoursesFiltered = getCoursesFiltered;
 
 /**
  * @type function
@@ -494,7 +438,6 @@ const removeCourseMentions = (req, res, next) => {
     let {course} = req, contentPromises = []
     let deleteOptions = { userId: req.auth._id, deleteFiles: true}
 
-    //TODO this is newly added, might not function
     try{
         course.sections.forEach(s =>
             s.entries.forEach(e => contentPromises.push(e.delete(deleteOptions)))
@@ -513,8 +456,6 @@ const removeCourseMentions = (req, res, next) => {
     } catch (err) {
         console.log(err);
     }
-
-    console.log(contentPromises);
 
     let usersWithRefs = [...course.subscribers, ...course.teachers, ...course.students];
     return Promise.all(contentPromises)

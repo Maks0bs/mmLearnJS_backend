@@ -86,7 +86,7 @@ let router = require('express').Router()
 router.post('/enroll',
     requireAuthentication,
     enrollInCourse
-);//TODO add tests for this
+);
 
 /**
  * @swagger
@@ -157,7 +157,7 @@ router.post('/send-teacher-invitation',
     validate,
     sendTeacherInvite,
     addToInvitedList
-)//TODO add tests for this
+)
 
 /**
  * @swagger
@@ -213,7 +213,7 @@ router.post('/accept-teacher-invitation',
     requireAuthentication,
     isTeacher,
     acceptTeacherInvite
-)//TODO add tests for this
+)
 
 /**
  * @swagger
@@ -270,7 +270,7 @@ router.post('/subscribe',
     requireAuthentication,
     userInCourse,
     subscribe
-)//TODO add tests for this
+)
 
 /**
  * @swagger
@@ -326,7 +326,7 @@ router.post('/unsubscribe',
     requireAuthentication,
     userInCourse,
     unsubscribe
-)//TODO add tests for this
+)
 
 /**
  * @swagger
@@ -375,7 +375,7 @@ router.post('/unsubscribe',
 router.get('/view',
     requireAuthentication,
     viewCourse
-)//TODO add tests for this
+)
 
 /**
  * @swagger
@@ -429,7 +429,7 @@ router.get('/exercises',
     getCourseExercisesConfigure,
     getFormattedExercises,
     sendExercises
-)//TODO add tests for this
+)
 
 /**
  * @swagger
@@ -513,16 +513,150 @@ router.get('/exercise-summary',
     getExerciseSummary
 )
 
-//TODO add swagger docs for this
+/**
+ * @swagger
+ * path:
+ *  /course/:courseId:
+ *    delete:
+ *      summary: >
+ *        Deletes the course with given Id and all content that only this
+ *        course references. Also deletes references to this course for its members
+ *      description: >
+ *        Deletes the course with given Id. All the members of this course
+ *        have the references to this course removed from their
+ *        enrolled, teacher and subscribed courses lists. If the course
+ *        contained any content (exercises/entries/forums) that existed
+ *        only and specifically in this course, also delete the documents
+ *        of these pieces of content and clean up refs to the as well.
+ *      operationId: deleteCourse
+ *      security:
+ *        - cookieAuth: []
+ *      parameters:
+ *        - name: courseId
+ *          in: path
+ *          description: >
+ *            the id of the course to perform operations with
+ *          required: true
+ *          type: string
+ *      tags:
+ *        - "/course/..."
+ *      responses:
+ *        "200":
+ *          description: Course has been deleted successfully
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *        "400":
+ *          description: course Id might be invalid
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *        "401":
+ *          description: unauthorized (unauthenticated / not the course's creator)
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
 router.delete('/',
     requireAuthentication,
     isCourseCreator,
     removeCourseMentions,
-    deleteFiles,
     deleteCourse
-);//TODO add tests for this
+);
 
-//TODO add swagger docs for this
+/**
+ * @swagger
+ * path:
+ *  /course/:courseId:
+ *    put:
+ *      summary: >
+ *        Updates the course with the given ID and sets new course data for it,
+ *        which is provided in the request body
+ *      description: >
+ *        Updates the course with the given ID and sets new course data for it,
+ *        which is provided in the request body
+ *        The request body should be
+ *        [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData).
+ *        Only the `name`, `about`, `type`, `hasPassword`, `password`, `updates`,
+ *        `sections` and `exercises` fields can be updated explicitly via this endpoint
+ *        (`hashed_password` and `salt` gets updates implicitly via setting `password`)
+ *        To update `sections` or `exercises`, please provide the complete
+ *        list of sections/exercises that should be set as new ones, i.e. it should be
+ *        distinguishable which exercises/entries have been deleted and which ones
+ *        should be created after calling this endpoint. The old data gets completely
+ *        replaced with the one that was received via this request and the new data
+ *        gets compared to the previous one to perform cleanup and DB restructuring.
+ *        NOTE: all operations while updating the course are performed
+ *        on a MongoDB transaction, which gets initialized upon
+ *        extracting the new course data from the received raw FormData
+ *      operationId: updateUser
+ *      security:
+ *        - cookieAuth: []
+ *      parameters:
+ *        - name: courseId
+ *          in: path
+ *          description: >
+ *            the id of the course to perform operations with
+ *          required: true
+ *          type: string
+ *      tags:
+ *        - "/course/..."
+ *      requestBody:
+ *        content:
+ *          application/form-data:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                course:
+ *                  - $ref: '#/components/schemas/Course'
+ *                files:
+ *                  type: array
+ *                  items:
+ *                    type: string
+ *                    format: binary
+ *      responses:
+ *        "200":
+ *          description: >
+ *            Course data has been updated successfully.
+ *            Return the updated course data as JSON
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  user:
+ *                    $ref: '#/components/schemas/Course'
+ *                  message:
+ *                    type: string
+ *        "400":
+ *          description: The provided data or courseId is invalid
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *        "401":
+ *          description: >
+ *            Not authorized to update the course or the user doesn't
+ *            have access to some course content they tried to change
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *
+ *        "404":
+ *          description: >
+ *            Course with given ID could not be found
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
 router.put('/',
     requireAuthentication,
     isTeacher,
@@ -536,7 +670,7 @@ router.put('/',
     mergeCourseBasicFields,
     deleteFiles,
     saveCourseChanges,
-)//TODO add tests for this
+)
 
 
 //TODO add a getter for a single course (GET /course/:courseId/)

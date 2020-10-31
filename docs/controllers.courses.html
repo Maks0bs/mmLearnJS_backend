@@ -174,7 +174,7 @@
         <p class="tag-source">
             <a href="courses_controllers_index.js.html" class="button">View Source</a>
             <span>
-                <a href="courses_controllers_index.js.html">courses/controllers/index.js</a>, <a href="courses_controllers_index.js.html#line9">line 9</a>
+                <a href="courses_controllers_index.js.html">courses/controllers/index.js</a>, <a href="courses_controllers_index.js.html#line8">line 8</a>
             </span>
         </p>
     
@@ -1090,7 +1090,7 @@ are applied locally to the object, mentioned above</p>
         <p class="tag-source">
             <a href="courses_controllers_updateCourse.js.html" class="button">View Source</a>
             <span>
-                <a href="courses_controllers_updateCourse.js.html">courses/controllers/updateCourse.js</a>, <a href="courses_controllers_updateCourse.js.html#line175">line 175</a>
+                <a href="courses_controllers_updateCourse.js.html">courses/controllers/updateCourse.js</a>, <a href="courses_controllers_updateCourse.js.html#line192">line 192</a>
             </span>
         </p>
     
@@ -1307,6 +1307,31 @@ changes to the course data</p>
             
 <tr class="deep-level-0">
   
+      <td class="name"><code>req.auth</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="models.User.html">models.User</a></span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
       <td class="name"><code>req.newCourse</code></td>
   
 
@@ -1314,6 +1339,31 @@ changes to the course data</p>
   
       
 <span class="param-type"><a href="models.Course.html">models.Course</a></span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req.promises</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Array.&lt;Promise></span>
 
 
   
@@ -1546,7 +1596,371 @@ changes to the course data</p>
         <p class="tag-source">
             <a href="courses_controllers_updateCourse.js.html" class="button">View Source</a>
             <span>
-                <a href="courses_controllers_updateCourse.js.html">courses/controllers/updateCourse.js</a>, <a href="courses_controllers_updateCourse.js.html#line104">line 104</a>
+                <a href="courses_controllers_updateCourse.js.html">courses/controllers/updateCourse.js</a>, <a href="courses_controllers_updateCourse.js.html#line106">line 106</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id=".configureCourseFilter">
+        <a class="href-link" href="#.configureCourseFilter">#</a>
+        
+            
+                <span class='tag'>static</span>
+            
+        
+        <span class="code-name">
+            
+                configureCourseFilter<span class="signature">(req, res, next)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    
+    <div class="description">
+        <p>Extracts params that specify what kind of courses
+should be found in the DB and sent via the
+getCoursesFiltered
+controller from the request query string. The appropriate filter object is stored
+under <code>req.courseFilter</code> and is used for the
+mongoose <code>model.find()</code> call</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+            <th>Attributes</th>
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">e.Request</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+  
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>auth</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="models.User.html">models.User</a></span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>courseFilter</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Object</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>body</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Object</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+  
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>res</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">e.Response</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>req.course</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type"><a href="models.Course.Entry.html">models.Course.Entry</a></span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>next</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">function</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="courses_controllers_courseData.js.html" class="button">View Source</a>
+            <span>
+                <a href="courses_controllers_courseData.js.html">courses/controllers/courseData.js</a>, <a href="courses_controllers_courseData.js.html#line105">line 105</a>
             </span>
         </p>
     
@@ -1800,7 +2214,7 @@ the request object under the <code>req.course</code> property</p>
         <p class="tag-source">
             <a href="courses_controllers_courseData.js.html" class="button">View Source</a>
             <span>
-                <a href="courses_controllers_courseData.js.html">courses/controllers/courseData.js</a>, <a href="courses_controllers_courseData.js.html#line18">line 18</a>
+                <a href="courses_controllers_courseData.js.html">courses/controllers/courseData.js</a>, <a href="courses_controllers_courseData.js.html#line23">line 23</a>
             </span>
         </p>
     
@@ -2047,7 +2461,7 @@ provided as well. See <a href="models.Course.html">course model</a> for details<
         <p class="tag-source">
             <a href="courses_controllers_courseData.js.html" class="button">View Source</a>
             <span>
-                <a href="courses_controllers_courseData.js.html">courses/controllers/courseData.js</a>, <a href="courses_controllers_courseData.js.html#line60">line 60</a>
+                <a href="courses_controllers_courseData.js.html">courses/controllers/courseData.js</a>, <a href="courses_controllers_courseData.js.html#line65">line 65</a>
             </span>
         </p>
     
@@ -2293,7 +2707,7 @@ to remove all references to this course beforehand.</p>
         <p class="tag-source">
             <a href="courses_controllers_courseData.js.html" class="button">View Source</a>
             <span>
-                <a href="courses_controllers_courseData.js.html">courses/controllers/courseData.js</a>, <a href="courses_controllers_courseData.js.html#line470">line 470</a>
+                <a href="courses_controllers_courseData.js.html">courses/controllers/courseData.js</a>, <a href="courses_controllers_courseData.js.html#line414">line 414</a>
             </span>
         </p>
     
@@ -2992,7 +3406,7 @@ adding the ref to course data to the configuration object</p>
         <p class="tag-source">
             <a href="courses_controllers_courseData.js.html" class="button">View Source</a>
             <span>
-                <a href="courses_controllers_courseData.js.html">courses/controllers/courseData.js</a>, <a href="courses_controllers_courseData.js.html#line445">line 445</a>
+                <a href="courses_controllers_courseData.js.html">courses/controllers/courseData.js</a>, <a href="courses_controllers_courseData.js.html#line389">line 389</a>
             </span>
         </p>
     
@@ -4028,7 +4442,7 @@ data, user the appropriate controllers</p>
         <p class="tag-source">
             <a href="courses_controllers_updateCourse.js.html" class="button">View Source</a>
             <span>
-                <a href="courses_controllers_updateCourse.js.html">courses/controllers/updateCourse.js</a>, <a href="courses_controllers_updateCourse.js.html#line439">line 439</a>
+                <a href="courses_controllers_updateCourse.js.html">courses/controllers/updateCourse.js</a>, <a href="courses_controllers_updateCourse.js.html#line453">line 453</a>
             </span>
         </p>
     
@@ -4301,7 +4715,7 @@ exercises/forums are used</p>
         <p class="tag-source">
             <a href="courses_controllers_courseData.js.html" class="button">View Source</a>
             <span>
-                <a href="courses_controllers_courseData.js.html">courses/controllers/courseData.js</a>, <a href="courses_controllers_courseData.js.html#line493">line 493</a>
+                <a href="courses_controllers_courseData.js.html">courses/controllers/courseData.js</a>, <a href="courses_controllers_courseData.js.html#line437">line 437</a>
             </span>
         </p>
     
@@ -4580,7 +4994,7 @@ the middleware chain.</p>
         <p class="tag-source">
             <a href="courses_controllers_updateCourse.js.html" class="button">View Source</a>
             <span>
-                <a href="courses_controllers_updateCourse.js.html">courses/controllers/updateCourse.js</a>, <a href="courses_controllers_updateCourse.js.html#line471">line 471</a>
+                <a href="courses_controllers_updateCourse.js.html">courses/controllers/updateCourse.js</a>, <a href="courses_controllers_updateCourse.js.html#line485">line 485</a>
             </span>
         </p>
     
@@ -6161,7 +6575,7 @@ are applied locally to <code>req.course</code>.</p>
         <p class="tag-source">
             <a href="courses_controllers_updateCourse.js.html" class="button">View Source</a>
             <span>
-                <a href="courses_controllers_updateCourse.js.html">courses/controllers/updateCourse.js</a>, <a href="courses_controllers_updateCourse.js.html#line349">line 349</a>
+                <a href="courses_controllers_updateCourse.js.html">courses/controllers/updateCourse.js</a>, <a href="courses_controllers_updateCourse.js.html#line363">line 363</a>
             </span>
         </p>
     
@@ -6530,7 +6944,7 @@ are applied locally to <code>req.course</code>.</p>
         <p class="tag-source">
             <a href="courses_controllers_updateCourse.js.html" class="button">View Source</a>
             <span>
-                <a href="courses_controllers_updateCourse.js.html">courses/controllers/updateCourse.js</a>, <a href="courses_controllers_updateCourse.js.html#line247">line 247</a>
+                <a href="courses_controllers_updateCourse.js.html">courses/controllers/updateCourse.js</a>, <a href="courses_controllers_updateCourse.js.html#line261">line 261</a>
             </span>
         </p>
     

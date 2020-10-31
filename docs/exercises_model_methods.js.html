@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> ExerciseParticipant</title>
+  <title> exercises/model/methods.js</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -81,236 +83,76 @@
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Class</p>
-                    <h1>ExerciseParticipant</h1>
+                    <p>Source</p>
+                    <h1>exercises/model/methods.js</h1>
                 </header>
                 
 
 
 
-
-<section>
-
-<header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>
-            <span class="ancestors"><a href="models.html">models</a><a href="models.Exercise.html">.Exercise</a>.</span>ExerciseParticipant<span class="signature">()</span><span class="type-signature"></span></h2>
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class='vertical-section'>
-                <div class="members">
-                    <div class="member">
-                        <div class=name>
-                            <span class="tag">Constructor</span>
-                        </div>
-                        
-
-
-    
-    <h4 class="name" id="ExerciseParticipant">
-        <a class="href-link" href="#ExerciseParticipant">#</a>
-        
-        <span class="code-name">
-            
-                new ExerciseParticipant<span class="signature">()</span><span class="type-signature"></span>
-            
-        </span>
-    </h4>
-    
-
-    
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h5 class="subsection-title">Properties:</h5>
-
-    
-<div class="table-container">
-    <table class="props table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-            
-<tr class="deep-level-0">
-    
-        <td class="name"><code>user</code></td>
-    
-
-    <td class="type">
-    
-        
-<span class="param-type"><a href="global.html#ObjectId">ObjectId</a></span>
-|
-
-<span class="param-type"><a href="models.User.html">models.User</a></span>
-
-
-    
-    </td>
-
-    
-
-    
-
-    <td class="description last"></td>
-</tr>
-
-        
-            
-<tr class="deep-level-0">
-    
-        <td class="name"><code>attempts</code></td>
-    
-
-    <td class="type">
-    
-        
-<span class="param-type">Array.&lt;<a href="global.html#ObjectId">ObjectId</a>></span>
-|
-
-<span class="param-type">Array.&lt;<a href="models.Exercise.ExerciseAttempt.html">models.Exercise.ExerciseAttempt</a>></span>
-
-
-    
-    </td>
-
-    
-
-    
-
-    <td class="description last"></td>
-</tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="exercises_model_index.js.html" class="button">View Source</a>
-            <span>
-                <a href="exercises_model_index.js.html">exercises/model/index.js</a>, <a href="exercises_model_index.js.html#line3">line 3</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    </div>
-                </div>
-            </div>
-        
-    
-    </div>
-    
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>exports.exerciseMethods = {
+    /**
+     * @param {Object} options
+     * @param {string|ObjectId} options.userId - required option! The user
+     * who performs the operation about deleting entries. Required
+     * to check if this user has enough authorization
+     * @return {Promise} - the promise that gets resolved
+     * if all object that exercise and its references were
+     * deleted successfully, it gets rejected if there
+     * was a problem deleting some object. Please note
+     * that this promise does not handle errors
+     * automatically, they should be caught manually
+     */
+    delete: function (options){
+        const Exercise = require('./index');
+        const {ExerciseTask} = require('./ExerciseTask');
+        const {ExerciseAttempt} = require('./ExerciseAttempt');
+        let exerciseRef = this;
+        return Exercise.findById(this._id)
+            .populate('courseRefs', ['_id', 'name', 'teachers', 'students'])
+            .populate('tasks')
+            .populate({
+                path: 'participants',
+                populate: {path: 'attempts'}
+            })
+            .then(exercise => {
+                let isAuthorized = false, tasksToDelete = [],
+                    attemptsToDelete = [], promises = []
+                let criteria = u => u.toString() === options.userId.toString();
+                for (let c of exercise.courseRefs){
+                    isAuthorized = c.teachers.findIndex(criteria) >= 0;
+                    if (isAuthorized) break;
+                }
+                if (!isAuthorized) throw {
+                    message: 'The authenticated user is not authorized ' +
+                        'to remove this exercise and its components'
+                }
+                exercise.tasks.forEach(t => {
+                    let exerciseRefIndex = t.exerciseRefs
+                        .findIndex(e => e.equals(exercise._id))
+                    if (exerciseRefIndex >= 0){
+                        t.exerciseRefs.splice(exerciseRefIndex);
+                        if (t.exerciseRefs.length === 0){
+                            tasksToDelete.push(t._id)
+                        } else {
+                            promises.push(t.save())
+                        }
+                    }
+                })
+                promises.push(ExerciseTask.deleteMany({_id: { $in: tasksToDelete}}))
+                exercise.participants
+                    .forEach(p => p.attempts.forEach(a => attemptsToDelete.push(a._id)))
+                promises.push(ExerciseAttempt.deleteMany({_id: {$in: attemptsToDelete}}))
+                return Promise.all(promises);
+            })
+            .then(() => Exercise.deleteOne({_id: exerciseRef._id}))
+    }
+}</code></pre>
+        </article>
+    </section>
 
 
 

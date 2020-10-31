@@ -169,7 +169,7 @@ router.get('/updates-by-date',
 router.get('/updates-notifications',
     requireAuthentication,
     getUpdatesNotifications
-)//TODO add tests for this
+)
 
 /**
  * @swagger
@@ -214,12 +214,6 @@ router.get('/updates-notifications',
  *                $ref: '#/components/schemas/Error'
  */
 router.get('/:userId', getUser);
-
-//TODO create basic functionality for this endpoint
-router.get('/',
-    (req, res) =>
-        res.json([])
-)
 
 /**
  * @swagger
