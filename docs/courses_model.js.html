@@ -210,8 +210,8 @@ let courseExerciseSchema = new mongoose.Schema({
 	discriminatorKey: 'kind'
 })
 
-let Exercise = mongoose.model('CourseExercise', courseExerciseSchema);
-exports.Exercise = Exercise;
+let Index = mongoose.model('CourseExercise', courseExerciseSchema);
+exports.Index = Index;
 
 
 function choiceArrayValidator(arr){

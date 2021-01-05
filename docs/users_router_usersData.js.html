@@ -76,7 +76,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="helpers.html">helpers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="controllers.files.html">files</a></li><li><a href="controllers.helpers.html">helpers</a></li><li><a href="controllers.users.html">users</a></li><li><a href="controllers.users.auth.html">auth</a></li><li><a href="controllers.users.usersData.html">usersData</a></li><li><a href="controllers.users.util.html">util</a></li><li><a href="controllers.users.validators.html">validators</a></li><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#getForgedId">getForgedId</a></li><li><a href="global.html#getGFS">getGFS</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#updateDeletedEntriesSchema">updateDeletedEntriesSchema</a></li><li><a href="global.html#updateNewEntriesSchema">updateNewEntriesSchema</a></li><li><a href="global.html#updateNewInfoSchema">updateNewInfoSchema</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="helpers.html">helpers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="controllers.courses.html">courses</a></li><li><a href="controllers.exercises.html">exercises</a></li><li><a href="controllers.files.html">files</a></li><li><a href="controllers.forum.html">forum</a></li><li><a href="controllers.helpers.html">helpers</a></li><li><a href="controllers.users.html">users</a></li><li><a href="models.Course.html">Course</a></li><li><a href="models.Course.CourseSection.html">CourseSection</a></li><li><a href="models.Course.CourseUpdate.html">CourseUpdate</a></li><li><a href="models.Course.CourseUpdateDeletedEntries.html">CourseUpdateDeletedEntries</a></li><li><a href="models.Course.CourseUpdateDeletedExercises.html">CourseUpdateDeletedExercises</a></li><li><a href="models.Course.CourseUpdateNewEntries.html">CourseUpdateNewEntries</a></li><li><a href="models.Course.CourseUpdateNewExercises.html">CourseUpdateNewExercises</a></li><li><a href="models.Course.Entry.html">Entry</a></li><li><a href="models.Course.EntryFile.html">EntryFile</a></li><li><a href="models.Course.EntryText.html">EntryText</a></li><li><a href="models.Exercise.html">Exercise</a></li><li><a href="models.Exercise.ExerciseAttempt.html">ExerciseAttempt</a></li><li><a href="models.Exercise.ExerciseAttemptAnswer.html">ExerciseAttemptAnswer</a></li><li><a href="models.Exercise.ExerciseParticipant.html">ExerciseParticipant</a></li><li><a href="models.Exercise.ExerciseTask.html">ExerciseTask</a></li><li><a href="models.Exercise.MultipleChoiceTask.html">MultipleChoiceTask</a></li><li><a href="models.Exercise.OneChoiceTask.html">OneChoiceTask</a></li><li><a href="models.Exercise.TextTask.html">TextTask</a></li><li><a href="models.Forum.html">Forum</a></li><li><a href="models.Forum.ForumTopic.html">ForumTopic</a></li><li><a href="models.Forum.ForumTopic.ForumTopicPost.html">ForumTopicPost</a></li><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#attemptAnswerSchema">attemptAnswerSchema</a></li><li><a href="global.html#courseExerciseSchema">courseExerciseSchema</a></li><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#courseUpdateSchema">courseUpdateSchema</a></li><li><a href="global.html#entrySchema">entrySchema</a></li><li><a href="global.html#exerciseTaskSchema">exerciseTaskSchema</a></li><li><a href="global.html#forumRouter">forumRouter</a></li><li><a href="global.html#forumSchema">forumSchema</a></li><li><a href="global.html#forumTopicPostSchema">forumTopicPostSchema</a></li><li><a href="global.html#getExerciseUserStatus">getExerciseUserStatus</a></li><li><a href="global.html#getForgedId">getForgedId</a></li><li><a href="global.html#getGFS">getGFS</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul></div>
                 
             </nav>
         </div>
@@ -95,9 +95,9 @@
         <article>
             <pre class="prettyprint source linenums"><code>let {validate} = require("../../helpers");
 let {
-    requireAuthentication, getUser, userById, getUsersFiltered,
+    requireAuthentication, getUser, userById,
     updateUser, deserializeAndCleanUserData, isAuthenticatedUser, getUpdatesByDate,
-    deleteUser, removeUserMentions
+    deleteUser, removeUserMentions, getUpdatesNotifications
 } = require('../controllers');
 let {
     uploadFiles, deleteFiles
@@ -180,10 +180,9 @@ let router = require('express').Router()
  *          content:
  *            application/json:
  *              schema:
- *                type: object
- *                properties:
- *                  message:
- *                    type: string
+ *                type: array
+ *                items:
+ *                  $ref: '#/components/schemas/CourseUpdate'
  *        "400":
  *          description: The provided query params are invalid
  *          content:
@@ -208,6 +207,63 @@ let router = require('express').Router()
 router.get('/updates-by-date',
     requireAuthentication,
     getUpdatesByDate
+)
+
+/**
+ * @swagger
+ * path:
+ *  /users/updates-notifications:
+ *    get:
+ *      summary: >
+ *        Fetches the amount of unseen notifications for each specified course (as a map).
+ *        The user should be subscribed to each specified course;
+ *      operationId: getUpdatesNotifications
+ *      security:
+ *        - cookieAuth: []
+ *      tags:
+ *        - "/users/..."
+ *      parameters:
+ *        - in: query
+ *          name: courses
+ *          description: >
+ *            the list of course IDs for which the amount of notifications.
+ *            The array of IDs is passed in the
+ *            [default `req.query` notation](https://expressjs.com/de/api.html#req.query)
+ *          required: true
+ *          schema:
+ *            type: array
+ *            items:
+ *              type: string
+ *          example: ?courses=abababababababababababab&amp;courses=cdcdcdcdcdcdcdcdcdcdcdcd
+ *      responses:
+ *        "200":
+ *          description: All updates have been sent
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                additionalProperties:
+ *                  type: number
+ *                example:
+ *                  abababababababababababab: 5
+ *                  cdcdcdcdcdcdcdcdcdcdcdcd: 2
+ *        "400":
+ *          description: provided course IDs might be invalid
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *        "401":
+ *          description: >
+ *            User is not authenticated
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
+router.get('/updates-notifications',
+    requireAuthentication,
+    getUpdatesNotifications
 )
 
 /**
@@ -253,10 +309,6 @@ router.get('/updates-by-date',
  *                $ref: '#/components/schemas/Error'
  */
 router.get('/:userId', getUser);
-
-//TODO!!!!!!!!
-router.get('/', getUsersFiltered)//TODO create basic functionality for this endpoint
-//TODO!!!!!!!!
 
 /**
  * @swagger

@@ -1,0 +1,289 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> courses/model/methods.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">mmLearnJS API</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+                <div class="search-wrapper">
+                    <input id="search" type="text" placeholder="Search docs..." class="input">
+                </div>
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="helpers.html">helpers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="controllers.courses.html">courses</a></li><li><a href="controllers.exercises.html">exercises</a></li><li><a href="controllers.files.html">files</a></li><li><a href="controllers.forum.html">forum</a></li><li><a href="controllers.helpers.html">helpers</a></li><li><a href="controllers.users.html">users</a></li><li><a href="models.Course.html">Course</a></li><li><a href="models.Course.CourseSection.html">CourseSection</a></li><li><a href="models.Course.CourseUpdate.html">CourseUpdate</a></li><li><a href="models.Course.CourseUpdateDeletedEntries.html">CourseUpdateDeletedEntries</a></li><li><a href="models.Course.CourseUpdateDeletedExercises.html">CourseUpdateDeletedExercises</a></li><li><a href="models.Course.CourseUpdateNewEntries.html">CourseUpdateNewEntries</a></li><li><a href="models.Course.CourseUpdateNewExercises.html">CourseUpdateNewExercises</a></li><li><a href="models.Course.Entry.html">Entry</a></li><li><a href="models.Course.EntryFile.html">EntryFile</a></li><li><a href="models.Course.EntryText.html">EntryText</a></li><li><a href="models.Exercise.html">Exercise</a></li><li><a href="models.Exercise.ExerciseAttempt.html">ExerciseAttempt</a></li><li><a href="models.Exercise.ExerciseAttemptAnswer.html">ExerciseAttemptAnswer</a></li><li><a href="models.Exercise.ExerciseParticipant.html">ExerciseParticipant</a></li><li><a href="models.Exercise.ExerciseTask.html">ExerciseTask</a></li><li><a href="models.Exercise.MultipleChoiceTask.html">MultipleChoiceTask</a></li><li><a href="models.Exercise.OneChoiceTask.html">OneChoiceTask</a></li><li><a href="models.Exercise.TextTask.html">TextTask</a></li><li><a href="models.Forum.html">Forum</a></li><li><a href="models.Forum.ForumTopic.html">ForumTopic</a></li><li><a href="models.Forum.ForumTopic.ForumTopicPost.html">ForumTopicPost</a></li><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#attemptAnswerSchema">attemptAnswerSchema</a></li><li><a href="global.html#courseExerciseSchema">courseExerciseSchema</a></li><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#courseUpdateSchema">courseUpdateSchema</a></li><li><a href="global.html#entrySchema">entrySchema</a></li><li><a href="global.html#exerciseTaskSchema">exerciseTaskSchema</a></li><li><a href="global.html#forumRouter">forumRouter</a></li><li><a href="global.html#forumSchema">forumSchema</a></li><li><a href="global.html#forumTopicPostSchema">forumTopicPostSchema</a></li><li><a href="global.html#getExerciseUserStatus">getExerciseUserStatus</a></li><li><a href="global.html#getForgedId">getForgedId</a></li><li><a href="global.html#getGFS">getGFS</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>courses/model/methods.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>let crypto = require('crypto');
+let { getGFS } = require('../../files/model')
+
+const USER_STATS = {
+    NOT_ENROLLED: 'not enrolled',
+    TEACHER: 'teacher',
+    CREATOR: 'creator',
+    INVITED_TEACHER: 'invited teacher',
+    STUDENT: 'student'
+}
+const CONSTANTS = {
+    USER_COURSE_STATUSES: USER_STATS
+}
+exports.COURSE_DATA_CONSTANTS = CONSTANTS;
+
+exports.courseMethods = {
+    /**
+     * @function checkPassword
+     * @description returns true if the given password in plain text is the correct one
+     * for the given course and course has a password (this password was originally hashed and saved)
+     * @param {string} plain
+     * @return {boolean}
+     *
+     * @memberOf models.Course
+     */
+    checkPassword: function(plain){
+        return this.hasPassword &amp;&amp;
+            (this.encryptPassword(plain) === this.hashed_password)
+    },
+    /**
+     * @description returns a hashed password, see {@link crypto}. The key for hashing the salt,
+     * which is saved in the course document.
+     * @param {string} password
+     * @return {string}
+     * @memberOf models.Course
+     */
+    encryptPassword: function(password){
+        // we return "" because errors are caught inside this func.
+        // if we try to set the wrongly encrypted password, it would cause a mongoose error
+        if ((typeof password !== 'string') || !password) return "";
+        try {
+            return crypto.createHmac('sha1', this.salt)
+                .update(password)
+                .digest('hex');
+        } catch(err){
+            console.log(err);
+            return '';
+        }
+    },
+    /**
+     * @description Cleans up some course data so that
+     * all the data that is left can be displayed to
+     * unauthenticated users that don't have any special access to course
+     * @return undefined
+     * @memberOf models.Course
+     */
+    leavePublicData: function(){
+        delete this.sections;
+        delete this.actions;
+        delete this.students;
+        delete this.invitedTeachers;
+        delete this.creator;
+        delete this.updates;
+        delete this.exercises;
+    },
+    /**
+     * @description Returns the status of the provided
+     * user in relation to this course. The user
+     * can be a teacher, creator, invited teacher, student
+     * or not have any relation to the course
+     * @param {string|ObjectId} userId
+     * @return {string}
+     * @memberOf models.Course
+     */
+    getUserCourseStatus: function(userId){
+        if (Array.isArray(this.invitedTeachers)){
+            for (let invited of this.invitedTeachers){
+                if (invited.toString() === userId.toString()){
+                    return USER_STATS.INVITED_TEACHER
+                }
+            }
+        }
+        for (let student of this.students){
+            if (student.toString() === userId.toString()){
+                return USER_STATS.STUDENT
+            }
+        }
+        for (let teacher of this.teachers){
+            if (teacher.toString() === userId.toString()){
+                return USER_STATS.TEACHER
+            }
+        }
+        if (this.creator &amp;&amp; this.creator.toString() === userId.toString()){
+            return USER_STATS.CREATOR
+        }
+        return USER_STATS.NOT_ENROLLED
+    }
+}
+
+exports.entryMethods = {
+    /**
+     * @param {Object} options
+     * @param {boolean} [options.deleteFiles] - set to true if
+     * the files that are referenced in the entries should
+     * also be removed from the DB
+     * @param {string|ObjectId} options.userId - required option! The user
+     * who performs the operation about deleting entries. Required
+     * to check if this user has enough authorization
+     * @return {Promise} - the promise that gets resolved
+     * if all object that this entry references were
+     * deleted successfully, it gets rejected if there
+     * was a problem deleting some object. Please note
+     * that this promise does not handle errors
+     * automatically, they should be caught manually
+     */
+    delete: function (options) {
+        const {Entry} = require('./Entry');
+        const Forum = require('../../forums/model')
+        let entryRef = this;
+        return Entry.findById(this._id)
+            .populate('courseRef', ['_id', 'name', 'teachers', 'students'])
+            .then(entry => {
+                let criteria = u => u.toString() === options.userId.toString();
+                if (!entry.courseRef.teachers.find(criteria)){
+                    throw {
+                        message: 'The authenticated user is not authorized ' +
+                            'to remove this entry'
+                    }
+                }
+                switch (entry.kind){
+                    case 'EntryForum':{
+                        return Forum.findById(entry.forum)
+                            .then(forum => {
+                                let courseRefIndex = forum.courseRefs
+                                    .findIndex(f => f.equals(entry.courseRef._id))
+                                if (courseRefIndex >= 0){
+                                    forum.courseRefs.splice(courseRefIndex, 1);
+                                    if (forum.courseRefs.length === 0){
+                                        return Forum.deleteOne({ _id: forum._id })
+                                    } else {
+                                        return forum.save();
+                                    }
+                                } else {
+                                    return Promise.resolve(forum)
+                                }
+                            })
+                    }
+                    case 'EntryFile':{
+                        let gfs = getGFS();
+                        if (!gfs || !options.deleteFiles) return Promise.resolve(true);
+                        return new Promise((resolve, reject) => {
+                            gfs.remove({_id: entry.file, root: 'uploads'}, err => (
+                                err ? reject(err) : resolve(entry.file)
+                            ))
+                        })
+                    }
+                    default: {
+                        return Promise.resolve(true)
+                    }
+                }
+            })
+            .then(() => Entry.deleteOne({_id: entryRef._id}))
+    }
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+<script src="scripts/search.js"> </script>
+
+</body>
+</html>

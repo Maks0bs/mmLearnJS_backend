@@ -1,0 +1,310 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> courses/controllers/teachers.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">mmLearnJS API</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+                <div class="search-wrapper">
+                    <input id="search" type="text" placeholder="Search docs..." class="input">
+                </div>
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="helpers.html">helpers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="controllers.courses.html">courses</a></li><li><a href="controllers.exercises.html">exercises</a></li><li><a href="controllers.files.html">files</a></li><li><a href="controllers.forum.html">forum</a></li><li><a href="controllers.helpers.html">helpers</a></li><li><a href="controllers.users.html">users</a></li><li><a href="models.Course.html">Course</a></li><li><a href="models.Course.CourseSection.html">CourseSection</a></li><li><a href="models.Course.CourseUpdate.html">CourseUpdate</a></li><li><a href="models.Course.CourseUpdateDeletedEntries.html">CourseUpdateDeletedEntries</a></li><li><a href="models.Course.CourseUpdateDeletedExercises.html">CourseUpdateDeletedExercises</a></li><li><a href="models.Course.CourseUpdateNewEntries.html">CourseUpdateNewEntries</a></li><li><a href="models.Course.CourseUpdateNewExercises.html">CourseUpdateNewExercises</a></li><li><a href="models.Course.Entry.html">Entry</a></li><li><a href="models.Course.EntryFile.html">EntryFile</a></li><li><a href="models.Course.EntryText.html">EntryText</a></li><li><a href="models.Exercise.html">Exercise</a></li><li><a href="models.Exercise.ExerciseAttempt.html">ExerciseAttempt</a></li><li><a href="models.Exercise.ExerciseAttemptAnswer.html">ExerciseAttemptAnswer</a></li><li><a href="models.Exercise.ExerciseParticipant.html">ExerciseParticipant</a></li><li><a href="models.Exercise.ExerciseTask.html">ExerciseTask</a></li><li><a href="models.Exercise.MultipleChoiceTask.html">MultipleChoiceTask</a></li><li><a href="models.Exercise.OneChoiceTask.html">OneChoiceTask</a></li><li><a href="models.Exercise.TextTask.html">TextTask</a></li><li><a href="models.Forum.html">Forum</a></li><li><a href="models.Forum.ForumTopic.html">ForumTopic</a></li><li><a href="models.Forum.ForumTopic.ForumTopicPost.html">ForumTopicPost</a></li><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#attemptAnswerSchema">attemptAnswerSchema</a></li><li><a href="global.html#courseExerciseSchema">courseExerciseSchema</a></li><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#courseUpdateSchema">courseUpdateSchema</a></li><li><a href="global.html#entrySchema">entrySchema</a></li><li><a href="global.html#exerciseTaskSchema">exerciseTaskSchema</a></li><li><a href="global.html#forumRouter">forumRouter</a></li><li><a href="global.html#forumSchema">forumSchema</a></li><li><a href="global.html#forumTopicPostSchema">forumTopicPostSchema</a></li><li><a href="global.html#getExerciseUserStatus">getExerciseUserStatus</a></li><li><a href="global.html#getForgedId">getForgedId</a></li><li><a href="global.html#getGFS">getGFS</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>courses/controllers/teachers.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>let User = require('../../users/model');
+let constants = require('../../constants');
+const jwt = require("jsonwebtoken");
+let { sendEmail, handleError } = require('../../helpers');
+let { COURSE_TEACHER_INVITATION } = constants.notifications,
+	{ JWT_SECRET } = constants.auth,
+	{ CLIENT_URL } = constants.client,
+	{ COURSE_INVITATION_DURATION} = constants.users
+/**
+ * @type function
+ * @throws 403
+ * @description sends the invitation to the course to the specified email address.
+ * If the user with such email is a teacher, add a notification in their account.
+ * Otherwise send an invitation link in the email to signup with a special token.
+ * See {@link controllers.users.inviteSignup inviteSignup controller}
+ * for details on the token. If the invited user was a teacher, add the
+ * teacher's data with the new notification to the `req.invitedTeacher` object
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Course} req.course
+ * @param {models.User} [req.invitedTeacher]
+ * @param {function} next
+ * @memberOf controllers.courses
+ */
+const sendTeacherInvite = (req, res, next) => {
+	let newUser = false;
+	let getInviteSignupString = (token) => (
+		'Please sign up with this ' +
+		'link to become a teacher at that course: \n' +
+		`${CLIENT_URL}/invite-signup/${token}?teacher=true&amp;email=${req.body.email}`
+	)
+	let registeredUserString = `${CLIENT_URL}/classroom/course/${req.course._id}`
+	let getEmailData = (isNewUser, token) => ({
+		from: "noreply@mmlearnjs.com",
+		to: req.body.email,
+		subject: "Teacher invitation to course on mmLearnJS",
+		text: 'You have been invited to be a teacher at the course ' +
+			`"${req.course.name}" on mmLearnJS. ` +
+			(isNewUser ? getInviteSignupString(token) : registeredUserString),
+		html: `
+			&lt;div>
+				&lt;p>
+					You have been invited to be a teacher at 
+					the course "${req.course.name}" on mmLearnJS.
+				&lt;/p> 
+				&lt;p> 
+					(isNewUser ? getInviteSignupString(token) : registeredUserString) 
+				&lt;/p>
+			&lt;/div>
+		`
+	})
+	return User.findOne({email: req.body.email})
+		.then((user) => {
+			if (!user) {
+				// in case the user with given email could not be found,
+				// send an invitation signup link to the invited user
+				newUser = true;
+				let token = jwt.sign(
+					{
+						email: req.body.email,
+						teacher: true,
+						courseId: req.course._id,
+						courseName: req.course.name,
+						invited: true
+					},
+					JWT_SECRET,
+					{expiresIn: COURSE_INVITATION_DURATION}
+				)
+				return sendEmail(getEmailData(true, token));
+			}
+			if (user.role !== 'teacher') throw {
+				status: 403,
+				message: 'User with this email is a STUDENT'
+			}
+			if (req.course.teachers.includes(user._id)) throw {
+				status: 403,
+				message: 'User with this email is already a teacher at this course'
+			}
+			if (req.course.invitedTeachers.includes(user._id)) throw {
+				status: 403,
+				message: 'User with this email is already invited'
+			}
+			user.addNotification({
+				type: COURSE_TEACHER_INVITATION + '/course:' + req.course._id.toString(),
+				title: 'You are invited to be a teacher',
+				text:
+					`The creator of the course "${req.course.name}" has ` +
+					'invited you to be a teacher in their course. ' +
+					'You can accept of decline this invitation'
+			})
+			req.invitedTeacher = user;
+
+			return sendEmail(getEmailData(false));
+		})
+		.then(() => {
+			if (newUser){
+				return res.json({ message: 'Invitation sent to unregistered user'})
+			}
+			return next();
+		})
+		.catch(err => handleError(err, res))
+}
+exports.sendTeacherInvite = sendTeacherInvite;
+
+/**
+ * @type function
+ * @description adds the user, specified under `req.invitedTeacher` to the
+ * list of invited teachers in the course which was found by id and saved in `req.course`.
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Course} req.course
+ * @param {models.User} [req.invitedTeacher]
+ * @memberOf controllers.courses
+ */
+const addToInvitedList = (req, res) => {
+	let {course, invitedTeacher} = req;
+	if (invitedTeacher){
+		course.invitedTeachers.push(req.invitedTeacher);
+	}
+	return course.save()
+		.then(() => {
+			return res.json({ message: 'Teacher has been invited'})
+		})
+		.catch(err => handleError(err, res))
+}
+exports.addToInvitedList = addToInvitedList;
+
+/**
+ * @type function
+ * @throws 401
+ * @description the authenticated user
+ * accepts the invitation to the course with the specified ID and therefore
+ * gets added to the teacher list of this course and the course
+ * gets added to the user's `teacherCourses` list
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Course} req.course
+ * @param {models.User} req.auth
+ * @memberOf controllers.courses
+ */
+const acceptTeacherInvite = (req, res) => {
+	let {course} = req;
+	let invitedTeacherPos =
+		course.invitedTeachers.findIndex(t => t.equals(req.auth._id));
+	if (invitedTeacherPos >= 0){
+		// remove the user from the list of invited teachers
+		course.invitedTeachers.splice(invitedTeacherPos, 1);
+	} else {
+		return res.status(401).json({
+			error: {
+				status: 401,
+				message: 'You are not on the list of invited teachers to this course'
+			}
+		})
+	}
+	if (course.teachers.findIndex(t => t.equals(req.auth._id)) >= 0){
+		return res.json({
+			message: 'You are already a teacher at this course'
+		})
+	}
+	course.teachers.push(req.auth);
+
+	let notificationType =
+		COURSE_TEACHER_INVITATION + '/course:' + req.course._id.toString()
+	return course.save()
+		.then((course) => {
+			// remove notification about course invitation
+			// and add course to the list of teacher courses for user
+			return User.findByIdAndUpdate(
+				req.auth._id,
+				{
+					$pull: { notifications: { type: notificationType } },
+					$push: { teacherCourses: course }
+				},
+				{new: true}
+			)
+		})
+		.then(() => {
+			return res.json({
+				message: 'You are now a teacher of this course'
+			})
+		})
+		.catch(err => {handleError(err, res)})
+}
+exports.acceptTeacherInvite = acceptTeacherInvite;</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+<script src="scripts/search.js"> </script>
+
+</body>
+</html>

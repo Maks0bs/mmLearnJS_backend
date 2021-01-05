@@ -1,0 +1,346 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> exercises/controllers/util.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">mmLearnJS API</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+                <div class="search-wrapper">
+                    <input id="search" type="text" placeholder="Search docs..." class="input">
+                </div>
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="helpers.html">helpers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="controllers.courses.html">courses</a></li><li><a href="controllers.exercises.html">exercises</a></li><li><a href="controllers.files.html">files</a></li><li><a href="controllers.forum.html">forum</a></li><li><a href="controllers.helpers.html">helpers</a></li><li><a href="controllers.users.html">users</a></li><li><a href="models.Course.html">Course</a></li><li><a href="models.Course.CourseSection.html">CourseSection</a></li><li><a href="models.Course.CourseUpdate.html">CourseUpdate</a></li><li><a href="models.Course.CourseUpdateDeletedEntries.html">CourseUpdateDeletedEntries</a></li><li><a href="models.Course.CourseUpdateDeletedExercises.html">CourseUpdateDeletedExercises</a></li><li><a href="models.Course.CourseUpdateNewEntries.html">CourseUpdateNewEntries</a></li><li><a href="models.Course.CourseUpdateNewExercises.html">CourseUpdateNewExercises</a></li><li><a href="models.Course.Entry.html">Entry</a></li><li><a href="models.Course.EntryFile.html">EntryFile</a></li><li><a href="models.Course.EntryText.html">EntryText</a></li><li><a href="models.Exercise.html">Exercise</a></li><li><a href="models.Exercise.ExerciseAttempt.html">ExerciseAttempt</a></li><li><a href="models.Exercise.ExerciseAttemptAnswer.html">ExerciseAttemptAnswer</a></li><li><a href="models.Exercise.ExerciseParticipant.html">ExerciseParticipant</a></li><li><a href="models.Exercise.ExerciseTask.html">ExerciseTask</a></li><li><a href="models.Exercise.MultipleChoiceTask.html">MultipleChoiceTask</a></li><li><a href="models.Exercise.OneChoiceTask.html">OneChoiceTask</a></li><li><a href="models.Exercise.TextTask.html">TextTask</a></li><li><a href="models.Forum.html">Forum</a></li><li><a href="models.Forum.ForumTopic.html">ForumTopic</a></li><li><a href="models.Forum.ForumTopic.ForumTopicPost.html">ForumTopicPost</a></li><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#attemptAnswerSchema">attemptAnswerSchema</a></li><li><a href="global.html#courseExerciseSchema">courseExerciseSchema</a></li><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#courseUpdateSchema">courseUpdateSchema</a></li><li><a href="global.html#entrySchema">entrySchema</a></li><li><a href="global.html#exerciseTaskSchema">exerciseTaskSchema</a></li><li><a href="global.html#forumRouter">forumRouter</a></li><li><a href="global.html#forumSchema">forumSchema</a></li><li><a href="global.html#forumTopicPostSchema">forumTopicPostSchema</a></li><li><a href="global.html#getExerciseUserStatus">getExerciseUserStatus</a></li><li><a href="global.html#getForgedId">getForgedId</a></li><li><a href="global.html#getGFS">getGFS</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>exercises/controllers/util.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>let Course = require('../../courses/model')
+let Exercise = require('../model')
+let { ExerciseAttempt } = require('../model/ExerciseAttempt')
+const {handleError} = require("../../helpers");
+let { getExerciseUserStatus } = require('../helpers')
+let {EXERCISE_DATA_CONSTANTS} = require('./exercises')
+let { RELEVANT_EXERCISE_USER_FIELDS} = EXERCISE_DATA_CONSTANTS
+/**
+ * @type function
+ * @throws 400, 404
+ * @description works with the `:exerciseId` param in the url. Adds all the data
+ * about the exercise with the ID the provided parameter. Adds all exercise data to
+ * the request object under the `req.exercise` property
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Exercise} req.exercise
+ * @param {function} next
+ * @param {string} id - the id of the exercise that should be found
+ * @memberOf controllers.exercises
+ */
+const exerciseById = (req, res, next, id) => {
+    return Exercise.findOne({_id: id})
+        .populate('tasks')
+        .populate({
+            path: 'participants',
+            populate:[
+                {path: 'user', select: RELEVANT_EXERCISE_USER_FIELDS},
+                {path: 'attempts'}
+            ]
+        })
+        .then(exercise => {
+            if (!exercise) throw {
+                status: 404, error: 'Exercise not found'
+            }
+            return exercise;
+        })
+        .then(ex => {
+            // hide fields of topic/post creators
+            if (Array.isArray(ex.participants)) ex.participants.forEach((p, i) => {
+                let newUser = p.user;
+                newUser.hideFields();
+                ex.participants[i].user = newUser;
+            })
+            req.exercise = ex;
+            return next();
+        })
+        .catch(err => handleError(err, res))
+}
+exports.exerciseById = exerciseById;
+
+/**
+ * @type function
+ * @throws 400, 404
+ * @description it configure the
+ * {@link controllers.exercises.getFormattedExercises getFormattedExercises}
+ * controller to work with the course, which was found previously via the
+ * {@link controllers.exercises.exerciseById exerciseById} controller.
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Exercise} req.exercise
+ * @param {models.Course} [req.exercisesConfig.course]
+ * @param {models.Exercise[]} [req.exercisesConfig.foundExercises]
+ * @param {string} req.exercisesConfig.userStatus
+ * @param {Object} req.exercisesConfig.filter
+ * @param {function} next
+ * @memberOf controllers.exercises
+ */
+const configureFormatSingleExercise = (req, res, next) => {
+    let courseRef = req.query.courseRef || req.query.courseref;
+    req.exercisesConfig = {
+        filter: { _id: req.exercise._id },
+        foundExercises: [req.exercise]
+    }
+    if (!courseRef){
+        return next();
+    } else {
+        return Course.findById(courseRef)
+            .then(course => {
+                if (!course) throw {
+                    status: 404, error: 'Course from query param not found'
+                }
+                req.exercisesConfig.course = course;
+            })
+            .then(() => next())
+            .catch(err => handleError(err, res))
+    }
+}
+exports.configureFormatSingleExercise = configureFormatSingleExercise;
+
+
+/**
+ * @type function
+ * @throws 401
+ * @description lets subsequent middleware get invoked
+ * only if the authenticated user is a member of
+ * a course to which the given exercise has a reference.
+ * If the authenticated user is authorized
+ * for further actions, this middleware
+ * also adds the user's status to `req.userExerciseStatus`
+ * which can be equal to `student` or `teacher`
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Exercise} req.exercise
+ * @param {models.User} req.auth
+ * @param {string} req.userExerciseStatus
+ * @param {function} next
+ * @memberOf controllers.exercises
+ */
+const userInExercise = (req, res, next) => {
+    let status = getExerciseUserStatus(req.exercise, req.auth) || undefined;
+    if(status === 'teacher' || ((status === 'student') &amp;&amp; req.exercise.available)){
+        req.userExerciseStatus = status;
+        return next();
+    } else {
+        return res.status(401).json({
+            error: {
+                status: 401,
+                message: 'You are not allowed to access this exercise'
+            }
+        })
+    }
+}
+exports.userInExercise = userInExercise;
+
+/**
+ * @type function
+ * @description Sends exercises under `req.exercises` as a response
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Exercise[]} req.exercises
+ * @memberOf controllers.courses
+ */
+const sendExercises = (req, res) => {
+    return res.json(req.exercises);
+}
+exports.sendExercises = sendExercises;
+
+/**
+ * @type function
+ * @description Sends the first exercise in the `req.exercises` array as a response
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Exercise[]} req.exercises
+ * @memberOf controllers.courses
+ */
+const sendSingleExercise = (req, res) => {
+    return res.json(req.exercises[0] || {});
+}
+exports.sendSingleExercise = sendSingleExercise;
+
+/**
+ * @type function
+ * @throws 400, 404
+ * @description works with the `:attemptId` param in the url. Adds all the data
+ * about the exercise attempt with the ID from the provided parameter.
+ * Adds all attempt data to the request object under the `req.attempt` property.
+ * NOTE: this controller should always be invoked after calling the
+ * {@link controllers.exercises.exerciseById exerciseById} controller.
+ * If the exerciseRef is not equal to the id of the exercise in `req.exercise`
+ * than
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Exercise.ExerciseAttempt} req.attempt
+ * @param {function} next
+ * @param {string} id - the id of the attempt that should be found
+ * @memberOf controllers.exercises
+ */
+const attemptById = (req, res, next, id) => {
+    return ExerciseAttempt.findOne({_id: id})
+        .populate('respondent', RELEVANT_EXERCISE_USER_FIELDS)
+        .populate({
+            path: 'exerciseRef',
+            populate: {path: 'tasks'}
+        })
+        .then(attempt => {
+            if (!attempt) throw {
+                status: 404, error: 'Exercise attempt not found'
+            }
+            return attempt;
+        })
+        .then(attempt => {
+            let newRespondent = attempt.respondent;
+            newRespondent.hideFields();
+            attempt.respondent = newRespondent;
+            req.attempt = attempt;
+            return next();
+        })
+        .catch(err => handleError(err, res))
+}
+exports.attemptById = attemptById;
+
+/**
+ * @type function
+ * @throws 403
+ * @description lets subsequent middleware get invoked
+ * only if the authenticated user is the the owner of
+ * the attempt in `req.attempt` or the user is allowed
+ * to view/modify this attempt (is a teacher)
+ * This middleware
+ * also adds the user's status to `req.userAttemptStatus`
+ * which can be equal to `student` or `teacher`
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Exercise.ExerciseAttempt} req.attempt
+ * @param {string} req.userAttemptStatus
+ * @param {models.User} req.auth
+ * @param {function} next
+ * @memberOf controllers.exercises
+ */
+const correctAttemptOwner = (req, res, next) => {
+    let status = getExerciseUserStatus(req.attempt.exerciseRef, req.auth);
+    req.userAttemptStatus = status;
+    let isTeacher = status === 'teacher';
+    let isAttemptOwner = req.auth._id.equals(req.attempt.respondent._id);
+    let isStudent = (status === 'student') &amp;&amp; isAttemptOwner;
+    if (isTeacher || isStudent) return next();
+    return res.status(403).json({
+        error: {status: 403, message: 'You are not authorized to view this attempt'}
+    })
+}
+exports.correctAttemptOwner = correctAttemptOwner;</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+<script src="scripts/search.js"> </script>
+
+</body>
+</html>

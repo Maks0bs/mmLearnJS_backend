@@ -76,7 +76,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="helpers.html">helpers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="controllers.files.html">files</a></li><li><a href="controllers.helpers.html">helpers</a></li><li><a href="controllers.users.html">users</a></li><li><a href="controllers.users.auth.html">auth</a></li><li><a href="controllers.users.usersData.html">usersData</a></li><li><a href="controllers.users.util.html">util</a></li><li><a href="controllers.users.validators.html">validators</a></li><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#getForgedId">getForgedId</a></li><li><a href="global.html#getGFS">getGFS</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#updateDeletedEntriesSchema">updateDeletedEntriesSchema</a></li><li><a href="global.html#updateNewEntriesSchema">updateNewEntriesSchema</a></li><li><a href="global.html#updateNewInfoSchema">updateNewInfoSchema</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="helpers.html">helpers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="controllers.courses.html">courses</a></li><li><a href="controllers.exercises.html">exercises</a></li><li><a href="controllers.files.html">files</a></li><li><a href="controllers.forum.html">forum</a></li><li><a href="controllers.helpers.html">helpers</a></li><li><a href="controllers.users.html">users</a></li><li><a href="models.Course.html">Course</a></li><li><a href="models.Course.CourseSection.html">CourseSection</a></li><li><a href="models.Course.CourseUpdate.html">CourseUpdate</a></li><li><a href="models.Course.CourseUpdateDeletedEntries.html">CourseUpdateDeletedEntries</a></li><li><a href="models.Course.CourseUpdateDeletedExercises.html">CourseUpdateDeletedExercises</a></li><li><a href="models.Course.CourseUpdateNewEntries.html">CourseUpdateNewEntries</a></li><li><a href="models.Course.CourseUpdateNewExercises.html">CourseUpdateNewExercises</a></li><li><a href="models.Course.Entry.html">Entry</a></li><li><a href="models.Course.EntryFile.html">EntryFile</a></li><li><a href="models.Course.EntryText.html">EntryText</a></li><li><a href="models.Exercise.html">Exercise</a></li><li><a href="models.Exercise.ExerciseAttempt.html">ExerciseAttempt</a></li><li><a href="models.Exercise.ExerciseAttemptAnswer.html">ExerciseAttemptAnswer</a></li><li><a href="models.Exercise.ExerciseParticipant.html">ExerciseParticipant</a></li><li><a href="models.Exercise.ExerciseTask.html">ExerciseTask</a></li><li><a href="models.Exercise.MultipleChoiceTask.html">MultipleChoiceTask</a></li><li><a href="models.Exercise.OneChoiceTask.html">OneChoiceTask</a></li><li><a href="models.Exercise.TextTask.html">TextTask</a></li><li><a href="models.Forum.html">Forum</a></li><li><a href="models.Forum.ForumTopic.html">ForumTopic</a></li><li><a href="models.Forum.ForumTopic.ForumTopicPost.html">ForumTopicPost</a></li><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#attemptAnswerSchema">attemptAnswerSchema</a></li><li><a href="global.html#courseExerciseSchema">courseExerciseSchema</a></li><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#courseUpdateSchema">courseUpdateSchema</a></li><li><a href="global.html#entrySchema">entrySchema</a></li><li><a href="global.html#exerciseTaskSchema">exerciseTaskSchema</a></li><li><a href="global.html#forumRouter">forumRouter</a></li><li><a href="global.html#forumSchema">forumSchema</a></li><li><a href="global.html#forumTopicPostSchema">forumTopicPostSchema</a></li><li><a href="global.html#getExerciseUserStatus">getExerciseUserStatus</a></li><li><a href="global.html#getForgedId">getForgedId</a></li><li><a href="global.html#getGFS">getGFS</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul></div>
                 
             </nav>
         </div>
@@ -96,6 +96,7 @@
             <pre class="prettyprint source linenums"><code>let multer = require('multer');
 let mongoose = require('mongoose');
 let { ObjectId } = mongoose.Types;
+const { FILES_UPLOAD_LIMIT, MAX_FILE_SIZE } = require('../../constants').database
 const { fileStorage, getGFS } = require('../model');
 const {handleError} = require("../../helpers");
 const gfsError = {status: 404, message: 'could not connect to file storage'}
@@ -112,7 +113,10 @@ const gfsError = {status: 404, message: 'could not connect to file storage'}
  * @throws 400
  * @memberOf controllers.files
  */
-const uploadFiles = multer({ storage: fileStorage }).any();
+const uploadFiles = multer({
+    storage: fileStorage,
+    limits: { files: FILES_UPLOAD_LIMIT, fileSize: MAX_FILE_SIZE}
+}).any()
 exports.uploadFiles = uploadFiles;
 
 // gfs.remove(...) to delete file
@@ -146,7 +150,7 @@ const fileById = (req, res, next, id) => {
     let fileId;
     try {
         fileId = ObjectId(id);
-    } catch (err) { handleError(err, res) }
+    } catch (err) { return handleError(err, res) }
     const gfs = getGFS();
     if (!gfs) {
         return handleError(gfsError, res);
@@ -154,7 +158,7 @@ const fileById = (req, res, next, id) => {
     return gfs.files.findOne({_id: fileId})
         .then(file => {
             if (!file || file.length === 0) throw {
-                status: 404, error: 'no such file exists'
+                status: 404, message: 'no such file exists'
             }
             req.file = file;
             return next();
@@ -180,7 +184,7 @@ exports.fileById = fileById;
  */
 const allowModifyFile = (req, res, next) => {
     let { uploadedBy } = req.file.metadata;
-    if (!req.auth._id.equals(uploadedBy)){
+    if (uploadedBy &amp;&amp; !req.auth._id.equals(uploadedBy)){
         return res.status(401).json({
             error: 'you are not authorized to modify this file'
         })
@@ -304,13 +308,20 @@ exports.deleteFile = deleteFile;
 /**
  * @type function
  * @description deletes the files with the IDs, which are specified in the
- * `req.filesToDelete` array;
+ * `req.filesToDelete` array; This controller can be configured
+ * to work asynchronously. Set `req.deleteFilesPromises` to `true`
+ * before calling this middleware in order for this
+ * controller to push all promises of removing files
+ * to `req.promises` and call next middleware right away. Otherwise
+ * wait until all files files are fully deleted from DB and then call next middleware
  * @param {e.Request} req
  * @param {models.User} [req.auth]
+ * @param {boolean} [req.deleteFilesPromises]
+ * @param {Promise[]} [req.promises]
  * @param {string|ObjectId[]} [req.filesToDelete]
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers.users.usersData
+ * @memberOf controllers.files
  */
 const deleteFiles = (req, res, next) => {
     if (!req.filesToDelete || req.filesToDelete.length === 0){
@@ -320,15 +331,26 @@ const deleteFiles = (req, res, next) => {
     if (!gfs) {
         return handleError(gfsError, res);
     }
-    return Promise.all(req.filesToDelete.map(id => new Promise((resolve, reject ) => {
+    let promises = req.filesToDelete.map(id => new Promise((resolve, reject ) => {
         gfs.remove({_id: id, root: 'uploads'}, (err) => (
             err ? reject(err) : resolve(id)
         ))
-    })))
+    }))
+    if (req.deleteFilesPromises){
+        if (!Array.isArray(req.promises)){
+            req.promises = promises;
+        } else {
+            req.promises.push(...promises);
+        }
+
+        return next();
+    }
+    return Promise.all(promises)
         .then(() => next())
         .catch(err => {handleError(err, res)})
 }
 exports.deleteFiles = deleteFiles;
+
 
 // -----------------------------------------------------------------------
 // this lower part is still not finished or not implemented.
@@ -336,33 +358,34 @@ exports.deleteFiles = deleteFiles;
 //
 
 //TODO implement this controller
-exports.getFilesFiltered = (req, res) => {
-    let filter = {}
-    if (req.body.fileId){
-        filter._id = mongoose.mongo.ObjectId(req.body.fileId);
-    }
-    const gfs = getGFS();
-    if (!gfs) {
-        return handleError(gfsError, res);
-    }
-    gfs.files.find(filter).toArray((err, files) =>{
-        if (err) {
-            return res.status(400).json({
-                error: err
-            })
-        }
 
-        if (!files || files.length === 0){
-            return res.status(404).json({
-                error: {
-                    status: 404,
-                    message: 'files do not exist'
-                }
-            })
-        }
-        res.json(files);
-    })
-}</code></pre>
+// exports.getFilesFiltered = (req, res) => {
+//     let filter = {}
+//     if (req.body.fileId){
+//         filter._id = mongoose.mongo.ObjectId(req.body.fileId);
+//     }
+//     const gfs = getGFS();
+//     if (!gfs) {
+//         return handleError(gfsError, res);
+//     }
+//     gfs.files.find(filter).toArray((err, files) =>{
+//         if (err) {
+//             return res.status(400).json({
+//                 error: err
+//             })
+//         }
+//
+//         if (!files || files.length === 0){
+//             return res.status(404).json({
+//                 error: {
+//                     status: 404,
+//                     message: 'files do not exist'
+//                 }
+//             })
+//         }
+//         res.json(files);
+//     })
+// }</code></pre>
         </article>
     </section>
 

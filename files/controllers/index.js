@@ -213,13 +213,20 @@ exports.deleteFile = deleteFile;
 /**
  * @type function
  * @description deletes the files with the IDs, which are specified in the
- * `req.filesToDelete` array;
+ * `req.filesToDelete` array; This controller can be configured
+ * to work asynchronously. Set `req.deleteFilesPromises` to `true`
+ * before calling this middleware in order for this
+ * controller to push all promises of removing files
+ * to `req.promises` and call next middleware right away. Otherwise
+ * wait until all files files are fully deleted from DB and then call next middleware
  * @param {e.Request} req
  * @param {models.User} [req.auth]
+ * @param {boolean} [req.deleteFilesPromises]
+ * @param {Promise[]} [req.promises]
  * @param {string|ObjectId[]} [req.filesToDelete]
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers.users.usersData
+ * @memberOf controllers.files
  */
 const deleteFiles = (req, res, next) => {
     if (!req.filesToDelete || req.filesToDelete.length === 0){
@@ -229,15 +236,26 @@ const deleteFiles = (req, res, next) => {
     if (!gfs) {
         return handleError(gfsError, res);
     }
-    return Promise.all(req.filesToDelete.map(id => new Promise((resolve, reject ) => {
+    let promises = req.filesToDelete.map(id => new Promise((resolve, reject ) => {
         gfs.remove({_id: id, root: 'uploads'}, (err) => (
             err ? reject(err) : resolve(id)
         ))
-    })))
+    }))
+    if (req.deleteFilesPromises){
+        if (!Array.isArray(req.promises)){
+            req.promises = promises;
+        } else {
+            req.promises.push(...promises);
+        }
+
+        return next();
+    }
+    return Promise.all(promises)
         .then(() => next())
         .catch(err => {handleError(err, res)})
 }
 exports.deleteFiles = deleteFiles;
+
 
 // -----------------------------------------------------------------------
 // this lower part is still not finished or not implemented.
@@ -245,30 +263,31 @@ exports.deleteFiles = deleteFiles;
 //
 
 //TODO implement this controller
-exports.getFilesFiltered = (req, res) => {
-    let filter = {}
-    if (req.body.fileId){
-        filter._id = mongoose.mongo.ObjectId(req.body.fileId);
-    }
-    const gfs = getGFS();
-    if (!gfs) {
-        return handleError(gfsError, res);
-    }
-    gfs.files.find(filter).toArray((err, files) =>{
-        if (err) {
-            return res.status(400).json({
-                error: err
-            })
-        }
 
-        if (!files || files.length === 0){
-            return res.status(404).json({
-                error: {
-                    status: 404,
-                    message: 'files do not exist'
-                }
-            })
-        }
-        res.json(files);
-    })
-}
+// exports.getFilesFiltered = (req, res) => {
+//     let filter = {}
+//     if (req.body.fileId){
+//         filter._id = mongoose.mongo.ObjectId(req.body.fileId);
+//     }
+//     const gfs = getGFS();
+//     if (!gfs) {
+//         return handleError(gfsError, res);
+//     }
+//     gfs.files.find(filter).toArray((err, files) =>{
+//         if (err) {
+//             return res.status(400).json({
+//                 error: err
+//             })
+//         }
+//
+//         if (!files || files.length === 0){
+//             return res.status(404).json({
+//                 error: {
+//                     status: 404,
+//                     message: 'files do not exist'
+//                 }
+//             })
+//         }
+//         res.json(files);
+//     })
+// }

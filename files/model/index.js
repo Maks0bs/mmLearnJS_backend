@@ -47,6 +47,8 @@ mongoose.connection.on('open', () => {
 const getGFS = () => gfs;
 exports.getGFS = getGFS;
 
+console.log(constants)
+
 const fileStorage = new GridFSStorage({
     url: constants.database.MONGODB_URI,
     file: (req, file) => (new Promise((resolve, reject) => {

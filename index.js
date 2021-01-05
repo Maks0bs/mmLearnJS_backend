@@ -33,7 +33,8 @@ if (constants.environment !== 'production') {
 // general CORS for all requests
 app.use(cors({
     origin: (origin, callback) => {
-        if (!origin || origin === constants.client.CLIENT_URL) return callback(null, true);
+        if (!origin || origin === constants.client.CLIENT_URL)
+            return callback(null, true);
         return callback(
             new Error(
                 'the cors policy for this site does not ' +

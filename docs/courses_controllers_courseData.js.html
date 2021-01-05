@@ -1,0 +1,611 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> courses/controllers/courseData.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">mmLearnJS API</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+                <div class="search-wrapper">
+                    <input id="search" type="text" placeholder="Search docs..." class="input">
+                </div>
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="helpers.html">helpers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="controllers.courses.html">courses</a></li><li><a href="controllers.exercises.html">exercises</a></li><li><a href="controllers.files.html">files</a></li><li><a href="controllers.forum.html">forum</a></li><li><a href="controllers.helpers.html">helpers</a></li><li><a href="controllers.users.html">users</a></li><li><a href="models.Course.html">Course</a></li><li><a href="models.Course.CourseSection.html">CourseSection</a></li><li><a href="models.Course.CourseUpdate.html">CourseUpdate</a></li><li><a href="models.Course.CourseUpdateDeletedEntries.html">CourseUpdateDeletedEntries</a></li><li><a href="models.Course.CourseUpdateDeletedExercises.html">CourseUpdateDeletedExercises</a></li><li><a href="models.Course.CourseUpdateNewEntries.html">CourseUpdateNewEntries</a></li><li><a href="models.Course.CourseUpdateNewExercises.html">CourseUpdateNewExercises</a></li><li><a href="models.Course.Entry.html">Entry</a></li><li><a href="models.Course.EntryFile.html">EntryFile</a></li><li><a href="models.Course.EntryText.html">EntryText</a></li><li><a href="models.Exercise.html">Exercise</a></li><li><a href="models.Exercise.ExerciseAttempt.html">ExerciseAttempt</a></li><li><a href="models.Exercise.ExerciseAttemptAnswer.html">ExerciseAttemptAnswer</a></li><li><a href="models.Exercise.ExerciseParticipant.html">ExerciseParticipant</a></li><li><a href="models.Exercise.ExerciseTask.html">ExerciseTask</a></li><li><a href="models.Exercise.MultipleChoiceTask.html">MultipleChoiceTask</a></li><li><a href="models.Exercise.OneChoiceTask.html">OneChoiceTask</a></li><li><a href="models.Exercise.TextTask.html">TextTask</a></li><li><a href="models.Forum.html">Forum</a></li><li><a href="models.Forum.ForumTopic.html">ForumTopic</a></li><li><a href="models.Forum.ForumTopic.ForumTopicPost.html">ForumTopicPost</a></li><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#attemptAnswerSchema">attemptAnswerSchema</a></li><li><a href="global.html#courseExerciseSchema">courseExerciseSchema</a></li><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#courseUpdateSchema">courseUpdateSchema</a></li><li><a href="global.html#entrySchema">entrySchema</a></li><li><a href="global.html#exerciseTaskSchema">exerciseTaskSchema</a></li><li><a href="global.html#forumRouter">forumRouter</a></li><li><a href="global.html#forumSchema">forumSchema</a></li><li><a href="global.html#forumTopicPostSchema">forumTopicPostSchema</a></li><li><a href="global.html#getExerciseUserStatus">getExerciseUserStatus</a></li><li><a href="global.html#getForgedId">getForgedId</a></li><li><a href="global.html#getGFS">getGFS</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>courses/controllers/courseData.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>let Course = require('../model')
+let User = require('../../users/model');
+const {handleError} = require("../../helpers");
+let {cloneDeep} = require('lodash')
+let {USER_COURSE_STATUSES} = require('../model/methods').COURSE_DATA_CONSTANTS
+let {NOT_ENROLLED, CREATOR, TEACHER, STUDENT, INVITED_TEACHER} = USER_COURSE_STATUSES
+
+
+
+/**
+ * @type function
+ * @throws 400, 404
+ * @description works with the `:courseId` param in the url. Adds all the data
+ * about the course with the ID the provided parameter. Adds all course data to
+ * the request object under the `req.course` property
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Course} req.course
+ * @param {function} next
+ * @param {string} id - the id of the course that should be found
+ * @memberOf controllers.courses
+ */
+const courseById = (req, res, next, id) => {
+    return Course.findOne({_id: id})
+        .populate({
+            path: 'exercises',
+            populate: [
+                {path: 'tasks'},
+                {
+                    path: 'participants',
+                    populate: [
+                        {path: 'attempts'},
+                        {path: 'user'}
+                    ]
+                }
+            ]
+        })
+        .populate('sections.entries')
+        .then(course => {
+            if (!course) throw {
+                status: 404, error: 'course not found'
+            }
+            return course;
+        })
+        .then(course => {
+            req.course = course;
+            return next();
+        })
+        .catch(err => {handleError(err, res)})
+}
+exports.courseById = courseById;
+
+/**
+ * @type function
+ * @throws 400
+ * @description creates a new course with the given type and name.
+ * If the `hasPassword` attribute is true, the course password should be
+ * provided as well. See {@link models.Course course model} for details
+ * @param {e.Request} req
+ * @param {models.User} req.auth
+ * @param {e.Response} res
+ * @param {models.Course.Entry} req.course
+ * @memberOf controllers.courses
+ */
+const createCourse = (req, res) => {
+    let courseData = req.body;
+    courseData.creator = req.auth;
+    courseData.teachers = [req.auth];
+    let course = new Course(courseData);
+    return User.findByIdAndUpdate(
+        req.auth._id,
+        { $push: { teacherCourses: course } },
+        {new: true}
+    )
+        .then(() => (
+            course.save()
+        ))
+        .then(savedCourse => {
+            return res.json({
+                message: 'Your course has been created successfully',
+                course: savedCourse
+            })
+        })
+        .catch(err => handleError(err, res))
+};
+exports.createCourse = createCourse;
+
+/**
+ * @type function
+ * @description Extracts params that specify what kind of courses
+ * should be found in the DB and sent via the
+ * {@link controllers.courses.getCoursesFiltered getCoursesFiltered}
+ * controller from the request query string. The appropriate filter object is stored
+ * under `req.courseFilter` and is used for the
+ * mongoose `model.find()` call
+ * @param {e.Request} req
+ * @param {models.User} req.auth
+ * @param {Object} [req.courseFilter]
+ * @param {Object} req.body
+ * @param {e.Response} res
+ * @param {models.Course.Entry} req.course
+ * @param {function} next
+ * @memberOf controllers.courses
+ */
+const configureCourseFilter = (req, res, next) => {
+    //TODO add validation for sane request (e. g. can't POST enrolled + teacher)
+    let filter = {}, {body} = req, filterPromises = []
+    //TODO change body to req.query
+    filter._id = body.courseId ? body.courseId : undefined;
+    filter.type = body.type ? body.type : undefined;
+    if (req.body.enrolled){
+        filterPromises.push(User.findOne({_id: body.enrolled})
+            .then(user => filter._id = {$in: user.enrolledCourses})
+            .catch(err => handleError(err, res))
+        )
+    }
+    if (body.teacher){
+        filterPromises.push(User.findOne({_id: body.teacher})
+            .then(user => filter._id = {$in: user.teacherCourses})
+            .catch(err => handleError(err, res))
+        )
+    }
+    if (body.searchWord){
+        let reOptions = { $regex: body.searchWord, $options: 'i'}
+        filter.$or = [ { name: reOptions }, { about: reOptions }]
+    }
+    Promise.all(filterPromises)
+        .then(() => {
+            req.courseFilter = filter;
+            return next();
+        })
+}
+exports.configureCourseFilter = configureCourseFilter;
+
+//TODO add normal docs for this controller
+const getCoursesFiltered = async (req, res) => {
+    let {courseFilter: filter} = req, usersToPopulate = [], usersToPopulateSet = {},
+        courses, basicUserFields = ['name', 'photo', '_id', 'hiddenFields'];
+    //TODO replace usersToPopulate with .populate(...)
+    return Course.find({...filter})
+        .populate({path: 'students', select: basicUserFields})
+        .populate({path: 'teachers', select: basicUserFields})
+        .populate({path: 'creator', select: basicUserFields})
+        .populate({
+            path: 'exercises',
+            populate: {
+                path: 'tasks',
+                select: '-__v'
+            },
+            select: '-__v -courseRefs'
+        })
+        .populate('sections.entries')
+        .populate({
+            path: 'sections.entries',
+            populate: {
+                path: 'forum',
+                select:['name', 'description', 'teachersOnly']
+            }
+        })
+        .sort({name: 'asc', type: 'desc'})
+        .then(foundCourses => {
+            courses = foundCourses;
+            let userStatuses = courses.map(() => 'not enrolled')
+            courses.forEach((c, i) => {
+                userStatuses[i] = c.getUserCourseStatus(req.auth._id);
+                courses[i].salt = undefined;
+                courses[i].hashed_password = undefined;
+                if (c.type === 'public') return;
+                switch (userStatuses[i]) {
+                    case NOT_ENROLLED: {
+                        return courses[i].leavePublicData();
+                    }
+                    case CREATOR:
+                    case TEACHER: {
+                        return;
+                    }
+                    case INVITED_TEACHER:
+                    case STUDENT: {
+                        courses[i].creator = undefined;
+                        courses[i].invitedTeachers = undefined;
+                    }
+                }
+                if (Array.isArray(c.invitedTeachers)) c.invitedTeachers.forEach((t, j) => {
+                    if (t &amp;&amp; t.hideFields) courses[i].invitedTeachers[j].hideFields();
+                })
+                if (Array.isArray(c.students)) c.students.forEach((s, j) => {
+                    if (s &amp;&amp; s.hideFields) courses[i].students[j].hideFields();
+                })
+                if (Array.isArray(c.teachers)) c.teachers.forEach((t, j) => {
+                    if (t &amp;&amp; t.hideFields) courses[i].teachers[j].hideFields();
+                })
+                if (c.creator &amp;&amp; c.creator.hideFields) courses[i].creator.hideFields();
+            })
+
+            for (let c = 0; c &lt; courses.length; c++){
+                if (!courses[c].sections){
+                    continue;
+                }
+
+                let exercises = [];
+
+
+                for (let i = 0; i &lt; courses[c].exercises.length; i++){
+                    let exercise = courses[c].exercises[i];
+
+                    if (!(userStatuses[c] === 'teacher' || userStatuses[c] === 'creator')){
+
+                        exercise.tasks = undefined;
+                        exercise.participants = undefined;
+
+                        if (exercise.available){
+                            exercises.push(exercise)
+                        }
+                    } else {
+                        exercises.push(exercise);
+
+                    }
+
+
+                }
+
+
+                courses[c].exercises = exercises;
+
+
+
+                for (let i = 0; i &lt; courses[c].sections.length; i++){
+                    let section = cloneDeep(courses[c].sections[i]);
+                    section.entries = [];
+                    for (let j = 0; j &lt; courses[c].sections[i].entries.length; j++){
+                        let entry = courses[c].sections[i].entries[j];
+
+                        if (entry.access === 'teachers' &amp;&amp;
+                            !(userStatuses[c] === 'teacher' || userStatuses[c] === 'creator')
+                        ){
+                            continue;
+                        } else {
+                            section.entries.push(entry);
+                        }
+
+                        if (entry.type === 'forum'){
+
+                            //populate topic creators and posts creators
+                            for (let topic of entry.content.topics){
+                                if (!usersToPopulateSet[topic.creator._id]){
+                                    usersToPopulateSet[topic.creator._id] = 1;
+                                    usersToPopulate.push(topic.creator._id);
+                                }
+
+                                for (let post of topic.posts){
+                                    if (!usersToPopulateSet[post.creator._id]){
+                                        usersToPopulateSet[post.creator._id] = 1;
+                                        usersToPopulate.push(post.creator._id);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    courses[c].sections[i] = section;
+                }
+            }
+
+            return User.find({
+                _id: {
+                    $in: usersToPopulate
+                }
+            })
+        })
+        .then((users) => {
+            for (let user of users){
+                user.hideFields();
+                usersToPopulateSet[user._id] = user;
+            }
+
+            for (let c = 0; c &lt; courses.length; c++){
+                if (!courses[c].sections){
+                    continue;
+                }
+
+                for (let i = 0; i &lt; courses[c].sections.length; i++){
+                    for (let j = 0; j &lt; courses[c].sections[i].entries.length; j++){
+                        let entry = courses[c].sections[i].entries[j];
+
+                        if (entry &amp;&amp; entry.type === 'forum'){
+
+                            //populate topic creators and posts creators
+                            for (let t = 0;
+                                 t &lt; courses[c]
+                                     .sections[i]
+                                     .entries[j]
+                                     .content
+                                     .topics
+                                     .length;
+                                 t++
+                            ){
+                                courses[c]
+                                    .sections[i]
+                                    .entries[j]
+                                    .content
+                                    .topics[t]
+                                    .creator =
+                                    usersToPopulateSet[courses[c]
+                                        .sections[i]
+                                        .entries[j]
+                                        .content
+                                        .topics[t]
+                                        .creator
+                                        ._id
+                                        ];
+
+                                for (let p = 0;
+                                     p &lt; courses[c]
+                                         .sections[i]
+                                         .entries[j]
+                                         .content
+                                         .topics[t]
+                                         .posts
+                                         .length;
+                                     p++
+                                ){
+                                    courses[c]
+                                        .sections[i]
+                                        .entries[j]
+                                        .content
+                                        .topics[t]
+                                        .posts[p]
+                                        .creator =
+                                        usersToPopulateSet[courses[c]
+                                            .sections[i]
+                                            .entries[j]
+                                            .content
+                                            .topics[t]
+                                            .posts[p]
+                                            .creator
+                                            ._id
+                                            ];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return new Promise((resolve) => {
+                resolve(true);
+            })
+        })
+        .then(() => {
+            if (req.body.select){
+                let selectSet = {};
+                for (let s of req.body.select){
+                    selectSet[s] = 1;
+                }
+                for (let i = 0; i &lt; courses.length; i++){
+                    for (let v of Object.keys(courses[i]._doc)){
+                        if (!selectSet[v]){
+                            courses[i][v] = undefined;
+                        }
+                    }
+                }
+            }
+
+
+            return res.json(courses);
+        })
+        .catch(err => {handleError(err, res)})
+}
+
+
+exports.getCoursesFiltered = getCoursesFiltered;
+
+/**
+ * @type function
+ * @description configures the
+ * {@link controllers.exercises.getFormattedExercises getExercises} controller
+ * to get the exercises of the course, provided in `req.course`,
+ * adding the ref to course data to the configuration object
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Course} req.course
+ * @param {string} req.userCourseStatus
+ * @param {Object} req.exercisesConfig
+ * @param {models.Course} req.exercisesConfig.course
+ * @param {string} req.exercisesConfig.userStatus
+ * @param {Object} req.exercisesConfig.filter
+ * @param {function} next
+ * @memberOf controllers.courses
+ */
+const getCourseExercisesConfigure = (req, res, next) => {
+    let { course } = req;
+    req.exercisesConfig = {
+        course: course,
+        userStatus: req.userCourseStatus,
+        filter: {
+            _id: { $in: course.exercises.map(e => e._id)}
+        }
+    }
+    if (!course.exercises) return res.json([]);
+    return next();
+}
+exports.getCourseExercisesConfigure = getCourseExercisesConfigure;
+
+/**
+ * @type function
+ * @description deletes the course from the database. Please use this
+ * {@link controllers.courses.removeCourseMentions cleanup controller}
+ * to remove all references to this course beforehand.
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Course} req.course
+ * @param {models.User} req.auth
+ * @memberOf controllers.courses
+ */
+const deleteCourse = (req, res) => {
+    return Course.deleteOne({ _id: req.course._id})
+        .then(() => {
+            return res.json({ message: 'course deleted successfully'})
+        })
+        .catch(err => handleError(err, res))
+}
+exports.deleteCourse = deleteCourse;
+
+/**
+ * @type function
+ * @description removes all references to the course from
+ * all its members (students/teachers). Also removes
+ * the exercises/forums/etc. inside the course if
+ * this course is the only place where these
+ * exercises/forums are used
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @param {models.Course} req.course
+ * @param {models.User} req.auth
+ * @param {function} next
+ * @memberOf controllers.courses
+ */
+const removeCourseMentions = (req, res, next) => {
+    let {course} = req, contentPromises = []
+    let deleteOptions = { userId: req.auth._id, deleteFiles: true}
+
+    try{
+        course.sections.forEach(s =>
+            s.entries.forEach(e => contentPromises.push(e.delete(deleteOptions)))
+        )
+        course.exercises.forEach(e => {
+            let courseRefIndex = e.courseRefs.findIndex(c => c.equals(course._id))
+            if (courseRefIndex >= 0){
+                e.courseRefs.splice(courseRefIndex)
+                if (e.courseRefs.length === 0){
+                    contentPromises.push(e.delete(deleteOptions))
+                } else {
+                    contentPromises.push(e.save())
+                }
+            }
+        });
+    } catch (err) {
+        console.log(err);
+    }
+
+    let usersWithRefs = [...course.subscribers, ...course.teachers, ...course.students];
+    return Promise.all(contentPromises)
+        .then(() => User.find({ _id: { $in: usersWithRefs}}))
+        .then(users => {
+            let promises = [];
+            for (let u of users){
+                let index = u.subscribedCourses.findIndex(
+                    c => c.course.equals(course._id)
+                )
+                if (index >= 0) u.subscribedCourses.splice(index, 1);
+
+                index = u.enrolledCourses.findIndex(c => c.equals(course._id));
+                if (index >= 0) u.enrolledCourses.splice(index, 1);
+
+                if (Array.isArray(u.teacherCourses)){
+                    index = u.teacherCourses.findIndex(c => c.equals(course._id));
+                    if (index >= 0) u.teacherCourses.splice(index, 1);
+                }
+
+                promises.push(u.save());
+            }
+            return Promise.all(promises);
+        })
+        .then(() => next())
+        .catch(err => {handleError(err, res)})
+}
+exports.removeCourseMentions = removeCourseMentions;</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+<script src="scripts/search.js"> </script>
+
+</body>
+</html>

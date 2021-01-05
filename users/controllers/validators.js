@@ -1,14 +1,12 @@
 let { body } = require('express-validator')
 let userDataValidatorsSet = {}
-/**
- * @class controllers.users.validators
- */
+
 /**
  * @type function
  * @throws 400
  * @param {string} [fieldName]
  * @return function - the validator for the user's name, which is located in the request body
- * @memberOf controllers.users.validators
+ * @memberOf controllers.users
  */
 const userNameValidator = (fieldName) =>
     body(fieldName || "name", "Name is required").notEmpty().isString()
@@ -19,7 +17,7 @@ exports.userNameValidator = userNameValidator;
  * @throws 400
  * @param {string} [fieldName]
  * @return function - the validator for the user's email, which is located in the request body
- * @memberOf controllers.users.validators
+ * @memberOf controllers.users
  */
 const userEmailValidator = (fieldName) => [
     body(fieldName || "email", "Email is required").notEmpty().isString(),
@@ -35,7 +33,7 @@ exports.userEmailValidator = userEmailValidator;
  * @throws 400
  * @param {string} [fieldName]
  * @return function - the validator for the user's password, which is located in the request body
- * @memberOf controllers.users.validators
+ * @memberOf controllers.users
  */
 const userPasswordValidator = (fieldName) => [
     body(fieldName || 'password', "Password is required").notEmpty().isString(),
@@ -60,7 +58,7 @@ exports.userPasswordValidator = userPasswordValidator;
  * (like `_id` or `updated`) cannot be used here
  * @return {function[]} - returns the array with validator middleware to use in the router
  * See {@link https://express-validator.github.io/docs/index.html express-validator docs}
- * @memberOf controllers.users.validators
+ * @memberOf controllers.users
  */
 const userDataValidator = (options, ...fields) => {
     let middleware = [], hasOptions = options && ((typeof options) === 'object')

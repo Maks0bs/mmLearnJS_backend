@@ -2,6 +2,10 @@ let mongoose = require('mongoose');
 let { v1: uuidv1 } = require('uuid');
 let { ObjectId } = mongoose.Schema;
 
+const HIDEABLE_FIELDS = [
+    'email', 'created', 'updated', 'about', 'role', 'enrolledCourses',
+    'teacherCourses', 'photo'
+]
 /**
  * @class User
  * @memberOf models
@@ -224,11 +228,18 @@ let userSchema = new mongoose.Schema({
         default: null
     },
     hiddenFields: [
-        String
+        {
+            type: String,
+            validate: {
+                validator: function(field){
+                    return HIDEABLE_FIELDS.includes(field);
+                },
+                message: props => `Cannot hide the field "${props.value}"`
+            }
+        }
     ],
     notifications: [
         {
-            //TODO add discriminators for different types of notifications
             type: {
                 type: String,
             },
@@ -243,7 +254,7 @@ let userSchema = new mongoose.Schema({
             }
         }
     ]
-});
+}, {autoCreate: true});
 
 // when setting the password, the validation occurs right away (before saving document to database)
 // Because of that, always wrap the operation, where you try to set the password in a try...catch block

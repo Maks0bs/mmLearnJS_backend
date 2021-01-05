@@ -1,8 +1,8 @@
 let {validate} = require("../../helpers");
 let {
-    requireAuthentication, getUser, userById, getUsersFiltered,
+    requireAuthentication, getUser, userById,
     updateUser, deserializeAndCleanUserData, isAuthenticatedUser, getUpdatesByDate,
-    deleteUser, removeUserMentions
+    deleteUser, removeUserMentions, getUpdatesNotifications
 } = require('../controllers');
 let {
     uploadFiles, deleteFiles
@@ -117,6 +117,63 @@ router.get('/updates-by-date',
 /**
  * @swagger
  * path:
+ *  /users/updates-notifications:
+ *    get:
+ *      summary: >
+ *        Fetches the amount of unseen notifications for each specified course (as a map).
+ *        The user should be subscribed to each specified course;
+ *      operationId: getUpdatesNotifications
+ *      security:
+ *        - cookieAuth: []
+ *      tags:
+ *        - "/users/..."
+ *      parameters:
+ *        - in: query
+ *          name: courses
+ *          description: >
+ *            the list of course IDs for which the amount of notifications.
+ *            The array of IDs is passed in the
+ *            [default `req.query` notation](https://expressjs.com/de/api.html#req.query)
+ *          required: true
+ *          schema:
+ *            type: array
+ *            items:
+ *              type: string
+ *          example: ?courses=abababababababababababab&courses=cdcdcdcdcdcdcdcdcdcdcdcd
+ *      responses:
+ *        "200":
+ *          description: All updates have been sent
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                additionalProperties:
+ *                  type: number
+ *                example:
+ *                  abababababababababababab: 5
+ *                  cdcdcdcdcdcdcdcdcdcdcdcd: 2
+ *        "400":
+ *          description: provided course IDs might be invalid
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *        "401":
+ *          description: >
+ *            User is not authenticated
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
+router.get('/updates-notifications',
+    requireAuthentication,
+    getUpdatesNotifications
+)
+
+/**
+ * @swagger
+ * path:
  *  /users/:userId:
  *    get:
  *      summary: >
@@ -157,10 +214,6 @@ router.get('/updates-by-date',
  *                $ref: '#/components/schemas/Error'
  */
 router.get('/:userId', getUser);
-
-//TODO!!!!!!!!
-router.get('/', getUsersFiltered)//TODO create basic functionality for this endpoint
-//TODO!!!!!!!!
 
 /**
  * @swagger

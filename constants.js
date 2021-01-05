@@ -51,15 +51,15 @@ module.exports = {
 			]
 		},
 		apis: [
-			"./*.js", "./*.jsdoc", "./routes/*.js", "./users/*/*.js", "./courses/*.js",
-			"./courses/*/*.js", "./files/*/*.js"
+			"./*.js", "./*.jsdoc", "./routes/*.js", "./*/*/*.js"
 		]
 	},
 	environment: process.env.NODE_ENV,
 	users: {
 		USER_HIDDEN: 'USER_HIDDEN',
 		TEACHER_PASSWORD: 'testpass',
-		ACTIVATION_TIME_PERIOD: 24 * 60 * 60
+		ACTIVATION_TIME_PERIOD: 24 * 60 * 60,
+		COURSE_INVITATION_DURATION: 30 * 24 * 60 * 60
 	},
 	network: {
 		PORT: process.env.NODE_ENV === 'test' ?
@@ -79,6 +79,7 @@ module.exports = {
 				case 'test':
 					return process.env.MONGODB_TEST_URI
 				case 'development':
+				case 'dev':
 					return process.env.MONGODB_DEV_URI
 			}
 		})(),

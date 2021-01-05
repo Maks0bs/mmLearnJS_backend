@@ -1,0 +1,276 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> exercises/controllers/attempts.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">mmLearnJS API</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+                <div class="search-wrapper">
+                    <input id="search" type="text" placeholder="Search docs..." class="input">
+                </div>
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="helpers.html">helpers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="controllers.courses.html">courses</a></li><li><a href="controllers.exercises.html">exercises</a></li><li><a href="controllers.files.html">files</a></li><li><a href="controllers.forum.html">forum</a></li><li><a href="controllers.helpers.html">helpers</a></li><li><a href="controllers.users.html">users</a></li><li><a href="models.Course.html">Course</a></li><li><a href="models.Course.CourseSection.html">CourseSection</a></li><li><a href="models.Course.CourseUpdate.html">CourseUpdate</a></li><li><a href="models.Course.CourseUpdateDeletedEntries.html">CourseUpdateDeletedEntries</a></li><li><a href="models.Course.CourseUpdateDeletedExercises.html">CourseUpdateDeletedExercises</a></li><li><a href="models.Course.CourseUpdateNewEntries.html">CourseUpdateNewEntries</a></li><li><a href="models.Course.CourseUpdateNewExercises.html">CourseUpdateNewExercises</a></li><li><a href="models.Course.Entry.html">Entry</a></li><li><a href="models.Course.EntryFile.html">EntryFile</a></li><li><a href="models.Course.EntryText.html">EntryText</a></li><li><a href="models.Exercise.html">Exercise</a></li><li><a href="models.Exercise.ExerciseAttempt.html">ExerciseAttempt</a></li><li><a href="models.Exercise.ExerciseAttemptAnswer.html">ExerciseAttemptAnswer</a></li><li><a href="models.Exercise.ExerciseParticipant.html">ExerciseParticipant</a></li><li><a href="models.Exercise.ExerciseTask.html">ExerciseTask</a></li><li><a href="models.Exercise.MultipleChoiceTask.html">MultipleChoiceTask</a></li><li><a href="models.Exercise.OneChoiceTask.html">OneChoiceTask</a></li><li><a href="models.Exercise.TextTask.html">TextTask</a></li><li><a href="models.Forum.html">Forum</a></li><li><a href="models.Forum.ForumTopic.html">ForumTopic</a></li><li><a href="models.Forum.ForumTopic.ForumTopicPost.html">ForumTopicPost</a></li><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#attemptAnswerSchema">attemptAnswerSchema</a></li><li><a href="global.html#courseExerciseSchema">courseExerciseSchema</a></li><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#courseUpdateSchema">courseUpdateSchema</a></li><li><a href="global.html#entrySchema">entrySchema</a></li><li><a href="global.html#exerciseTaskSchema">exerciseTaskSchema</a></li><li><a href="global.html#forumRouter">forumRouter</a></li><li><a href="global.html#forumSchema">forumSchema</a></li><li><a href="global.html#forumTopicPostSchema">forumTopicPostSchema</a></li><li><a href="global.html#getExerciseUserStatus">getExerciseUserStatus</a></li><li><a href="global.html#getForgedId">getForgedId</a></li><li><a href="global.html#getGFS">getGFS</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>exercises/controllers/attempts.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const {handleError} = require("../../helpers");
+
+/**
+ * @type function
+ * @description sends the exercise attempt from `req.attempt` as a response
+ * @param {models.Exercise.ExerciseAttempt} req.attempt
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @memberOf controllers.exercises
+ */
+const getAttempt = (req, res) => {
+    req.attempt.exerciseRef = req.attempt.exerciseRef._id;
+    return res.json(req.attempt);
+}
+exports.getAttempt = getAttempt;
+
+/**
+ * @type function
+ * @throws 400, 403
+ * @description updates the attempt under `req.attempt` with new
+ * answers' data from the `req.body`
+ * @param {models.Exercise.ExerciseAttempt} req.attempt
+ * @param {models.Exercise.ExerciseAttemptAnswer[]} req.body
+ * @param {string} req.userAttemptStatus
+ * @param {models.User} req.auth
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @memberOf controllers.exercises
+ */
+const updateAttemptAnswers = (req, res) => {
+    let newAnswers = req.body, {attempt} = req;
+    let { answers } = attempt;
+    if (attempt.endTime &amp;&amp; req.userAttemptStatus === 'student'){
+        return res.status(403).json({
+            error: {
+                status: 403,
+                message: 'Cannot update attempt, it is already finished'
+            }
+        })
+    }
+    if (newAnswers.length !== answers.length){
+        return res.status(400).json({
+            error: {
+                status: 400,
+                message: 'Wrong amount of answers in the new attempt data'
+            }
+        })
+    }
+    for (let i = 0; i &lt; newAnswers.length; i++){
+        // verify that new answers are in correct order
+        if (newAnswers[i].taskRef !== answers[i].taskRef._id.toString()){
+            return res.status(400).json({
+                error: {
+                    status: 400,
+                    message: 'The order of new answers is incorrect or answers ' +
+                        'to some tasks are missing'
+                }
+            })
+        }
+        // do not let modification of answer score
+        newAnswers[i].score = answers[i].score;
+
+        switch(newAnswers[i].kind){
+            case 'MultipleChoiceTaskAttempt': {
+                if (!newAnswers[i].values){
+                    newAnswers[i].values = [];
+                }
+                break;
+            }
+            case 'TextTaskAttempt':
+            case 'OneChoiceTaskAttempt':
+            default: {
+                if (newAnswers[i].value === undefined){
+                    newAnswers[i].value = null;
+                }
+                break;
+            }
+        }
+    }
+    attempt.answers = newAnswers;
+    return attempt.save()
+        .then(savedAttempt => {
+            savedAttempt.exerciseRef = savedAttempt.exerciseRef._id;
+            return res.json(savedAttempt)
+        })
+        .catch(err => handleError(err, res))
+}
+exports.updateAttemptAnswers = updateAttemptAnswers;
+
+/**
+ * @type function
+ * @throws 400, 403
+ * @description Finishes the attempt with the given Id,
+ * calculates the score for this attempt and saves the finish time
+ * @param {models.Exercise.ExerciseAttempt} req.attempt
+ * @param {string} req.userAttemptStatus
+ * @param {models.User} req.auth
+ * @param {e.Request} req
+ * @param {e.Response} res
+ * @memberOf controllers.exercises
+ */
+const finishAttempt = (req, res) => {
+    let {attempt} = req, score = 0;
+    let { tasks } = attempt.exerciseRef, { answers } = attempt;
+    attempt.endTime = new Date();
+
+    tasks.forEach((t, i) => {
+        let taskScore = 0;
+        switch (t.kind){
+            case 'OneChoiceTask': {
+                if (answers[i].value === t.correctAnswer) {
+                    taskScore += t.score;
+                }
+                break;
+            }
+            case 'TextTask': {
+                if (t.correctAnswers.indexOf(answers[i].value) >= 0){
+                    taskScore += t.score;
+                }
+                break;
+            }
+            case 'MultipleChoiceTask': {
+                let cntCorrect = 0;
+                t.options.forEach(o => {
+                    let optionIsCorrect = t.correctAnswers.indexOf(o.key) >= 0,
+                        optionWasSelected = answers[i].values.indexOf(o.key) >= 0;
+                    if (!(optionIsCorrect ^ optionWasSelected)){
+                        cntCorrect++;
+                    }
+                })
+                if (!t.onlyFull){
+                    taskScore += t.score * (cntCorrect / t.options.length);
+                } else {
+                    taskScore += t.score * (cntCorrect === t.options.length);
+                }
+                break;
+            }
+        }
+        score += taskScore;
+        attempt.answers[i].score = taskScore;
+    })
+    attempt.score = score;
+
+    return attempt.save()
+        .then(savedAttempt => {
+            savedAttempt.exerciseRef = savedAttempt.exerciseRef._id;
+            return res.json(savedAttempt)
+        })
+        .catch(err => handleError(err, res))
+}
+exports.finishAttempt = finishAttempt;</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+<script src="scripts/search.js"> </script>
+
+</body>
+</html>

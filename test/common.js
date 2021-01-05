@@ -7,7 +7,7 @@ let should = chai.should();
 let expect = chai.expect;
 let mongoose = require('mongoose')
 let User = require('../users/model')
-let { Course } = require('../courses/model')
+let Course = require('../courses/model')
 let Async = require('async');
 let request = require('supertest')
 let sinon = require('sinon');
@@ -26,7 +26,6 @@ exports.request = request;
 exports.errCallback = (status) => (res) => {
     res.should.have.status(status);
     let { body } = res;
-    console.log(body);
     expect(body).to.be.an('object');
     expect(body.error).to.be.an('object');
     expect(body.error.message).to.be.a('string');

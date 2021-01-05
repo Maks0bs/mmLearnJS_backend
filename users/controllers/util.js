@@ -4,9 +4,7 @@ let constants = require('../../constants');
 let { handleError } = require('../../helpers')
 let { JWT_SECRET } = constants.auth,
     { DEFAULT_COOKIE_OPTIONS, NO_ACTION_LOGOUT_TIME } = constants.client
-/**
- * @class controllers.users.util
- */
+
 /**
  * @type function
  * @throws 401
@@ -17,7 +15,7 @@ let { JWT_SECRET } = constants.auth,
  * @param {models.User} [req.auth]
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers.users.util
+ * @memberOf controllers.users
  */
 const authenticate = async (req, res, next) => {
     if (req.auth){
@@ -56,7 +54,7 @@ exports.authenticate = authenticate
  * @param {models.User} [req.auth]
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers.users.util
+ * @memberOf controllers.users
  */
 const extendSession = (req, res, next) => {
     if (!req.auth){
@@ -92,7 +90,7 @@ exports.extendSession = extendSession;
  * @param {models.User} [req.auth]
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers.users.util
+ * @memberOf controllers.users
  */
 const requireAuthentication = (req, res, next) => {
     if (!req.auth){
@@ -109,7 +107,7 @@ exports.requireAuthentication = requireAuthentication
  * @param {e.Request} req
  * @param {models.User} req.auth
  * @param {e.Response} res
- * @memberOf controllers.users.util
+ * @memberOf controllers.users
  */
 const getAuthenticatedUser = (req, res) => {
     if (!req.auth){
@@ -129,7 +127,7 @@ exports.getAuthenticatedUser = getAuthenticatedUser;
  * [HttpOnly](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies) property
  * @param {e.Request} req
  * @param {e.Response} res
- * @memberOf controllers.users.util
+ * @memberOf controllers.users
  */
 const logout = (req, res) => {
     // no need for tests here, this endpoint always does the same harmless thing
@@ -147,7 +145,7 @@ exports.logout = logout
  * @param {models.User} [req.auth]
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers.users.util
+ * @memberOf controllers.users
  */
 const isTeacher = (req, res, next) => {
     if (req.auth.role !== 'teacher'){
@@ -165,15 +163,15 @@ exports.isTeacher = isTeacher;
  * or a student at the provided course. Stops the middleware flow otherwise.
  * @param {e.Request} req
  * @param {models.User} [req.auth]
- * @param {models.Course} [req.courseData]
+ * @param {models.Course} [req.course]
  * @param {string} [req.userCourseStatus] - sets this param in the request object for next middleware;
  * can be either `"creator"`, `"teacher"`, `"enrolled"` or `"not enrolled"`
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers.users.util
+ * @memberOf controllers.users
  */
 const userInCourse = (req, res, next) => {
-    let course = req.courseData;
+    let course = req.course;
     if (course.creator._id.equals(req.auth._id)){
         req.userCourseStatus = 'creator';
         return next();
@@ -199,26 +197,24 @@ exports.userInCourse = userInCourse;
 
 /**
  * @type function
- * @deprecated
  * @throws 401
  * @description lets subsequent middleware be invoked only if the authenticated user is a teacher
  * at the provided course. Stops the middleware flow otherwise.
- * Please prefer using {@link controllers.userInCourse this controller} instead of this one
  * @param {e.Request} req
  * @param {models.User} [req.auth]
- * @param {models.Course} [req.courseData]
+ * @param {models.Course} [req.course]
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers.users.util
+ * @memberOf controllers.users
  */
 const teacherInCourse = (req, res, next) => {
-    if (!req.courseData.teachers){
+    if (!req.course.teachers){
         return res.status(401).json({
             status: 401, message: 'No teachers in this course'
         })
     }
     let check = false;
-    for (let t of req.courseData.teachers){
+    for (let t of req.course.teachers){
         if (t.equals(req.auth._id)){
             check = true;
             break;
@@ -235,28 +231,22 @@ exports.teacherInCourse = teacherInCourse;
 
 /**
  * @type function
- * @deprecated
  * @throws 401
  * @description lets subsequent middleware be invoked only if the authenticated user is the creator
  * of the provided course. Stops the middleware flow otherwise.
- * Please prefer using {@link controllers.userInCourse this controller} instead of this one
  * @param {e.Request} req
  * @param {models.User} [req.auth]
- * @param {models.Course} [req.courseData]
+ * @param {models.Course} [req.course]
  * @param {e.Response} res
  * @param {function} next
- * @memberOf controllers.users.util
+ * @memberOf controllers.users
  */
 const isCourseCreator = (req, res, next) => {
-    if (!req.courseData.creator._id.equals(req.auth._id)){
+    if (!req.course.creator._id.equals(req.auth._id)){
         res.status(401).json({
-            error: {
-                status: 401,
-                message: 'you are not the creator of the course'
-            }
+            error: { status: 401, message: 'you are not the creator of the course'}
         })
     }
     return next();
 }
 exports.isCourseCreator = isCourseCreator;
-

@@ -1,418 +1,43 @@
 let mongoose = require('mongoose');
+const {
+	updateNewEntriesSchema, updateDeletedEntriesSchema, updateNewInfoSchema,
+	updateDeletedExercisesSchema, updateNewExercisesSchema
+} = require("./CourseUpdate");
 let { ObjectId } = mongoose.Schema;
 let { v1: uuidv1} = require('uuid');
-let crypto = require('crypto');
-
-let attemptAnswerSchema = new mongoose.Schema({
-	taskRef: {
-		type: ObjectId,
-		required: true
-	},
-	score: {
-		type: Number,
-		default: null
-	}
-}, {
-	discriminatorKey: 'kind'
-})
-
-let AttemptAnswer = mongoose.model('AttemptAnswer', attemptAnswerSchema);
-exports.AttemptAnswer = AttemptAnswer;
-
-let oneChoiceTaskAttemptSchema = new mongoose.Schema({
-	value: String
-})
-
-let OneChoiceTaskAttempt = AttemptAnswer.discriminator(
-	'OneChoiceTaskAttempt', oneChoiceTaskAttemptSchema);
-exports.OneChoiceTaskAttempt = OneChoiceTaskAttempt;
-
-// text tasks only have one answer option, the same as one choice tasks
-let TextTaskAttempt = AttemptAnswer.discriminator(
-	'TextTaskAttempt', oneChoiceTaskAttemptSchema);
-exports.TextTaskAttempt = TextTaskAttempt;
-
-let multipleChoiceTaskAttemptSchema = new mongoose.Schema({
-	values: [ String ]
-})
-
-let MultipleChoiceTaskAttempt = AttemptAnswer.discriminator(
-	'MultipleChoiceTaskAttempt', multipleChoiceTaskAttemptSchema);
-exports.MultipleChoiceTaskAttempt = MultipleChoiceTaskAttempt;
-
-
-let exerciseAttemptSchema = new mongoose.Schema({
-	startTime: {
-		type: Date,
-		default: Date.now
-		//TODO maybe make required
-	},
-	endTime: {
-		type: Date,
-		default: null
-		//TODO maybe make required
-	},
-	answers: [
-		attemptAnswerSchema
-	],
-	score: {
-		type: Number,
-		default: null
-	}
-}, {
-	discriminatorKey: 'kind'
-})
-
-let ExerciseAttempt = mongoose.model('ExerciseAttempt', exerciseAttemptSchema);
-exports.ExerciseAttempt = ExerciseAttempt;
-
-exerciseAttemptSchema.path('answers').discriminator('OneChoiceTaskAttempt', oneChoiceTaskAttemptSchema)
-exerciseAttemptSchema.path('answers').discriminator('MultipleChoiceTaskAttempt', multipleChoiceTaskAttemptSchema)
-exerciseAttemptSchema.path('answers').discriminator('TextTaskAttempt', oneChoiceTaskAttemptSchema)
-
-let exerciseTaskSchema = new mongoose.Schema({
-	description: String,
-	score: {
-		type: Number,
-		required: true
-	}
-}, {
-	discriminatorKey: 'kind'
-})
-
-let ExerciseTask = mongoose.model('ExerciseTask', exerciseTaskSchema);
-exports.ExerciseTask = ExerciseTask;
-
-let courseExerciseSchema = new mongoose.Schema({
-	name: {
-		type: String,
-		required: true
-	},
-	participants: [
-		{
-			user: {
-				type: ObjectId,
-				ref: 'User'
-			},
-			attempts: [
-				exerciseAttemptSchema
-			]
-		}
-	],
-	tasks: [
-		exerciseTaskSchema
-	],
-	available: {
-		type: Boolean,
-		required: true
-	},
-	weight: {//TODO if no weight gets received in the update request, set to 1. Add this to schema methods
-		type: Number,
-		required: true,
-		default: 1
-	}
-}, {
-	discriminatorKey: 'kind'
-})
-
-let Exercise = mongoose.model('CourseExercise', courseExerciseSchema);
-exports.Exercise = Exercise;
-
-
-function choiceArrayValidator(arr){
-	return arr.length >= 1;
-}
-function oneChoiceCorrectAnsValidator(){
-	console.log('one choice', this);
-	if (!this.correctAnswer){
-		return false;
-	}
-
-	for (let i of this.options){
-		if (i.key === this.correctAnswer){
-			return true;
-		}
-	}
-
-	return false;
-}
-let oneChoiceTaskSchema = new mongoose.Schema({
-	options: {
-		_id: false,
-		type: [
-			{
-				text: String,
-				key: String
-			}
-		],
-		validate: {
-			validator: choiceArrayValidator,
-			message: `There should be at least one option in every one-choice exercise`
-		}
-	},
-	correctAnswer: {
-		type: String,
-		required: 'There should be a correct answer which is equal to one of the options in every one-choice exercise',
-		validate: {
-			validator: oneChoiceCorrectAnsValidator,
-			message: 'There should be a correct answer which is equal to one of the options in every one-choice exercise'
-		}
-	}
-})
-let OneChoiceTask = ExerciseTask.discriminator('OneChoiceTask', oneChoiceTaskSchema);
-exports.OneChoiceTask = OneChoiceTask;
-
-function multipleChoiceCorrectAnsValidator(){
-	if (!this.correctAnswers){
-		return false;
-	}
-
-	let optionsSet = {};
-
-	for (let i of this.options){
-		optionsSet[i.key] = 1;
-	}
-
-	for (let i of this.correctAnswers){
-		if (!optionsSet[i]){
-			return false;
-		}
-	}
-
-	return true;
-}
-let multipleChoiceTaskSchema = new mongoose.Schema({
-	options: {
-		_id: false,
-		type: [
-			{
-				text: String,
-				key: String
-			}
-		],
-		validate: {
-			validator: choiceArrayValidator,
-			message: `There should be at least one option in every multiple-choice exercise`
-		}
-	},
-	correctAnswers: {
-		type: [
-			{
-				type: String
-			}
-		],
-		validate: {
-			validator: multipleChoiceCorrectAnsValidator,
-			message: 'Correct answers in multiple choice tasks should be the keys of other options of the given task'
-		}
-	},
-	onlyFull: Boolean // if true, score for this exercise gets counted if all options are selected correctly
-})
-let MultipleChoiceTask = ExerciseTask.discriminator('MultipleChoiceTask', multipleChoiceTaskSchema);
-exports.MultipleChoiceTask = MultipleChoiceTask;
-
-let textTaskSchema = new mongoose.Schema({
-	correctAnswers: [
-		{
-			type: String //has to be one of the keys
-		}
-	],
-	interpretMath: Boolean //TODO for future: interpret the answer as a math statement
-})
-let TextTask = ExerciseTask.discriminator('TextTask', textTaskSchema);
-exports.TextTask = TextTask;
-
-courseExerciseSchema.path('tasks').discriminator('OneChoiceTask', oneChoiceTaskSchema)
-courseExerciseSchema.path('tasks').discriminator('MultipleChoiceTask', multipleChoiceTaskSchema)
-courseExerciseSchema.path('tasks').discriminator('TextTask', textTaskSchema)
-
-let entryContentSchema = new mongoose.Schema({
-	info: {}
-}, {
-	discriminatorKey: 'kind'
-})
-let EntryContent = mongoose.model('EntryContent', entryContentSchema);
-exports.EntryContent = EntryContent;
-
-let entryTextSchema = new mongoose.Schema({
-	text: String
-}, {
-	discriminatorKey: 'kind'
-})
-let EntryText = EntryContent.discriminator('EntryText', entryTextSchema);
-exports.EntryText = EntryText;
-
-let forumTopicPostSchema = new mongoose.Schema({
-	creator: {
-		type: ObjectId,
-		ref: 'User'
-	},
-	created: {
-		type: Date,
-		default: Date.now
-	},
-	updated: Date,
-	content: String, //to change to smth more global
-	answers: [
-		{
-			type: ObjectId
-		}//!!!!!!!!!!populate this shit when sending response!!!!!!
-	]
-})
-
-let ForumTopicPost = mongoose.model('ForumTopicPost', forumTopicPostSchema);
-exports.ForumTopicPost = ForumTopicPost;
-
-let entryForumSchema = new mongoose.Schema({
-	description: String,
-	teachersOnly: Boolean,
-	topics: [
-		{
-			name: String,
-			creator: {
-				type: ObjectId,
-				ref: 'User'
-			},
-			created: {
-				type: Date,
-				default: Date.now
-			},
-			updated: Date,
-			posts: [
-				{
-					creator: {
-						type: ObjectId,
-						ref: 'User'
-					},
-					created: {
-						type: Date,
-						default: Date.now
-					},
-					updated: Date,
-					content: String, //TODO change to smth more global
-					answers: [
-						{
-							type: ObjectId
-						}
-					]
-				}
-			]
-		}
-	]
-}, {
-	discriminatorKey: 'kind'
-})
-let EntryForum = EntryContent.discriminator('EntryForum', entryForumSchema);
-exports.EntryForum = EntryForum;
-
-let entryFileSchema = new mongoose.Schema({
-	fileName: {
-		type: String,
-		required: true
-	},
-	file: {
-		type: ObjectId,
-		ref: 'Uploads.File'
-	},
-}, {
-	discriminatorKey: 'kind'
-})
-let EntryFile = EntryContent.discriminator('EntryFile', entryFileSchema);
-exports.EntryFile = EntryFile;
-
-let entrySchema = new mongoose.Schema({
-	type: {
-		type: String,
-		required: true
-	},
-	name: {
-		type: String,
-		required: true
-	},
-	access: {
-		type: String,
-		required: true
-	},
-	content: entryContentSchema
-}, {
-	discriminatorKey: 'kind'
-})
-entrySchema.path('content').discriminator('EntryFile', entryFileSchema)
-entrySchema.path('content').discriminator('EntryText', entryTextSchema)
-entrySchema.path('content').discriminator('EntryForum', entryForumSchema)
-let Entry = mongoose.model('Entry', entrySchema);
-exports.Entry = Entry;
-
-// ------------------ CourseUpdate
-let courseUpdateSchema = new mongoose.Schema({
-	created: {
-		type: Date,
-		default: Date.now
-	}
-}, {
-	discriminatorKey: 'kind'
-})
-let CourseUpdate = mongoose.model('CourseUpdate', courseUpdateSchema);
-exports.CourseUpdate = CourseUpdate;
-
- //* Here we don't use refs to EntrySchema, because they can GET deleted an this might cause trouble
- //* @param newEntries.name name of the added entry,
- //* @param newEntries.type type of the added entry
-
-let updateNewEntriesSchema = new mongoose.Schema({
-	newEntries: [
-		{
-			name: String,
-			type: {
-				type: String
-			}
-		}
-
-	]
-})
-let UpdateNewEntries = CourseUpdate.discriminator('UpdateNewEntries', updateNewEntriesSchema);
-exports.UpdateNewEntries = UpdateNewEntries;
-
-//
-//  * Here we don't use refs to EntrySchema, because entries are not stored separately from the course
-//  * @param newEntries.name name of the deleted entry,
-//  * @param newEntries.type type of the deleted entry
-//
-let updateDeletedEntriesSchema = new mongoose.Schema({
-	deletedEntries: [
-		{
-			name: String,
-			type: {
-				type: String
-			}
-		}
-
-	]
-})
-let UpdateDeletedEntries = CourseUpdate.discriminator('UpdateDeletedEntries', updateDeletedEntriesSchema);
-exports.UpdateDeletedEntries = UpdateDeletedEntries;
-
-// /**
-//  * @param newName new name of the updated course
-//  * @param newAbout new info about the updated course
-//
-let updateNewInfoSchema = new mongoose.Schema({
-	oldName: String,
-	newName: String,
-	newAbout: String
-})
-let UpdateNewInfo = CourseUpdate.discriminator('UpdateNewInfo', updateNewInfoSchema);
-exports.UpdateNewInfo = UpdateNewInfo;
-// ------------------ CourseUpdate end
+let { courseUpdateSchema } = require('./CourseUpdate');
 
 /**
- * @typedef Course
+ * @class CourseSection
+ * @memberOf models.Course
+ * @name CourseSection
+ * @type Object
+ * @property {string} name
+ * @property {?string} description
+ * @property {models.Course.Entry[]} entries
+ */
+/**
+ * @class Course
  * @memberOf models
  * @name Course
  * @type Object
  * @property {ObjectId} _id
  * @property {string} name
- * @property {models.User}
+ * @property {?string} [about]
+ * @property {string} [salt]
+ * @property {string} [hashed_password]
+ * @property {string} type
+ * @property {boolean} hasPassword
+ * @property {models.User|ObjectId} creator
+ * @property {models.User[]|ObjectId[]} teachers
+ * @property {models.User[]|ObjectId[]} students
+ * @property {models.User[]|ObjectId[]} invitedTeachers
+ * @property {models.User[]|ObjectId[]} subscribers
+ * @property {models.Course.CourseUpdate[]} updates
+ * @property {models.Course.Exercise[]} exercises
+ * @property {models.Course.CourseSection[]} sections
+ * @property {function(string): boolean} checkPassword see {@link models.Course.checkCredentials}
+ * @property {function(string): string} encryptPassword see {@link models.Course.encryptPassword}
  */
 /**
  * @swagger
@@ -427,17 +52,85 @@ exports.UpdateNewInfo = UpdateNewInfo;
  *       properties:
  *         _id:
  *           $ref: '#/components/schemas/ObjectId'
+ *         name:
+ *           type: string
+ *         about:
+ *           type: string
+ *         salt:
+ *           type: string
+ *         hashed_password:
+ *           type: string
+ *         type:
+ *           type: string
+ *           enum: [open, public, hidden]
+ *         hasPassword:
+ *           type: boolean
+ *         creator:
+ *           oneOf:
+ *             - $ref: '#/components/schemas/User'
+ *             - $ref: '#/components/schemas/ObjectId'
+ *         teachers:
+ *           type: array
+ *           items:
+ *             oneOf:
+ *               - $ref: '#/components/schemas/User'
+ *               - $ref: '#/components/schemas/ObjectId'
+ *         invitedTeachers:
+ *           type: array
+ *           items:
+ *             oneOf:
+ *               - $ref: '#/components/schemas/User'
+ *               - $ref: '#/components/schemas/ObjectId'
+ *         students:
+ *           type: array
+ *           items:
+ *             oneOf:
+ *               - $ref: '#/components/schemas/User'
+ *               - $ref: '#/components/schemas/ObjectId'
+ *         subscribers:
+ *           type: array
+ *           items:
+ *             oneOf:
+ *               - $ref: '#/components/schemas/User'
+ *               - $ref: '#/components/schemas/ObjectId'
+ *         updates:
+ *           type: array
+ *           items:
+ *             oneOf:
+ *               - $ref: '#/components/schemas/CourseUpdate'
+ *               - $ref: '#/components/schemas/ObjectId'
+ *         exercises:
+ *           type: array
+ *           items:
+ *             oneOf:
+ *               - $ref: '#/components/schemas/Exercise'
+ *               - $ref: '#/components/schemas/ObjectId'
+ *         sections:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               entries:
+ *                 type: array
+ *                 items:
+ *                   oneOf:
+ *                     - $ref: '#/components/schemas/Entry'
+ *                     - $ref: '#/components/schemas/ObjectId'
  */
 let courseSchema = new mongoose.Schema({
 	name: {
 		type: String,
 		trim: true,
-		required: true
+		required: 'Course name is required'
 	},
 	creator: {
 		type: ObjectId,
 		ref: 'User',
-		required: true
+		required: 'Each course should have a creator'
 	},
 	teachers: [
 		{
@@ -467,7 +160,7 @@ let courseSchema = new mongoose.Schema({
 	about: String,
 	type: {
 		type: String,
-		required: true,
+		required: 'Course type is required',
 		enum: ['open', 'public', 'hidden']
 	},
 	hasPassword: {
@@ -482,23 +175,43 @@ let courseSchema = new mongoose.Schema({
 		{
 			name: {
 				type: String,
-				required: true
+				required: 'Each section should have a name'
 			},
 			description: String,
 			entries: [
-				entrySchema
+				//entrySchema
+				{
+					type: ObjectId,
+					ref: 'Entry'
+				}
 			]
 		}
 	],
 	exercises: [
-		courseExerciseSchema
+		{
+			type: ObjectId,
+			ref: 'Exercise'
+		}
 	]
 }, {
-	discriminatorKey: 'kind'
+	discriminatorKey: 'kind',
+	autoCreate: true
 })
-courseSchema.path('updates').discriminator('UpdateNewEntries', updateNewEntriesSchema)
-courseSchema.path('updates').discriminator('UpdateDeletedEntries', updateDeletedEntriesSchema)
-courseSchema.path('updates').discriminator('UpdateNewInfo', updateNewInfoSchema)
+courseSchema.path('updates').discriminator(
+	'UpdateNewEntries', updateNewEntriesSchema
+)
+courseSchema.path('updates').discriminator(
+	'UpdateDeletedEntries', updateDeletedEntriesSchema
+)
+courseSchema.path('updates').discriminator(
+	'UpdateNewExercises', updateNewExercisesSchema
+)
+courseSchema.path('updates').discriminator(
+	'UpdateDeletedExercises', updateDeletedExercisesSchema
+)
+courseSchema.path('updates').discriminator(
+	'UpdateNewInfo', updateNewInfoSchema
+)
 
 courseSchema
 	.virtual('password')
@@ -511,22 +224,7 @@ courseSchema
 		return this._password;
 	})
 
-courseSchema.methods = {
-	checkPassword: function(plainText){
-		return this.encryptPassword(plainText) === this.hashed_password
-	},
+courseSchema.methods = require('./methods').courseMethods;
 
-	encryptPassword: function(password){
-		if (!password) return '';
-		try {
-			return crypto.createHmac('sha1', this.salt)
-			.update(password)
-			.digest('hex');
-		} catch(err){
-			console.log(err);
-			return '';
-		}
-	}
-}
 let Course = mongoose.model('Course', courseSchema);
-exports.Course = Course;
+module.exports = Course;

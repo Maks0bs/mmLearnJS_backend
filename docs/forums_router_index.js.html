@@ -1,0 +1,398 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> forums/router/index.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">mmLearnJS API</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+                <div class="search-wrapper">
+                    <input id="search" type="text" placeholder="Search docs..." class="input">
+                </div>
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Namespaces</h3><ul><li><a href="controllers.html">controllers</a></li><li><a href="helpers.html">helpers</a></li><li><a href="models.html">models</a></li><li><a href="routers.html">routers</a></li></ul><h3>Classes</h3><ul><li><a href="controllers.courses.html">courses</a></li><li><a href="controllers.exercises.html">exercises</a></li><li><a href="controllers.files.html">files</a></li><li><a href="controllers.forum.html">forum</a></li><li><a href="controllers.helpers.html">helpers</a></li><li><a href="controllers.users.html">users</a></li><li><a href="models.Course.html">Course</a></li><li><a href="models.Course.CourseSection.html">CourseSection</a></li><li><a href="models.Course.CourseUpdate.html">CourseUpdate</a></li><li><a href="models.Course.CourseUpdateDeletedEntries.html">CourseUpdateDeletedEntries</a></li><li><a href="models.Course.CourseUpdateDeletedExercises.html">CourseUpdateDeletedExercises</a></li><li><a href="models.Course.CourseUpdateNewEntries.html">CourseUpdateNewEntries</a></li><li><a href="models.Course.CourseUpdateNewExercises.html">CourseUpdateNewExercises</a></li><li><a href="models.Course.Entry.html">Entry</a></li><li><a href="models.Course.EntryFile.html">EntryFile</a></li><li><a href="models.Course.EntryText.html">EntryText</a></li><li><a href="models.Exercise.html">Exercise</a></li><li><a href="models.Exercise.ExerciseAttempt.html">ExerciseAttempt</a></li><li><a href="models.Exercise.ExerciseAttemptAnswer.html">ExerciseAttemptAnswer</a></li><li><a href="models.Exercise.ExerciseParticipant.html">ExerciseParticipant</a></li><li><a href="models.Exercise.ExerciseTask.html">ExerciseTask</a></li><li><a href="models.Exercise.MultipleChoiceTask.html">MultipleChoiceTask</a></li><li><a href="models.Exercise.OneChoiceTask.html">OneChoiceTask</a></li><li><a href="models.Exercise.TextTask.html">TextTask</a></li><li><a href="models.Forum.html">Forum</a></li><li><a href="models.Forum.ForumTopic.html">ForumTopic</a></li><li><a href="models.Forum.ForumTopic.ForumTopicPost.html">ForumTopicPost</a></li><li><a href="models.User.html">User</a></li></ul><h3>Global</h3><ul><li><a href="global.html#attemptAnswerSchema">attemptAnswerSchema</a></li><li><a href="global.html#courseExerciseSchema">courseExerciseSchema</a></li><li><a href="global.html#courseSchema">courseSchema</a></li><li><a href="global.html#courseUpdateSchema">courseUpdateSchema</a></li><li><a href="global.html#entrySchema">entrySchema</a></li><li><a href="global.html#exerciseTaskSchema">exerciseTaskSchema</a></li><li><a href="global.html#forumRouter">forumRouter</a></li><li><a href="global.html#forumSchema">forumSchema</a></li><li><a href="global.html#forumTopicPostSchema">forumTopicPostSchema</a></li><li><a href="global.html#getExerciseUserStatus">getExerciseUserStatus</a></li><li><a href="global.html#getForgedId">getForgedId</a></li><li><a href="global.html#getGFS">getGFS</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#userSchema">userSchema</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>forums/router/index.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>let {requireAuthentication} = require('../../users/controllers')
+let {
+    createForumTopic, answerTopicPost, topicById, postById,
+    deleteTopicPost, getForumById, forumById, canAccessForum, canEditForum
+} = require('../controllers')
+
+/**
+ * @swagger
+ * tags:
+ *   name: /forum/...
+ *   description: >
+ *     All endpoints related to creating/updating forums and managing posts in them
+ */
+let forumRouter = require('express').Router()
+let router = require('express').Router()
+
+/**
+ * @swagger
+ * path:
+ *  /forum/:forumId:
+ *    get:
+ *      summary: >
+ *        Returns the forum with the given ID if the user is a member of the
+ *        course, to which the forum has a reference
+ *      operationId: getForumById
+ *      parameters:
+ *        - name: forumId
+ *          in: path
+ *          description: >
+ *            the id of the forum to perform operations with
+ *          required: true
+ *          type: string
+ *      security:
+ *        - cookieAuth: []
+ *      tags:
+ *        - "/forum/..."
+ *      responses:
+ *        "200":
+ *          description: respond with all relevant forum data
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Forum'
+ *        "400":
+ *          description: Invalid forum ID
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *        "401":
+ *          description: >
+ *            unauthorized (unauthenticated / not allowed to view forum)
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
+forumRouter.get('/',
+    requireAuthentication,
+    canAccessForum,
+    getForumById
+)
+
+/**
+ * @swagger
+ * path:
+ *  /forum/:forumId/new-topic:
+ *    post:
+ *      summary: >
+ *        Creates a new topic in the forum with the given ID with the provided name and
+ *        first post content
+ *      description: >
+ *        Creates a new topic in the forum with the given ID with the provided name and
+ *        first post content if the user is a member of the
+ *        course, to which the forum has a reference and the forum allows all members
+ *        to create posts. If forum restricts creating posts for students,
+ *        the mentioned member should be a teacher
+ *      operationId: newForumTopic
+ *      parameters:
+ *        - name: forumId
+ *          in: path
+ *          description: >
+ *            the id of the forum to perform operations with
+ *          required: true
+ *          type: string
+ *      security:
+ *        - cookieAuth: []
+ *      tags:
+ *        - "/forum/..."
+ *      requestBody:
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                name:
+ *                  type: string
+ *                content:
+ *                  type: string
+ *      responses:
+ *        "200":
+ *          description: respond with updated forum data
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Forum'
+ *        "400":
+ *          description: Invalid forum ID / invalid topic data
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *        "401":
+ *          description: >
+ *            unauthorized (unauthenticated / not allowed to edit forum)
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
+forumRouter.post('/new-topic',
+    requireAuthentication,
+    canEditForum,
+    createForumTopic,
+)
+
+/**
+ * @swagger
+ * path:
+ *  /forum/:forumId/topic/:topicId/post/:postId/answer:
+ *    post:
+ *      summary: >
+ *        Creates a new post as a response to the specified post in the
+ *        specified forum and topic with the given post content
+ *      description: >
+ *        Creates a new post as a response to the specified post in the
+ *        specified forum and topic with given post content
+ *        if the user is a member of the course, to which the forum has a
+ *        reference and the forum allows all members to create posts.
+ *        If forum restricts creating posts for students,
+ *        the mentioned member should be a teacher
+ *      operationId: answerTopicPost
+ *      parameters:
+ *        - name: forumId
+ *          in: path
+ *          description: >
+ *            the id of the forum to perform operations with
+ *          required: true
+ *          type: string
+ *        - name: topicId
+ *          in: path
+ *          description: >
+ *            the id of the wanted topic in the forum, mentioned above
+ *          required: true
+ *          type: string
+ *        - name: postId
+ *          in: path
+ *          description: >
+ *            the id of the wanted post in the topic, mentioned above
+ *          required: true
+ *          type: string
+ *      security:
+ *        - cookieAuth: []
+ *      tags:
+ *        - "/forum/..."
+ *      requestBody:
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                content:
+ *                  type: string
+ *      responses:
+ *        "200":
+ *          description: respond with updated forum data
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Forum'
+ *        "400":
+ *          description: Invalid forum ID / invalid post data
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *        "401":
+ *          description: >
+ *            unauthorized (unauthenticated / not allowed to edit forum)
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
+forumRouter.post('/topic/:topicId/post/:postId/answer',
+    requireAuthentication,
+    canEditForum,
+    answerTopicPost
+)
+
+/**
+ * @swagger
+ * path:
+ *  /forum/:forumId/topic/:topicId/post/:postId/answer:
+ *    delete:
+ *      summary: >
+ *        Delete the forum post with the specified ID. If the user is
+ *        authorized (is a teacher), also remove the answers to this post
+ *      description: >
+ *        If the user is the teacher in a course to which the forum
+ *        has a reference, then they are authorized to delete
+ *        any post and any post tree (the post + its answers).
+ *        Otherwise, the authorized member (student) in a referenced
+ *        course can delete the posts only they created if they
+ *        don't have any answers
+ *      operationId: deleteTopicPost
+ *      parameters:
+ *        - name: forumId
+ *          in: path
+ *          description: >
+ *            the id of the forum to perform operations with
+ *          required: true
+ *          type: string
+ *        - name: topicId
+ *          in: path
+ *          description: >
+ *            the id of the wanted topic in the forum, mentioned above
+ *          required: true
+ *          type: string
+ *        - name: postId
+ *          in: path
+ *          description: >
+ *            the id of the wanted post in the topic, mentioned above
+ *          required: true
+ *          type: string
+ *      security:
+ *        - cookieAuth: []
+ *      tags:
+ *        - "/forum/..."
+ *      responses:
+ *        "200":
+ *          description: respond with updated forum data
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Forum'
+ *        "400":
+ *          description: Invalid forum ID
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *        "401":
+ *          description: >
+ *            unauthorized (unauthenticated / not allowed to edit forum)
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ */
+forumRouter.delete('/topic/:topicId/post/:postId',
+    requireAuthentication,
+    canEditForum,
+    deleteTopicPost
+)
+
+forumRouter.param('topicId', topicById);
+forumRouter.param('postId', postById);
+
+router.use('/forum/:forumId', forumRouter)
+router.param('forumId', forumById)
+//reserved router for other forum-related endpoints
+module.exports = router;</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+<script src="scripts/search.js"> </script>
+
+</body>
+</html>
