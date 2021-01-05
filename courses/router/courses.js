@@ -3,7 +3,7 @@ let {
 } = require('../../users/controllers')
 
 let {
-    getCoursesFiltered, createCourse
+    getCoursesFiltered, createCourse, configureCourseFilter
 } = require('../controllers')
 
 /**
@@ -93,6 +93,6 @@ router.post('/create',
 //TODO change to get with url params
 //TODO specify that it doesn't provide exhaustive data about exercises/entries
 //TODO maybe add a param that lets populate exercises/entries
-router.post('/', getCoursesFiltered)
+router.post('/', configureCourseFilter, getCoursesFiltered)
 
 module.exports = router;

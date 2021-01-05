@@ -1,7 +1,6 @@
 let Course = require('../model')
 let User = require('../../users/model');
 const {handleError} = require("../../helpers");
-let {cloneDeep} = require('lodash')
 let {USER_COURSE_STATUSES} = require('../model/methods').COURSE_DATA_CONSTANTS
 let {NOT_ENROLLED, CREATOR, TEACHER, STUDENT, INVITED_TEACHER} = USER_COURSE_STATUSES
 
@@ -122,9 +121,11 @@ const configureCourseFilter = (req, res, next) => {
     }
     if (body.searchWord){
         let reOptions = { $regex: body.searchWord, $options: 'i'}
+        // filter.name = reOptions
+        // filter.about = reOptions
         filter.$or = [ { name: reOptions }, { about: reOptions }]
     }
-    Promise.all(filterPromises)
+    return Promise.all(filterPromises)
         .then(() => {
             req.courseFilter = filter;
             return next();
@@ -134,9 +135,14 @@ exports.configureCourseFilter = configureCourseFilter;
 
 //TODO add normal docs for this controller
 const getCoursesFiltered = async (req, res) => {
-    let {courseFilter: filter} = req, usersToPopulate = [], usersToPopulateSet = {},
-        courses, basicUserFields = ['name', 'photo', '_id', 'hiddenFields'];
-    //TODO replace usersToPopulate with .populate(...)
+    let {courseFilter: filter} = req, {select} = req.body,//TODO replace body with query
+        basicUserFields = ['name', 'photo', '_id', 'hiddenFields'];
+    console.log('filter', {...filter})
+    for (let k in filter){
+        if (filter.hasOwnProperty(k) && filter[k] === undefined){
+            delete filter[k]
+        }
+    }
     return Course.find({...filter})
         .populate({path: 'students', select: basicUserFields})
         .populate({path: 'teachers', select: basicUserFields})
@@ -158,8 +164,8 @@ const getCoursesFiltered = async (req, res) => {
             }
         })
         .sort({name: 'asc', type: 'desc'})
-        .then(foundCourses => {
-            courses = foundCourses;
+        .then(courses => {
+            console.log('courses', courses)
             let userStatuses = courses.map(() => 'not enrolled')
             courses.forEach((c, i) => {
                 userStatuses[i] = c.getUserCourseStatus(req.auth._id);
@@ -192,175 +198,52 @@ const getCoursesFiltered = async (req, res) => {
                 if (c.creator && c.creator.hideFields) courses[i].creator.hideFields();
             })
 
-            for (let c = 0; c < courses.length; c++){
-                if (!courses[c].sections){
-                    continue;
-                }
-
-                let exercises = [];
 
 
-                for (let i = 0; i < courses[c].exercises.length; i++){
-                    let exercise = courses[c].exercises[i];
-
-                    if (!(userStatuses[c] === 'teacher' || userStatuses[c] === 'creator')){
-
-                        exercise.tasks = undefined;
-                        exercise.participants = undefined;
-
-                        if (exercise.available){
-                            exercises.push(exercise)
+            courses.forEach((c, i) => {
+                if (!Array.isArray(c.sections)) return;
+                let exercises = [], sections = []
+                let isTeacher =
+                    (userStatuses[c] === 'teacher' || userStatuses[c] === 'creator')
+                if (Array.isArray(c.exercises)) c.exercises.forEach(e => {
+                    if (!isTeacher){
+                        e.tasks = undefined;
+                        e.participants = undefined;
+                        if (e.available){
+                            exercises.push(e)
                         }
                     } else {
-                        exercises.push(exercise);
-
+                        exercises.push(e);
                     }
+                })
+                courses[i].exercises = exercises;
 
-
-                }
-
-
-                courses[c].exercises = exercises;
-
-
-
-                for (let i = 0; i < courses[c].sections.length; i++){
-                    let section = cloneDeep(courses[c].sections[i]);
-                    section.entries = [];
-                    for (let j = 0; j < courses[c].sections[i].entries.length; j++){
-                        let entry = courses[c].sections[i].entries[j];
-
-                        if (entry.access === 'teachers' &&
-                            !(userStatuses[c] === 'teacher' || userStatuses[c] === 'creator')
-                        ){
-                            continue;
-                        } else {
-                            section.entries.push(entry);
-                        }
-
-                        if (entry.type === 'forum'){
-
-                            //populate topic creators and posts creators
-                            for (let topic of entry.content.topics){
-                                if (!usersToPopulateSet[topic.creator._id]){
-                                    usersToPopulateSet[topic.creator._id] = 1;
-                                    usersToPopulate.push(topic.creator._id);
-                                }
-
-                                for (let post of topic.posts){
-                                    if (!usersToPopulateSet[post.creator._id]){
-                                        usersToPopulateSet[post.creator._id] = 1;
-                                        usersToPopulate.push(post.creator._id);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    courses[c].sections[i] = section;
-                }
-            }
-
-            return User.find({
-                _id: {
-                    $in: usersToPopulate
-                }
+                c.sections.forEach(s => {
+                    let entries = []
+                    if (Array.isArray(s.entries)) s.entries.forEach(e => {
+                        if (e.access === 'teachers' && !isTeacher) return;
+                        entries.push(e);
+                        //TODO earlier there was population
+                        // of topic / posts creators for forums
+                    })
+                    sections.push({...s, entries: entries})
+                })
+                courses[i].sections = sections
             })
+
+            return courses;
         })
-        .then((users) => {
-            for (let user of users){
-                user.hideFields();
-                usersToPopulateSet[user._id] = user;
-            }
-
-            for (let c = 0; c < courses.length; c++){
-                if (!courses[c].sections){
-                    continue;
-                }
-
-                for (let i = 0; i < courses[c].sections.length; i++){
-                    for (let j = 0; j < courses[c].sections[i].entries.length; j++){
-                        let entry = courses[c].sections[i].entries[j];
-
-                        if (entry && entry.type === 'forum'){
-
-                            //populate topic creators and posts creators
-                            for (let t = 0;
-                                 t < courses[c]
-                                     .sections[i]
-                                     .entries[j]
-                                     .content
-                                     .topics
-                                     .length;
-                                 t++
-                            ){
-                                courses[c]
-                                    .sections[i]
-                                    .entries[j]
-                                    .content
-                                    .topics[t]
-                                    .creator =
-                                    usersToPopulateSet[courses[c]
-                                        .sections[i]
-                                        .entries[j]
-                                        .content
-                                        .topics[t]
-                                        .creator
-                                        ._id
-                                        ];
-
-                                for (let p = 0;
-                                     p < courses[c]
-                                         .sections[i]
-                                         .entries[j]
-                                         .content
-                                         .topics[t]
-                                         .posts
-                                         .length;
-                                     p++
-                                ){
-                                    courses[c]
-                                        .sections[i]
-                                        .entries[j]
-                                        .content
-                                        .topics[t]
-                                        .posts[p]
-                                        .creator =
-                                        usersToPopulateSet[courses[c]
-                                            .sections[i]
-                                            .entries[j]
-                                            .content
-                                            .topics[t]
-                                            .posts[p]
-                                            .creator
-                                            ._id
-                                            ];
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            return new Promise((resolve) => {
-                resolve(true);
-            })
-        })
-        .then(() => {
-            if (req.body.select){
+        .then(courses => {
+            if (Array.isArray(select)){
+                //TODO test this (if only necessary stuff is selected)
                 let selectSet = {};
-                for (let s of req.body.select){
-                    selectSet[s] = 1;
-                }
-                for (let i = 0; i < courses.length; i++){
-                    for (let v of Object.keys(courses[i]._doc)){
-                        if (!selectSet[v]){
-                            courses[i][v] = undefined;
-                        }
-                    }
-                }
+                select.forEach(s => selectSet[s] = true)
+                courses.forEach((c, i) => {
+                    Object.keys(c._doc).forEach(k => {
+                        !selectSet[k] && (courses[i][k] = undefined)
+                    })
+                })
             }
-
-
             return res.json(courses);
         })
         .catch(err => {handleError(err, res)})

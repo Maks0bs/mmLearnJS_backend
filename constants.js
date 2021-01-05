@@ -79,6 +79,7 @@ module.exports = {
 				case 'test':
 					return process.env.MONGODB_TEST_URI
 				case 'development':
+				case 'dev':
 					return process.env.MONGODB_DEV_URI
 			}
 		})(),
